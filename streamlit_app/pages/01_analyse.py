@@ -18,13 +18,33 @@ import plotly.express as px
 import plotly.graph_objects as go
 import random
 import re
-from textblob import TextBlob
-import nltk
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.cluster import KMeans
-from sklearn.decomposition import PCA
 import warnings
 warnings.filterwarnings('ignore')
+
+# Imports conditionnels pour éviter les erreurs
+try:
+    from textblob import TextBlob
+    TEXTBLOB_AVAILABLE = True
+except ImportError:
+    TEXTBLOB_AVAILABLE = False
+    print("TextBlob non disponible, certaines fonctionnalités textuelles seront limitées")
+
+try:
+    import nltk
+    NLTK_AVAILABLE = True
+except ImportError:
+    NLTK_AVAILABLE = False
+    print("NLTK non disponible, certaines fonctionnalités textuelles seront limitées")
+
+try:
+    from sklearn.feature_extraction.text import TfidfVectorizer
+    from sklearn.cluster import KMeans
+    from sklearn.decomposition import PCA
+    from sklearn.preprocessing import StandardScaler
+    SKLEARN_AVAILABLE = True
+except ImportError:
+    SKLEARN_AVAILABLE = False
+    print("Scikit-learn non disponible, certaines fonctionnalités ML seront limitées")
 
 # Configuration
 st.set_page_config(
@@ -612,10 +632,9 @@ def _analyze_data_characteristics(df: pd.DataFrame) -> Dict[str, Any]:
         analysis['correlation_matrix'] = corr_matrix
     
     # Analyse des clusters
-    if len(numeric_cols) >= 2:
+    if len(numeric_cols) >= 2 and SKLEARN_AVAILABLE:
         try:
             # Normalisation des données
-            from sklearn.preprocessing import StandardScaler
             scaler = StandardScaler()
             numeric_data = scaler.fit_transform(df[numeric_cols].fillna(0))
             
@@ -625,9 +644,13 @@ def _analyze_data_characteristics(df: pd.DataFrame) -> Dict[str, Any]:
             clusters = kmeans.fit_predict(numeric_data)
             analysis['clusters'] = clusters
             analysis['cluster_count'] = n_clusters
-        except:
+        except Exception as e:
+            print(f"Erreur clustering: {e}")
             analysis['clusters'] = None
             analysis['cluster_count'] = 0
+    else:
+        analysis['clusters'] = None
+        analysis['cluster_count'] = 0
     
     # Analyse des anomalies
     anomalies = []
