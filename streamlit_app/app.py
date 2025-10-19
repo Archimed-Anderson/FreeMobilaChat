@@ -58,18 +58,33 @@ def render_header():
 def render_hero():
     """Section principale avec présentation de l'application"""
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 5rem 3rem; text-align: center;">
-        <h1 style="color: white; font-size: 3.5rem; font-weight: 900; margin-bottom: 1.5rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); letter-spacing: -1px;">Analysez vos Tweets avec l'IA</h1>
-        <p style="color: white; font-size: 1.3rem; opacity: 0.98; max-width: 800px; margin: 0 auto 3rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transformez vos donnees Twitter en insights actionnables grace a l'intelligence artificielle.<br>Analyse de sentiment, categorisation automatique et KPIs en temps reel.</p>
+    <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 3rem 2rem; text-align: center; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+        <h1 style="color: white; font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); letter-spacing: -1px;">Analysez vos Tweets avec l'IA</h1>
+        <p style="color: white; font-size: 1.1rem; opacity: 0.98; max-width: 700px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transformez vos donnees Twitter en insights actionnables grace a l'intelligence artificielle.<br>Analyse de sentiment, categorisation automatique et KPIs en temps reel.</p>
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Commencer Maintenant", type="primary", use_container_width=True):
-            st.switch_page("pages/01_analyse.py")
+            st.switch_page("pages/01_analyse_intelligente.py")
     
-    st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+    # Indicateur de scroll
+    st.markdown("""
+    <div style="text-align: center; margin-top: 2rem;">
+        <div style="color: white; font-size: 1rem; margin-bottom: 1rem; opacity: 0.8;">Découvrez nos fonctionnalités</div>
+        <div style="color: white; font-size: 2rem; animation: bounce 2s infinite;">↓</div>
+    </div>
+    <style>
+    @keyframes bounce {
+        0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+        40% { transform: translateY(-10px); }
+        60% { transform: translateY(-5px); }
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
     
     # 3 Cartes avec icônes Font Awesome
     col_a, col_b, col_c = st.columns(3)
@@ -382,6 +397,37 @@ def render_pricing():
 
 def render_features():
     """Section fonctionnalités avec icônes Font Awesome"""
+    # Section de navigation rapide vers les pages d'analyse
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 3rem; text-align: center; margin: 3rem 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+        <h2 style="color: #CC0000; font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Accès Rapide aux Analyses</h2>
+        <p style="color: #666; font-size: 1.2rem; margin-bottom: 3rem; font-weight: 400; line-height: 1.6;">Choisissez votre type d'analyse et commencez immédiatement</p>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
+            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #CC0000;">
+                <i class="fas fa-brain" style="font-size: 2.5rem; color: #CC0000; margin-bottom: 1rem;"></i>
+                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Intelligente</h3>
+                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">IA avancée avec LLM pour des insights uniques</p>
+                <a href="/analyse_intelligente" style="background: #CC0000; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Commencer →</a>
+            </div>
+            
+            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #28a745;">
+                <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;"></i>
+                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Classique</h3>
+                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Analyse traditionnelle avec visualisations</p>
+                <a href="/analyse_old" style="background: #28a745; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Commencer →</a>
+            </div>
+            
+            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8;">
+                <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;"></i>
+                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Résultats</h3>
+                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Visualisez et explorez vos résultats</p>
+                <a href="/resultat" style="background: #17a2b8; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Voir →</a>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
         <h2 style="text-align: center; 
