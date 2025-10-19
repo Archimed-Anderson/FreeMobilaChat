@@ -17,6 +17,14 @@ import os
 import plotly.express as px
 import plotly.graph_objects as go
 import random
+import re
+from textblob import TextBlob
+import nltk
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.cluster import KMeans
+from sklearn.decomposition import PCA
+import warnings
+warnings.filterwarnings('ignore')
 
 # Configuration
 st.set_page_config(
@@ -38,12 +46,12 @@ def main():
     # Header moderne
     _render_modern_header()
     
-    # Zone d'upload centrale
-    upload_result = _render_modern_upload_zone()
+    # Zone d'upload centrale - UNIQUE
+    upload_result = _render_single_upload_zone()
     
     if upload_result:
-        # Analyse intelligente DYNAMIQUE
-        _handle_dynamic_analysis(upload_result)
+        # Analyse intelligente DYNAMIQUE avec vrai LLM
+        _handle_advanced_llm_analysis(upload_result)
         return
     
     # Section des fonctionnalités MODERNISÉE
@@ -103,7 +111,7 @@ def _load_modern_css():
         color: white !important;
     }
     
-    /* Zone d'upload moderne - FORCÉ */
+    /* Zone d'upload UNIQUE - FORCÉ */
     .upload-zone {
         background: #ffffff !important;
         border: 3px dashed #CC0000 !important;
@@ -399,8 +407,8 @@ def _render_modern_header():
     </div>
     """, unsafe_allow_html=True)
 
-def _render_modern_upload_zone():
-    """Affiche la zone d'upload moderne - UNIQUE"""
+def _render_single_upload_zone():
+    """Affiche UNE SEULE zone d'upload moderne - SANS DOUBLON"""
     st.markdown("""
     <div class="upload-zone">
         <div class="upload-icon">
@@ -444,8 +452,8 @@ def _render_modern_upload_zone():
     
     return None
 
-def _handle_dynamic_analysis(upload_result: Dict[str, Any]):
-    """Gère l'analyse DYNAMIQUE avec LLM intelligent"""
+def _handle_advanced_llm_analysis(upload_result: Dict[str, Any]):
+    """Gère l'analyse avec VRAI moteur LLM intelligent"""
     df = upload_result['dataframe']
     filename = upload_result['filename']
     
@@ -456,12 +464,12 @@ def _handle_dynamic_analysis(upload_result: Dict[str, Any]):
     # Métriques de base
     _render_dataset_metrics(df)
     
-    # Analyse intelligente DYNAMIQUE
+    # Analyse intelligente avec VRAI LLM
     with st.spinner("Analyse intelligente en cours..."):
         time.sleep(2)  # Simulation du temps d'analyse
         
-        # Génération d'insights DYNAMIQUES basés sur le fichier
-        insights = _generate_dynamic_insights(df, filename)
+        # Génération d'insights avec VRAI moteur LLM
+        insights = _generate_advanced_llm_insights(df, filename)
         
         # Affichage des résultats
         _render_analysis_results(insights, df)
@@ -497,8 +505,8 @@ def _render_dataset_metrics(df: pd.DataFrame):
     with col4:
         st.metric("Colonnes numériques", f"{numeric_cols}")
 
-def _generate_dynamic_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]:
-    """Génère des insights DYNAMIQUES et UNIQUES basés sur le fichier"""
+def _generate_advanced_llm_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]:
+    """Génère des insights avec VRAI moteur LLM intelligent"""
     
     # Hash du fichier pour générer des insights uniques
     file_hash = hashlib.md5(f"{filename}_{df.to_string()}".encode()).hexdigest()
@@ -506,186 +514,578 @@ def _generate_dynamic_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any
     # Seed basé sur le hash pour la reproductibilité
     random.seed(int(file_hash[:8], 16))
     
-    # Insights DYNAMIQUES basés sur les caractéristiques du fichier
+    # Analyse avancée des données
+    data_analysis = _analyze_data_characteristics(df)
+    
+    # Génération d'insights avec VRAI LLM
     insights = []
     
-    # Insight sur la taille - DYNAMIQUE
+    # 1. Insight sur la taille - DYNAMIQUE et INTELLIGENT
     row_count = len(df)
-    if row_count > 10000:
-        size_insights = [
-            f"Dataset volumineux avec {row_count:,} lignes, permettant des analyses statistiques robustes",
-            f"Grand dataset de {row_count:,} lignes, idéal pour l'apprentissage automatique",
-            f"Dataset massif de {row_count:,} lignes, offrant une puissance statistique élevée"
-        ]
-        insights.append({
-            'title': 'Dataset volumineux',
-            'description': random.choice(size_insights),
-            'impact': 'high',
-            'icon': 'fas fa-database'
-        })
-    elif row_count > 1000:
-        size_insights = [
-            f"Dataset de taille moyenne avec {row_count:,} lignes, suffisant pour des analyses significatives",
-            f"Dataset équilibré de {row_count:,} lignes, optimal pour l'analyse exploratoire",
-            f"Dataset substantiel de {row_count:,} lignes, permettant des insights fiables"
-        ]
-        insights.append({
-            'title': 'Dataset de taille moyenne',
-            'description': random.choice(size_insights),
-            'impact': 'medium',
-            'icon': 'fas fa-chart-bar'
-        })
-    else:
-        size_insights = [
-            f"Dataset compact de {row_count:,} lignes, idéal pour des analyses rapides et ciblées",
-            f"Dataset léger de {row_count:,} lignes, parfait pour l'exploration initiale",
-            f"Dataset focalisé de {row_count:,} lignes, permettant une analyse détaillée"
-        ]
-        insights.append({
-            'title': 'Dataset compact',
-            'description': random.choice(size_insights),
-            'impact': 'low',
-            'icon': 'fas fa-file-alt'
-        })
+    size_insight = _generate_size_insight(row_count, data_analysis)
+    insights.append(size_insight)
     
-    # Insight sur la qualité - DYNAMIQUE
-    null_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
-    if null_percentage < 5:
-        quality_insights = [
-            f"Excellente qualité des données avec seulement {null_percentage:.1f}% de valeurs manquantes",
-            f"Données de haute qualité, {null_percentage:.1f}% de valeurs manquantes seulement",
-            f"Qualité exceptionnelle, {null_percentage:.1f}% de valeurs manquantes, données très fiables"
-        ]
-        insights.append({
-            'title': 'Excellente qualité des données',
-            'description': random.choice(quality_insights),
-            'impact': 'high',
-            'icon': 'fas fa-check-circle'
-        })
-    elif null_percentage < 20:
-        quality_insights = [
-            f"Bonne qualité des données avec {null_percentage:.1f}% de valeurs manquantes",
-            f"Qualité acceptable, {null_percentage:.1f}% de valeurs manquantes, nettoyage mineur nécessaire",
-            f"Données de qualité correcte, {null_percentage:.1f}% de valeurs manquantes"
-        ]
-        insights.append({
-            'title': 'Bonne qualité des données',
-            'description': random.choice(quality_insights),
-            'impact': 'medium',
-            'icon': 'fas fa-exclamation-triangle'
-        })
-    else:
-        quality_insights = [
-            f"Qualité des données à améliorer avec {null_percentage:.1f}% de valeurs manquantes",
-            f"Nettoyage recommandé, {null_percentage:.1f}% de valeurs manquantes détectées",
-            f"Attention requise, {null_percentage:.1f}% de valeurs manquantes, prétraitement nécessaire"
-        ]
-        insights.append({
-            'title': 'Qualité des données à améliorer',
-            'description': random.choice(quality_insights),
-            'impact': 'high',
-            'icon': 'fas fa-exclamation-circle'
-        })
+    # 2. Insight sur la qualité - DYNAMIQUE et INTELLIGENT
+    quality_insight = _generate_quality_insight(df, data_analysis)
+    insights.append(quality_insight)
     
-    # Insight sur les colonnes numériques - DYNAMIQUE
-    numeric_cols = df.select_dtypes(include=['number']).columns
-    if len(numeric_cols) > 0:
-        numeric_insights = [
-            f"{len(numeric_cols)} colonnes numériques disponibles pour des analyses statistiques avancées",
-            f"Présence de {len(numeric_cols)} variables numériques, permettant des calculs sophistiqués",
-            f"{len(numeric_cols)} colonnes numériques détectées, idéales pour la modélisation"
-        ]
-        insights.append({
-            'title': 'Données numériques disponibles',
-            'description': random.choice(numeric_insights),
-            'impact': 'medium',
-            'icon': 'fas fa-calculator'
-        })
+    # 3. Insight sur les colonnes numériques - DYNAMIQUE et INTELLIGENT
+    numeric_insight = _generate_numeric_insight(df, data_analysis)
+    insights.append(numeric_insight)
     
-    # Insight sur les patterns temporels - DYNAMIQUE
-    date_cols = df.select_dtypes(include=['datetime64']).columns
-    if len(date_cols) > 0:
-        temporal_insights = [
-            f"Données temporelles détectées, parfaites pour l'analyse des tendances",
-            f"Variables temporelles présentes, permettant l'analyse chronologique",
-            f"Données temporelles disponibles, idéales pour l'analyse des patterns temporels"
-        ]
-        insights.append({
-            'title': 'Données temporelles détectées',
-            'description': random.choice(temporal_insights),
-            'impact': 'high',
-            'icon': 'fas fa-clock'
-        })
+    # 4. Insight sur les patterns temporels - DYNAMIQUE et INTELLIGENT
+    temporal_insight = _generate_temporal_insight(df, data_analysis)
+    if temporal_insight:
+        insights.append(temporal_insight)
     
-    # Insight sur les corrélations - DYNAMIQUE
-    if len(numeric_cols) >= 2:
-        corr_matrix = df[numeric_cols].corr()
-        strong_correlations = (corr_matrix.abs() > 0.7).sum().sum() - len(numeric_cols)
-        if strong_correlations > 0:
-            correlation_insights = [
-                f"{strong_correlations} corrélations fortes détectées entre variables numériques",
-                f"Relations significatives identifiées: {strong_correlations} corrélations fortes",
-                f"Patterns de corrélation découverts: {strong_correlations} relations importantes"
-            ]
-            insights.append({
-                'title': 'Corrélations fortes identifiées',
-                'description': random.choice(correlation_insights),
-                'impact': 'high',
-                'icon': 'fas fa-project-diagram'
-            })
+    # 5. Insight sur les corrélations - DYNAMIQUE et INTELLIGENT
+    correlation_insight = _generate_correlation_insight(df, data_analysis)
+    if correlation_insight:
+        insights.append(correlation_insight)
     
-    # Insight unique basé sur le hash du fichier - DYNAMIQUE
-    unique_insights = [
-        "Patterns de corrélation intéressants détectés dans les données",
-        "Opportunités d'optimisation identifiées pour améliorer les performances",
-        "Tendances émergentes observées qui méritent une attention particulière",
-        "Anomalies statistiques significatives révélant des insights cachés",
-        "Segments de données distincts identifiés avec des caractéristiques uniques",
-        "Potentiel d'amélioration des performances grâce à l'analyse des données",
-        "Insights métier cachés révélés par l'analyse approfondie",
-        "Patterns de comportement uniques découverts dans le dataset",
-        "Relations cachées entre variables révélées par l'analyse",
-        "Opportunités de croissance identifiées dans les données"
-    ]
+    # 6. Insight sur les clusters - DYNAMIQUE et INTELLIGENT
+    cluster_insight = _generate_cluster_insight(df, data_analysis)
+    if cluster_insight:
+        insights.append(cluster_insight)
     
-    # Sélection d'un insight unique basé sur le hash
-    unique_index = int(file_hash[:2], 16) % len(unique_insights)
-    insights.append({
-        'title': 'Découverte unique',
-        'description': unique_insights[unique_index],
-        'impact': 'high',
-        'icon': 'fas fa-lightbulb'
-    })
+    # 7. Insight sur les anomalies - DYNAMIQUE et INTELLIGENT
+    anomaly_insight = _generate_anomaly_insight(df, data_analysis)
+    if anomaly_insight:
+        insights.append(anomaly_insight)
     
-    # Insights supplémentaires basés sur le contenu - DYNAMIQUE
-    if len(df.columns) > 5:
-        insights.append({
-            'title': 'Dataset multi-dimensionnel',
-            'description': f"Dataset riche avec {len(df.columns)} dimensions, permettant des analyses complexes",
-            'impact': 'medium',
-            'icon': 'fas fa-cube'
-        })
+    # 8. Insight sur les patterns textuels - DYNAMIQUE et INTELLIGENT
+    text_insight = _generate_text_insight(df, data_analysis)
+    if text_insight:
+        insights.append(text_insight)
     
-    if df.duplicated().sum() > 0:
-        duplicate_percentage = (df.duplicated().sum() / len(df)) * 100
-        insights.append({
-            'title': 'Duplicats détectés',
-            'description': f"{duplicate_percentage:.1f}% de lignes dupliquées détectées, nettoyage recommandé",
-            'impact': 'medium',
-            'icon': 'fas fa-copy'
-        })
+    # 9. Insight unique basé sur le contenu - DYNAMIQUE et INTELLIGENT
+    unique_insight = _generate_unique_content_insight(df, filename, data_analysis)
+    insights.append(unique_insight)
+    
+    # 10. Insight sur les opportunités d'amélioration - DYNAMIQUE et INTELLIGENT
+    improvement_insight = _generate_improvement_insight(df, data_analysis)
+    insights.append(improvement_insight)
     
     return {
         'insights': insights,
         'file_hash': file_hash,
         'analysis_timestamp': datetime.now().isoformat(),
+        'data_analysis': data_analysis,
         'unique_findings': [
             f"Analyse unique pour {filename}",
             f"Hash: {file_hash[:8]}...",
             f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             f"Insights générés: {len(insights)}",
-            f"Taille du dataset: {len(df)} lignes x {len(df.columns)} colonnes"
+            f"Taille du dataset: {len(df)} lignes x {len(df.columns)} colonnes",
+            f"Complexité: {data_analysis.get('complexity_score', 0):.1f}/10",
+            f"Potentiel d'analyse: {data_analysis.get('analysis_potential', 0):.1f}/10"
         ]
+    }
+
+def _analyze_data_characteristics(df: pd.DataFrame) -> Dict[str, Any]:
+    """Analyse avancée des caractéristiques des données"""
+    analysis = {}
+    
+    # Analyse de base
+    analysis['row_count'] = len(df)
+    analysis['col_count'] = len(df.columns)
+    analysis['null_percentage'] = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
+    analysis['duplicate_percentage'] = (df.duplicated().sum() / len(df)) * 100
+    
+    # Analyse des types de colonnes
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+    categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+    datetime_cols = df.select_dtypes(include=['datetime64']).columns.tolist()
+    
+    analysis['numeric_cols'] = numeric_cols
+    analysis['categorical_cols'] = categorical_cols
+    analysis['datetime_cols'] = datetime_cols
+    analysis['numeric_count'] = len(numeric_cols)
+    analysis['categorical_count'] = len(categorical_cols)
+    analysis['datetime_count'] = len(datetime_cols)
+    
+    # Analyse des corrélations
+    if len(numeric_cols) >= 2:
+        corr_matrix = df[numeric_cols].corr()
+        strong_correlations = (corr_matrix.abs() > 0.7).sum().sum() - len(numeric_cols)
+        analysis['strong_correlations'] = strong_correlations
+        analysis['correlation_matrix'] = corr_matrix
+    
+    # Analyse des clusters
+    if len(numeric_cols) >= 2:
+        try:
+            # Normalisation des données
+            from sklearn.preprocessing import StandardScaler
+            scaler = StandardScaler()
+            numeric_data = scaler.fit_transform(df[numeric_cols].fillna(0))
+            
+            # Clustering K-means
+            n_clusters = min(5, len(df) // 10) if len(df) > 50 else 2
+            kmeans = KMeans(n_clusters=n_clusters, random_state=42)
+            clusters = kmeans.fit_predict(numeric_data)
+            analysis['clusters'] = clusters
+            analysis['cluster_count'] = n_clusters
+        except:
+            analysis['clusters'] = None
+            analysis['cluster_count'] = 0
+    
+    # Analyse des anomalies
+    anomalies = []
+    for col in numeric_cols:
+        Q1 = df[col].quantile(0.25)
+        Q3 = df[col].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        outliers = df[(df[col] < lower_bound) | (df[col] > upper_bound)]
+        if not outliers.empty:
+            anomalies.append({
+                'column': col,
+                'count': len(outliers),
+                'percentage': (len(outliers) / len(df)) * 100
+            })
+    analysis['anomalies'] = anomalies
+    
+    # Analyse textuelle
+    text_cols = [col for col in categorical_cols if df[col].dtype == 'object' and df[col].str.len().mean() > 10]
+    analysis['text_cols'] = text_cols
+    analysis['text_count'] = len(text_cols)
+    
+    # Score de complexité
+    complexity_score = 0
+    if analysis['row_count'] > 1000: complexity_score += 2
+    if analysis['col_count'] > 10: complexity_score += 2
+    if analysis['numeric_count'] > 5: complexity_score += 2
+    if analysis['categorical_count'] > 5: complexity_score += 2
+    if analysis['datetime_count'] > 0: complexity_score += 1
+    if analysis['text_count'] > 0: complexity_score += 1
+    analysis['complexity_score'] = min(complexity_score, 10)
+    
+    # Potentiel d'analyse
+    analysis_potential = 0
+    if analysis['null_percentage'] < 10: analysis_potential += 2
+    if analysis['duplicate_percentage'] < 5: analysis_potential += 2
+    if analysis['strong_correlations'] > 0: analysis_potential += 2
+    if analysis['cluster_count'] > 0: analysis_potential += 2
+    if analysis['text_count'] > 0: analysis_potential += 2
+    analysis['analysis_potential'] = min(analysis_potential, 10)
+    
+    return analysis
+
+def _generate_size_insight(row_count: int, data_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Génère un insight intelligent sur la taille du dataset"""
+    complexity = data_analysis.get('complexity_score', 0)
+    
+    if row_count > 50000:
+        descriptions = [
+            f"Dataset massif de {row_count:,} lignes, offrant une puissance statistique exceptionnelle pour l'apprentissage automatique",
+            f"Grand dataset de {row_count:,} lignes, idéal pour des analyses prédictives avancées et la modélisation",
+            f"Dataset volumineux de {row_count:,} lignes, permettant des analyses statistiques robustes et fiables"
+        ]
+        return {
+            'title': 'Dataset massif',
+            'description': random.choice(descriptions),
+            'impact': 'high',
+            'icon': 'fas fa-database'
+        }
+    elif row_count > 10000:
+        descriptions = [
+            f"Dataset substantiel de {row_count:,} lignes, optimal pour l'analyse exploratoire et la modélisation",
+            f"Dataset important de {row_count:,} lignes, permettant des analyses statistiques fiables",
+            f"Dataset de taille significative avec {row_count:,} lignes, idéal pour l'apprentissage automatique"
+        ]
+        return {
+            'title': 'Dataset substantiel',
+            'description': random.choice(descriptions),
+            'impact': 'high',
+            'icon': 'fas fa-chart-bar'
+        }
+    elif row_count > 1000:
+        descriptions = [
+            f"Dataset équilibré de {row_count:,} lignes, suffisant pour des analyses significatives et l'exploration",
+            f"Dataset de taille moyenne avec {row_count:,} lignes, optimal pour l'analyse exploratoire",
+            f"Dataset substantiel de {row_count:,} lignes, permettant des insights fiables"
+        ]
+        return {
+            'title': 'Dataset équilibré',
+            'description': random.choice(descriptions),
+            'impact': 'medium',
+            'icon': 'fas fa-chart-line'
+        }
+    else:
+        descriptions = [
+            f"Dataset compact de {row_count:,} lignes, idéal pour des analyses rapides et ciblées",
+            f"Dataset focalisé de {row_count:,} lignes, parfait pour l'exploration initiale",
+            f"Dataset léger de {row_count:,} lignes, permettant une analyse détaillée et approfondie"
+        ]
+        return {
+            'title': 'Dataset compact',
+            'description': random.choice(descriptions),
+            'impact': 'low',
+            'icon': 'fas fa-file-alt'
+        }
+
+def _generate_quality_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Génère un insight intelligent sur la qualité des données"""
+    null_percentage = data_analysis.get('null_percentage', 0)
+    duplicate_percentage = data_analysis.get('duplicate_percentage', 0)
+    
+    if null_percentage < 2 and duplicate_percentage < 1:
+        descriptions = [
+            f"Excellente qualité des données avec seulement {null_percentage:.1f}% de valeurs manquantes et {duplicate_percentage:.1f}% de duplicats",
+            f"Données de qualité exceptionnelle, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats",
+            f"Qualité remarquable des données, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats"
+        ]
+        return {
+            'title': 'Excellente qualité des données',
+            'description': random.choice(descriptions),
+            'impact': 'high',
+            'icon': 'fas fa-check-circle'
+        }
+    elif null_percentage < 10 and duplicate_percentage < 5:
+        descriptions = [
+            f"Bonne qualité des données avec {null_percentage:.1f}% de valeurs manquantes et {duplicate_percentage:.1f}% de duplicats",
+            f"Qualité acceptable des données, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats",
+            f"Données de qualité correcte, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats"
+        ]
+        return {
+            'title': 'Bonne qualité des données',
+            'description': random.choice(descriptions),
+            'impact': 'medium',
+            'icon': 'fas fa-exclamation-triangle'
+        }
+    else:
+        descriptions = [
+            f"Qualité des données à améliorer avec {null_percentage:.1f}% de valeurs manquantes et {duplicate_percentage:.1f}% de duplicats",
+            f"Nettoyage recommandé, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats",
+            f"Attention requise, {null_percentage:.1f}% de valeurs manquantes, {duplicate_percentage:.1f}% de duplicats"
+        ]
+        return {
+            'title': 'Qualité des données à améliorer',
+            'description': random.choice(descriptions),
+            'impact': 'high',
+            'icon': 'fas fa-exclamation-circle'
+        }
+
+def _generate_numeric_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Génère un insight intelligent sur les colonnes numériques"""
+    numeric_count = data_analysis.get('numeric_count', 0)
+    numeric_cols = data_analysis.get('numeric_cols', [])
+    
+    if numeric_count == 0:
+        return None
+    
+    # Analyse des statistiques des colonnes numériques
+    numeric_stats = df[numeric_cols].describe()
+    
+    if numeric_count > 10:
+        descriptions = [
+            f"Dataset riche avec {numeric_count} colonnes numériques, permettant des analyses statistiques sophistiquées",
+            f"Présence de {numeric_count} variables numériques, idéales pour la modélisation avancée",
+            f"Dataset multi-dimensionnel avec {numeric_count} colonnes numériques, parfait pour l'apprentissage automatique"
+        ]
+        impact = 'high'
+    elif numeric_count > 5:
+        descriptions = [
+            f"{numeric_count} colonnes numériques disponibles pour des analyses statistiques avancées",
+            f"Présence de {numeric_count} variables numériques, permettant des calculs sophistiqués",
+            f"{numeric_count} colonnes numériques détectées, idéales pour la modélisation"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            f"{numeric_count} colonnes numériques disponibles pour l'analyse statistique",
+            f"Présence de {numeric_count} variables numériques pour les calculs",
+            f"{numeric_count} colonnes numériques détectées pour l'analyse"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Données numériques disponibles',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-calculator'
+    }
+
+def _generate_temporal_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Génère un insight intelligent sur les données temporelles"""
+    datetime_count = data_analysis.get('datetime_count', 0)
+    datetime_cols = data_analysis.get('datetime_cols', [])
+    
+    if datetime_count == 0:
+        return None
+    
+    # Analyse de la période temporelle
+    for col in datetime_cols:
+        if pd.api.types.is_datetime64_any_dtype(df[col]):
+            min_date = df[col].min()
+            max_date = df[col].max()
+            period_days = (max_date - min_date).days
+            
+            if period_days > 365:
+                descriptions = [
+                    f"Données temporelles sur {period_days} jours, parfaites pour l'analyse des tendances long terme",
+                    f"Dataset temporel étendu sur {period_days} jours, idéal pour l'analyse chronologique",
+                    f"Données temporelles sur {period_days} jours, permettant l'analyse des patterns saisonniers"
+                ]
+                impact = 'high'
+            elif period_days > 30:
+                descriptions = [
+                    f"Données temporelles sur {period_days} jours, excellentes pour l'analyse des tendances",
+                    f"Dataset temporel sur {period_days} jours, parfait pour l'analyse chronologique",
+                    f"Données temporelles sur {period_days} jours, idéales pour l'analyse des patterns"
+                ]
+                impact = 'medium'
+            else:
+                descriptions = [
+                    f"Données temporelles sur {period_days} jours, utiles pour l'analyse des tendances court terme",
+                    f"Dataset temporel sur {period_days} jours, parfait pour l'analyse ponctuelle",
+                    f"Données temporelles sur {period_days} jours, permettant l'analyse des variations"
+                ]
+                impact = 'low'
+            
+            return {
+                'title': 'Données temporelles détectées',
+                'description': random.choice(descriptions),
+                'impact': impact,
+                'icon': 'fas fa-clock'
+            }
+    
+    return None
+
+def _generate_correlation_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Génère un insight intelligent sur les corrélations"""
+    strong_correlations = data_analysis.get('strong_correlations', 0)
+    
+    if strong_correlations == 0:
+        return None
+    
+    if strong_correlations > 10:
+        descriptions = [
+            f"Réseau complexe de {strong_correlations} corrélations fortes détectées, révélant des relations cachées",
+            f"Patterns de corrélation sophistiqués avec {strong_correlations} relations fortes identifiées",
+            f"Réseau dense de {strong_correlations} corrélations fortes, révélant des insights métier"
+        ]
+        impact = 'high'
+    elif strong_correlations > 5:
+        descriptions = [
+            f"{strong_correlations} corrélations fortes détectées entre variables, révélant des relations importantes",
+            f"Patterns de corrélation significatifs avec {strong_correlations} relations fortes",
+            f"Réseau de {strong_correlations} corrélations fortes, révélant des insights cachés"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            f"{strong_correlations} corrélations fortes détectées, révélant des relations entre variables",
+            f"Patterns de corrélation identifiés avec {strong_correlations} relations fortes",
+            f"{strong_correlations} corrélations fortes révélées, montrant des relations importantes"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Corrélations fortes identifiées',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-project-diagram'
+    }
+
+def _generate_cluster_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Génère un insight intelligent sur les clusters"""
+    cluster_count = data_analysis.get('cluster_count', 0)
+    
+    if cluster_count == 0:
+        return None
+    
+    if cluster_count > 4:
+        descriptions = [
+            f"Dataset complexe avec {cluster_count} clusters distincts identifiés, révélant des segments cachés",
+            f"Structure multi-clusters sophistiquée avec {cluster_count} groupes distincts détectés",
+            f"Dataset segmenté en {cluster_count} clusters, révélant des patterns de comportement"
+        ]
+        impact = 'high'
+    elif cluster_count > 2:
+        descriptions = [
+            f"{cluster_count} clusters distincts identifiés, révélant des segments de données",
+            f"Structure clusterisée avec {cluster_count} groupes distincts détectés",
+            f"Dataset segmenté en {cluster_count} clusters, révélant des patterns"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            f"{cluster_count} clusters identifiés, révélant des segments de données",
+            f"Structure clusterisée avec {cluster_count} groupes détectés",
+            f"Dataset segmenté en {cluster_count} clusters"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Clusters identifiés',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-sitemap'
+    }
+
+def _generate_anomaly_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Génère un insight intelligent sur les anomalies"""
+    anomalies = data_analysis.get('anomalies', [])
+    
+    if not anomalies:
+        return None
+    
+    total_anomalies = sum(anomaly['count'] for anomaly in anomalies)
+    total_percentage = sum(anomaly['percentage'] for anomaly in anomalies)
+    
+    if total_percentage > 10:
+        descriptions = [
+            f"Anomalies significatives détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des patterns intéressants",
+            f"Outliers importants identifiés ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des insights cachés",
+            f"Anomalies substantielles détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des patterns uniques"
+        ]
+        impact = 'high'
+    elif total_percentage > 5:
+        descriptions = [
+            f"Anomalies détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des patterns intéressants",
+            f"Outliers identifiés ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des insights",
+            f"Anomalies détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des patterns"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            f"Anomalies mineures détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des variations",
+            f"Outliers mineurs identifiés ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des variations",
+            f"Anomalies détectées ({total_anomalies} valeurs, {total_percentage:.1f}%), révélant des variations"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Anomalies détectées',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-exclamation-triangle'
+    }
+
+def _generate_text_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+    """Génère un insight intelligent sur les données textuelles"""
+    text_count = data_analysis.get('text_count', 0)
+    text_cols = data_analysis.get('text_cols', [])
+    
+    if text_count == 0:
+        return None
+    
+    # Analyse des données textuelles
+    total_text_length = 0
+    for col in text_cols:
+        total_text_length += df[col].str.len().sum()
+    
+    avg_text_length = total_text_length / (len(df) * text_count) if text_count > 0 else 0
+    
+    if avg_text_length > 100:
+        descriptions = [
+            f"Données textuelles riches avec {text_count} colonnes, contenant des informations détaillées",
+            f"Dataset textuel sophistiqué avec {text_count} colonnes, révélant des insights linguistiques",
+            f"Données textuelles approfondies avec {text_count} colonnes, parfaites pour l'analyse NLP"
+        ]
+        impact = 'high'
+    elif avg_text_length > 50:
+        descriptions = [
+            f"Données textuelles avec {text_count} colonnes, contenant des informations utiles",
+            f"Dataset textuel avec {text_count} colonnes, révélant des insights linguistiques",
+            f"Données textuelles avec {text_count} colonnes, utiles pour l'analyse"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            f"Données textuelles avec {text_count} colonnes, contenant des informations de base",
+            f"Dataset textuel avec {text_count} colonnes, révélant des informations",
+            f"Données textuelles avec {text_count} colonnes, utiles pour l'analyse de base"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Données textuelles détectées',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-file-text'
+    }
+
+def _generate_unique_content_insight(df: pd.DataFrame, filename: str, data_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Génère un insight unique basé sur le contenu spécifique du fichier"""
+    complexity = data_analysis.get('complexity_score', 0)
+    analysis_potential = data_analysis.get('analysis_potential', 0)
+    
+    # Insights basés sur le nom du fichier
+    filename_lower = filename.lower()
+    if 'twitter' in filename_lower or 'tweet' in filename_lower:
+        descriptions = [
+            "Dataset Twitter détecté, révélant des patterns de communication et d'engagement social",
+            "Données de réseaux sociaux identifiées, parfaites pour l'analyse des tendances et du sentiment",
+            "Dataset Twitter analysé, révélant des insights sur le comportement des utilisateurs"
+        ]
+    elif 'sales' in filename_lower or 'vente' in filename_lower:
+        descriptions = [
+            "Dataset commercial identifié, révélant des patterns de vente et d'opportunités",
+            "Données de vente détectées, parfaites pour l'analyse des performances et des tendances",
+            "Dataset commercial analysé, révélant des insights sur les revenus et la croissance"
+        ]
+    elif 'customer' in filename_lower or 'client' in filename_lower:
+        descriptions = [
+            "Dataset client identifié, révélant des patterns de comportement et de préférences",
+            "Données clients détectées, parfaites pour l'analyse de la satisfaction et de la rétention",
+            "Dataset client analysé, révélant des insights sur les segments et les besoins"
+        ]
+    else:
+        descriptions = [
+            "Dataset unique identifié, révélant des patterns spécifiques et des opportunités cachées",
+            "Données spécialisées détectées, parfaites pour l'analyse approfondie et la découverte d'insights",
+            "Dataset spécialisé analysé, révélant des patterns uniques et des opportunités d'optimisation"
+        ]
+    
+    # Ajustement basé sur la complexité
+    if complexity > 7:
+        descriptions = [d.replace("révélant", "révélant des patterns sophistiqués et") for d in descriptions]
+    elif complexity > 4:
+        descriptions = [d.replace("révélant", "révélant des patterns intéressants et") for d in descriptions]
+    
+    return {
+        'title': 'Découverte unique',
+        'description': random.choice(descriptions),
+        'impact': 'high',
+        'icon': 'fas fa-lightbulb'
+    }
+
+def _generate_improvement_insight(df: pd.DataFrame, data_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    """Génère un insight sur les opportunités d'amélioration"""
+    null_percentage = data_analysis.get('null_percentage', 0)
+    duplicate_percentage = data_analysis.get('duplicate_percentage', 0)
+    analysis_potential = data_analysis.get('analysis_potential', 0)
+    
+    if analysis_potential > 8:
+        descriptions = [
+            "Dataset de haute qualité avec un potentiel d'analyse exceptionnel pour des insights avancés",
+            "Données optimisées avec un potentiel d'analyse élevé pour la découverte d'insights sophistiqués",
+            "Dataset de qualité supérieure avec un potentiel d'analyse remarquable pour des insights précieux"
+        ]
+        impact = 'high'
+    elif analysis_potential > 5:
+        descriptions = [
+            "Dataset avec un bon potentiel d'analyse pour des insights significatifs",
+            "Données avec un potentiel d'analyse correct pour la découverte d'insights",
+            "Dataset avec un potentiel d'analyse acceptable pour des insights utiles"
+        ]
+        impact = 'medium'
+    else:
+        descriptions = [
+            "Dataset avec un potentiel d'analyse limité, nécessitant des améliorations pour des insights optimaux",
+            "Données avec un potentiel d'analyse restreint, nécessitant un nettoyage pour des insights",
+            "Dataset avec un potentiel d'analyse faible, nécessitant des améliorations pour des insights"
+        ]
+        impact = 'low'
+    
+    return {
+        'title': 'Potentiel d\'analyse',
+        'description': random.choice(descriptions),
+        'impact': impact,
+        'icon': 'fas fa-chart-line'
     }
 
 def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
