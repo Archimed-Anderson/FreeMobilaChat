@@ -15,22 +15,22 @@
 
 ---
 
-## 📋 Table des Matières
+## Table des Matières
 
-- [Description du Projet](#-description-du-projet)
-- [Fonctionnalités Principales](#-fonctionnalités-principales)
-- [Architecture Technique](#-architecture-technique)
-- [Structure du Projet](#-structure-du-projet)
-- [Installation et Utilisation](#-installation-et-utilisation)
-- [Déploiement](#-déploiement)
-- [Technologies Utilisées](#-technologies-utilisées)
-- [Documentation](#-documentation)
-- [Contribution](#-contribution)
-- [Auteur](#-auteur)
+- [Description du Projet](#description-du-projet)
+- [Fonctionnalités Principales](#fonctionnalités-principales)
+- [Architecture Technique](#architecture-technique)
+- [Structure du Projet](#structure-du-projet)
+- [Installation et Utilisation](#installation-et-utilisation)
+- [Déploiement](#déploiement)
+- [Technologies Utilisées](#technologies-utilisées)
+- [Documentation](#documentation)
+- [Contribution](#contribution)
+- [Auteur](#auteur)
 
 ---
 
-## 🎯 Description du Projet
+## Description du Projet
 
 FreeMobilaChat est une application web développée dans le cadre d'un **mémoire de master en Data Science**. Cette application permet l'analyse avancée de données Twitter en utilisant l'intelligence artificielle pour :
 
@@ -43,22 +43,22 @@ L'application offre une interface utilisateur moderne et intuitive, permettant a
 
 ---
 
-## ⭐ Fonctionnalités Principales
+## Fonctionnalités Principales
 
-### 🖥️ Interface Utilisateur Moderne
+### Interface Utilisateur Moderne
 - **Design responsive** avec thème Free Mobile personnalisé
 - **Navigation intuitive** entre les différentes sections
 - **Interface d'upload** de fichiers drag & drop
 - **Visualisations interactives** avec Plotly
 
-### 📊 Analyse de Données Avancée
+### Analyse de Données Avancée
 - **Support multi-formats** : CSV, Excel, JSON, Parquet
 - **Analyse de sentiment** automatique avec scores de confiance
 - **Classification par catégories** intelligente
 - **Calcul de priorités** basé sur l'IA
 - **Génération de KPIs** en temps réel
 
-### 📈 Visualisations Interactives
+### Visualisations Interactives
 - **Graphiques dynamiques** avec Plotly Express
 - **Tableaux de bord** personnalisables
 - **Export des résultats** en différents formats
@@ -66,7 +66,7 @@ L'application offre une interface utilisateur moderne et intuitive, permettant a
 
 ---
 
-## 🏗️ Architecture Technique
+## Architecture Technique
 
 ### Frontend (Streamlit)
 ```
@@ -124,7 +124,7 @@ backend/
 
 ---
 
-## 🚀 Installation et Utilisation
+## Installation et Utilisation
 
 ### Prérequis
 - **Python 3.9+**
@@ -187,7 +187,7 @@ backend/
 
 ---
 
-## 🌐 Déploiement
+## Déploiement
 
 ### Déploiement Local
 L'application peut être déployée localement en suivant les instructions d'installation ci-dessus.
@@ -208,7 +208,7 @@ docker-compose up -d
 
 ---
 
-## 🛠️ Technologies Utilisées
+## Technologies Utilisées
 
 ### Frontend
 - **[Streamlit](https://streamlit.io)** - Framework web pour applications de données
@@ -230,7 +230,7 @@ docker-compose up -d
 
 ---
 
-## 📚 Documentation
+## Documentation
 
 ### Documentation Technique
 - [Guide de Déploiement](streamlit_app/DEPLOYMENT.md)
@@ -243,7 +243,7 @@ docker-compose up -d
 
 ---
 
-## 🤝 Contribution
+## Contribution
 
 Ce projet a été développé dans le cadre d'un mémoire de master en Data Science. Pour toute question ou suggestion :
 
@@ -252,7 +252,7 @@ Ce projet a été développé dans le cadre d'un mémoire de master en Data Scie
 
 ---
 
-## 👨‍💻 Auteur
+## Auteur
 
 **Archimed Anderson**  
 *Étudiant en Master Data Science*
@@ -263,7 +263,7 @@ Ce projet a été développé dans le cadre d'un mémoire de master en Data Scie
 
 ---
 
-## 📄 Licence
+## Licence
 
 Ce projet est développé dans le cadre académique d'un mémoire de master.  
 **Usage éducatif uniquement.**
