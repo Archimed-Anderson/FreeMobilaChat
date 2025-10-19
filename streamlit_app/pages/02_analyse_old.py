@@ -258,10 +258,10 @@ def _render_sidebar_config():
             st.switch_page("pages/03_resultat.py")
         
         if st.button("Parametres", use_container_width=True):
-            st.switch_page("pages/03_settings.py")
+            st.info("Page de paramètres en cours de développement")
         
         if st.button("A propos", use_container_width=True):
-            st.switch_page("pages/04_about.py")
+            st.info("Page à propos en cours de développement")
 
 def _render_modern_upload_zone() -> Optional[Dict[str, Any]]:
     """Affiche la zone d'upload moderne et retourne les données si upload réussi"""
@@ -420,7 +420,7 @@ def _handle_successful_upload(upload_result: Dict[str, Any]):
     time.sleep(1)
     
     # Redirection vers le dashboard
-                    st.switch_page("pages/03_resultat.py")
+    st.switch_page("pages/03_resultat.py")
 
 def _render_current_analyses():
     """Affiche les analyses en cours"""
