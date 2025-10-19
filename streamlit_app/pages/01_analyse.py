@@ -1,5 +1,5 @@
 """
-Page d'Analyse Moderne - Version simplifiée et fonctionnelle
+Page d'Analyse Intelligente Moderne - FreeMobilaChat
 Interface utilisateur moderne pour l'upload et l'analyse de fichiers de données
 Développé dans le cadre d'un mémoire de master en Data Science
 """
@@ -14,6 +14,8 @@ from datetime import datetime
 import json
 import hashlib
 import os
+import plotly.express as px
+import plotly.graph_objects as go
 
 # Configuration
 st.set_page_config(
@@ -509,6 +511,9 @@ def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
             </div>
             """, unsafe_allow_html=True)
     
+    # Visualisations
+    _render_visualizations(df)
+    
     # Aperçu des données
     with st.expander("👁️ Aperçu des données"):
         st.dataframe(df.head(100), use_container_width=True)
@@ -538,10 +543,58 @@ def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
             mime="text/csv"
         )
 
+def _render_visualizations(df: pd.DataFrame):
+    """Génère des visualisations intelligentes"""
+    st.markdown("### 📊 Visualisations Intelligentes")
+    
+    # Colonnes numériques pour les graphiques
+    numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
+    categorical_cols = df.select_dtypes(include=['object']).columns.tolist()
+    
+    if len(numeric_cols) > 0:
+        # Graphique de distribution
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if len(numeric_cols) >= 1:
+                fig = px.histogram(df, x=numeric_cols[0], title=f"Distribution de {numeric_cols[0]}")
+                fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            if len(numeric_cols) >= 2:
+                fig = px.scatter(df, x=numeric_cols[0], y=numeric_cols[1], 
+                               title=f"Relation {numeric_cols[0]} vs {numeric_cols[1]}")
+                fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
+                st.plotly_chart(fig, use_container_width=True)
+    
+    if len(categorical_cols) > 0:
+        # Graphique en barres pour les catégories
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            if len(categorical_cols) >= 1:
+                value_counts = df[categorical_cols[0]].value_counts().head(10)
+                fig = px.bar(x=value_counts.index, y=value_counts.values, 
+                           title=f"Top 10 - {categorical_cols[0]}")
+                fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
+                st.plotly_chart(fig, use_container_width=True)
+        
+        with col2:
+            if len(categorical_cols) >= 2:
+                # Heatmap de corrélation si possible
+                if len(numeric_cols) >= 2:
+                    corr_matrix = df[numeric_cols].corr()
+                    fig = px.imshow(corr_matrix, text_auto=True, aspect="auto",
+                                  title="Matrice de Corrélation")
+                    fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
+                    st.plotly_chart(fig, use_container_width=True)
+
 def _render_features_section():
-    """Affiche la section des fonctionnalités"""
+    """Affiche la section des fonctionnalités - CORRIGÉE"""
     st.markdown("### 🚀 Fonctionnalités Avancées")
     
+    # Liste des fonctionnalités avec toutes les clés requises
     features = [
         {
             'icon': 'fas fa-brain',
@@ -550,7 +603,8 @@ def _render_features_section():
         },
         {
             'icon': 'fas fa-chart-pie',
-            'description': 'Visualisations interactives et dashboards dynamiques'
+            'title': 'Visualisations',
+            'description': 'Graphiques interactifs et dashboards dynamiques'
         },
         {
             'icon': 'fas fa-clock',
