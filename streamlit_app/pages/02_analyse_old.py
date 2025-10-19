@@ -255,7 +255,7 @@ def _render_sidebar_config():
         st.markdown("### Actions Rapides")
         
         if st.button("Voir Dashboard", use_container_width=True):
-            st.switch_page("pages/02_resultat.py")
+            st.switch_page("pages/03_resultat.py")
         
         if st.button("Parametres", use_container_width=True):
             st.switch_page("pages/03_settings.py")
@@ -393,7 +393,7 @@ def _process_uploaded_file(uploaded_file) -> Optional[Dict[str, Any]]:
                     # Redirection automatique vers le dashboard
                     st.info("Redirection vers le dashboard des KPIs...")
                     time.sleep(1)
-                    st.switch_page("pages/02_resultat.py")
+                    st.switch_page("pages/03_resultat.py")
         
         # Aperçu des données avec style
         with st.expander("Apercu des donnees (10 premieres lignes)", expanded=False):
@@ -420,7 +420,7 @@ def _handle_successful_upload(upload_result: Dict[str, Any]):
     time.sleep(1)
     
     # Redirection vers le dashboard
-    st.switch_page("pages/02_resultat.py")
+                    st.switch_page("pages/03_resultat.py")
 
 def _render_current_analyses():
     """Affiche les analyses en cours"""
@@ -442,7 +442,7 @@ def _render_current_analyses():
         
         # Bouton pour voir les résultats
         if st.button("Voir les Resultats", type="primary"):
-            st.switch_page("pages/02_resultat.py")
+            st.switch_page("pages/03_resultat.py")
 
 def _render_global_metrics():
     """Affiche les métriques globales avec design moderne"""
