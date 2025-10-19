@@ -479,13 +479,13 @@ def compute_kpis(df: pd.DataFrame) -> Dict[str, Any]:
     
     kpis = {}
     
-    # KPIs de base
+    # KPIs de base - conversion explicite en types Python natifs
     kpis['basic'] = {
-        'row_count': len(df),
-        'column_count': len(df.columns),
-        'memory_usage': df.memory_usage(deep=True).sum() / (1024 * 1024),  # MB
-        'null_percentage': (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100,
-        'duplicate_percentage': (df.duplicated().sum() / len(df)) * 100
+        'row_count': int(len(df)),
+        'column_count': int(len(df.columns)),
+        'memory_usage': float(df.memory_usage(deep=True).sum() / (1024 * 1024)),  # MB
+        'null_percentage': float((df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100),
+        'duplicate_percentage': float((df.duplicated().sum() / len(df)) * 100)
     }
     
     # KPIs numériques
@@ -493,14 +493,22 @@ def compute_kpis(df: pd.DataFrame) -> Dict[str, Any]:
     if len(numeric_cols) > 0:
         kpis['numeric'] = {}
         for col in numeric_cols:
+            # Conversion explicite de tous les types NumPy
+            mean_val = df[col].mean()
+            median_val = df[col].median()
+            std_val = df[col].std()
+            min_val = df[col].min()
+            max_val = df[col].max()
+            null_count = df[col].isnull().sum()
+            
             kpis['numeric'][col] = {
-                'mean': df[col].mean(),
-                'median': df[col].median(),
-                'std': df[col].std(),
-                'min': df[col].min(),
-                'max': df[col].max(),
-                'null_count': df[col].isnull().sum(),
-                'null_percentage': (df[col].isnull().sum() / len(df)) * 100
+                'mean': float(mean_val) if pd.notna(mean_val) else None,
+                'median': float(median_val) if pd.notna(median_val) else None,
+                'std': float(std_val) if pd.notna(std_val) else None,
+                'min': float(min_val) if pd.notna(min_val) else None,
+                'max': float(max_val) if pd.notna(max_val) else None,
+                'null_count': int(null_count),
+                'null_percentage': float((null_count / len(df)) * 100)
             }
     
     # KPIs catégoriels
@@ -509,12 +517,14 @@ def compute_kpis(df: pd.DataFrame) -> Dict[str, Any]:
         kpis['categorical'] = {}
         for col in categorical_cols:
             value_counts = df[col].value_counts()
+            null_count = df[col].isnull().sum()
+            
             kpis['categorical'][col] = {
-                'unique_count': df[col].nunique(),
-                'most_common': value_counts.index[0] if len(value_counts) > 0 else None,
-                'most_common_count': value_counts.iloc[0] if len(value_counts) > 0 else 0,
-                'null_count': df[col].isnull().sum(),
-                'null_percentage': (df[col].isnull().sum() / len(df)) * 100
+                'unique_count': int(df[col].nunique()),
+                'most_common': str(value_counts.index[0]) if len(value_counts) > 0 else None,
+                'most_common_count': int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
+                'null_count': int(null_count),
+                'null_percentage': float((null_count / len(df)) * 100)
             }
     
     # Corrélations
@@ -526,9 +536,9 @@ def compute_kpis(df: pd.DataFrame) -> Dict[str, Any]:
                 corr_value = corr_matrix.iloc[i, j]
                 if abs(corr_value) > 0.7:
                     strong_correlations.append({
-                        'col1': corr_matrix.columns[i],
-                        'col2': corr_matrix.columns[j],
-                        'correlation': corr_value
+                        'col1': str(corr_matrix.columns[i]),
+                        'col2': str(corr_matrix.columns[j]),
+                        'correlation': float(corr_value)
                     })
         kpis['correlations'] = strong_correlations
     
@@ -719,12 +729,17 @@ def detect_anomalies(df: pd.DataFrame) -> Dict[str, Any]:
             
             outlier_indices = df[outlier_labels == -1].index.tolist()
             anomalies['outliers'] = {
-                'count': len(outlier_indices),
-                'percentage': (len(outlier_indices) / len(df)) * 100,
-                'indices': outlier_indices[:10]  # Limiter à 10 pour l'affichage
+                'count': int(len(outlier_indices)),
+                'percentage': float((len(outlier_indices) / len(df)) * 100),
+                'indices': [int(idx) for idx in outlier_indices[:10]]  # Limiter à 10 pour l'affichage
             }
         except Exception as e:
             logger.error(f"Erreur lors de la détection d'outliers: {e}")
+            anomalies['outliers'] = {
+                'count': 0,
+                'percentage': 0.0,
+                'indices': []
+            }
     
     # Patterns de valeurs manquantes
     missing_data = df.isnull().sum()
@@ -732,9 +747,15 @@ def detect_anomalies(df: pd.DataFrame) -> Dict[str, Any]:
     
     if len(missing_cols) > 0:
         anomalies['missing_patterns'] = {
-            'columns_with_missing': len(missing_cols),
-            'most_missing': missing_cols.index[0],
-            'missing_percentage': (missing_cols.iloc[0] / len(df)) * 100
+            'columns_with_missing': int(len(missing_cols)),
+            'most_missing': str(missing_cols.index[0]),
+            'missing_percentage': float((missing_cols.iloc[0] / len(df)) * 100)
+        }
+    else:
+        anomalies['missing_patterns'] = {
+            'columns_with_missing': 0,
+            'most_missing': None,
+            'missing_percentage': 0.0
         }
     
     # Vérification des types de données
@@ -850,6 +871,21 @@ def _render_visualizations(df: pd.DataFrame, filename: str):
                 fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
                 st.plotly_chart(fig, use_container_width=True)
 
+def _convert_numpy_types(obj):
+    """Convertit les types NumPy en types Python natifs pour la sérialisation JSON"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: _convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [_convert_numpy_types(item) for item in obj]
+    else:
+        return obj
+
 def _render_global_summary(all_results: List[Dict[str, Any]]):
     """Affiche un résumé global de toutes les analyses"""
     
@@ -881,36 +917,70 @@ def _render_global_summary(all_results: List[Dict[str, Any]]):
     col1, col2 = st.columns(2)
     
     with col1:
-        # Export JSON
-        json_data = json.dumps(all_results, ensure_ascii=False, indent=2)
-        st.download_button(
-            label="Télécharger Analyse JSON",
-            data=json_data,
-            file_name=f"analyse_globale_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            mime="application/json"
-        )
+        # Export JSON avec conversion des types NumPy
+        try:
+            # Conversion des types NumPy avant sérialisation
+            converted_results = _convert_numpy_types(all_results)
+            json_data = json.dumps(converted_results, ensure_ascii=False, indent=2)
+            st.download_button(
+                label="Télécharger Analyse JSON",
+                data=json_data,
+                file_name=f"analyse_globale_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json"
+            )
+        except Exception as e:
+            st.error(f"Erreur lors de la génération du JSON: {e}")
+            # Fallback: export simplifié
+            simplified_results = []
+            for result in all_results:
+                simplified_result = {
+                    'filename': result['filename'],
+                    'file_size': int(result['file_size']),
+                    'timestamp': result['timestamp'],
+                    'kpis': {
+                        'basic': {
+                            'row_count': int(result['kpis']['basic']['row_count']),
+                            'column_count': int(result['kpis']['basic']['column_count']),
+                            'memory_usage': float(result['kpis']['basic']['memory_usage']),
+                            'null_percentage': float(result['kpis']['basic']['null_percentage']),
+                            'duplicate_percentage': float(result['kpis']['basic']['duplicate_percentage'])
+                        }
+                    }
+                }
+                simplified_results.append(simplified_result)
+            
+            json_data = json.dumps(simplified_results, ensure_ascii=False, indent=2)
+            st.download_button(
+                label="Télécharger Analyse JSON (Simplifié)",
+                data=json_data,
+                file_name=f"analyse_globale_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
+                mime="application/json"
+            )
     
     with col2:
         # Export CSV des métriques
-        metrics_data = []
-        for result in all_results:
-            basic = result['kpis']['basic']
-            metrics_data.append({
-                'filename': result['filename'],
-                'rows': basic['row_count'],
-                'columns': basic['column_count'],
-                'completeness': 100 - basic['null_percentage'],
-                'duplicates': basic['duplicate_percentage']
-            })
-        
-        metrics_df = pd.DataFrame(metrics_data)
-        csv_data = metrics_df.to_csv(index=False)
-        st.download_button(
-            label="Télécharger Métriques CSV",
-            data=csv_data,
-            file_name=f"metriques_globales_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
-        )
+        try:
+            metrics_data = []
+            for result in all_results:
+                basic = result['kpis']['basic']
+                metrics_data.append({
+                    'filename': result['filename'],
+                    'rows': int(basic['row_count']),
+                    'columns': int(basic['column_count']),
+                    'completeness': float(100 - basic['null_percentage']),
+                    'duplicates': float(basic['duplicate_percentage'])
+                })
+            
+            metrics_df = pd.DataFrame(metrics_data)
+            csv_data = metrics_df.to_csv(index=False)
+            st.download_button(
+                label="Télécharger Métriques CSV",
+                data=csv_data,
+                file_name=f"metriques_globales_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+                mime="text/csv"
+            )
+        except Exception as e:
+            st.error(f"Erreur lors de la génération du CSV: {e}")
 
 def _render_features_section():
     """Affiche la section des fonctionnalités"""
