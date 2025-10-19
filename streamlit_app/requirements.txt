@@ -1,0 +1,66 @@
+# FreeMobilaChat - Requirements
+# Application Streamlit moderne pour l'analyse de données Twitter
+
+# Core Streamlit
+streamlit>=1.28.0
+streamlit-option-menu>=0.3.6
+streamlit-aggrid>=0.3.4
+streamlit-plotly-events>=0.0.6
+
+# Data Processing
+pandas>=2.0.0
+numpy>=1.24.0
+plotly>=5.15.0
+altair>=5.0.0
+
+# HTTP Requests
+requests>=2.31.0
+urllib3>=2.0.0
+
+# Data Validation
+pydantic>=2.0.0
+email-validator>=2.0.0
+
+# File Processing
+openpyxl>=3.1.0
+xlrd>=2.0.0
+pyarrow>=12.0.0
+
+# Text Processing
+chardet>=5.0.0
+python-magic>=0.4.27
+
+# System Monitoring
+psutil>=5.8.0
+
+# Date/Time
+python-dateutil>=2.8.0
+
+# Logging
+loguru>=0.7.0
+
+# Environment
+python-dotenv>=1.0.0
+
+# Development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Optional: AI/ML
+# openai>=1.0.0
+# anthropic>=0.3.0
+# mistralai>=0.0.8
+# ollama>=0.1.0
+
+# Optional: Database
+# psycopg2-binary>=2.9.0
+# sqlalchemy>=2.0.0
+
+# Optional: Caching
+# redis>=4.5.0
+
+# Optional: Monitoring
+# prometheus-client>=0.17.0

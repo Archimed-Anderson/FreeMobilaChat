@@ -1,0 +1,23 @@
+# Requirements for Automated Analysis System
+# Add these to your main requirements.txt
+
+# Core dependencies (likely already installed)
+streamlit>=1.28.0
+pandas>=2.1.0
+numpy>=1.25.0
+
+# Visualization
+plotly>=5.17.0
+
+# Data profiling (optional but recommended)
+ydata-profiling>=4.5.0
+
+# Statistical analysis
+scipy>=1.11.0
+
+# For Excel support
+openpyxl>=3.1.0
+xlrd>=2.0.1
+
+# Utilities
+python-dateutil>=2.8.2
