@@ -63,6 +63,17 @@ nltk>=3.8.1
 pandas>=2.0.0
 numpy>=1.24.0
 
+# LLM and AI Libraries
+sentence-transformers>=2.2.0
+faiss-cpu>=1.7.4
+langchain>=0.1.0
+langchain-community>=0.0.10
+openai>=1.0.0
+anthropic>=0.3.0
+
+# Optional: Local LLM
+# ollama>=0.1.0
+
 # Optional: Local LLM
 # ollama>=0.1.0
 
