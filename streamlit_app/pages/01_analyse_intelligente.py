@@ -381,23 +381,14 @@ def _render_sidebar_config():
 
 def _render_multiple_upload_zone():
     """Affiche la zone d'upload multiple"""
-    st.markdown("""
-    <div class="upload-zone">
-        <div class="upload-icon">
-            <i class="fas fa-cloud-upload-alt"></i>
-        </div>
-        <div class="upload-title">Importez vos fichiers CSV</div>
-        <div class="upload-subtitle">Glissez-déposez un ou plusieurs fichiers ou cliquez pour parcourir</div>
-    </div>
-    """, unsafe_allow_html=True)
     
-    # Upload multiple de fichiers
+    # Upload multiple de fichiers avec style personnalisé intégré
     uploaded_files = st.file_uploader(
-        "Choisissez un ou plusieurs fichiers",
+        "Importez vos fichiers CSV - Glissez-déposez un ou plusieurs fichiers ou cliquez pour parcourir",
         type=['csv'],
         accept_multiple_files=True,
         help="Formats supportés: CSV | Taille max: 50MB par fichier",
-        label_visibility="collapsed"
+        label_visibility="visible"
     )
     
     return uploaded_files
