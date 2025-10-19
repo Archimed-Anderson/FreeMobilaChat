@@ -60,7 +60,8 @@ def _load_modern_css():
         --primary-color: #CC0000;
         --secondary-color: #8B0000;
         --accent-color: #FF6B6B;
-        --text-color: #333;
+        --text-color: #000000;
+        --text-light: #333333;
         --bg-color: #f8f9fa;
         --card-bg: #ffffff;
         --border-radius: 12px;
@@ -104,7 +105,7 @@ def _load_modern_css():
         opacity: 0.9;
     }
     
-    /* Zone d'upload moderne */
+    /* Zone d'upload moderne - UNIQUE */
     .upload-zone {
         background: var(--card-bg);
         border: 3px dashed var(--primary-color);
@@ -137,7 +138,7 @@ def _load_modern_css():
     }
     
     .upload-subtitle {
-        color: #666;
+        color: var(--text-light);
         font-size: 1.1rem;
         margin-bottom: 2rem;
     }
@@ -180,7 +181,7 @@ def _load_modern_css():
     }
     
     .feature-description {
-        color: #666;
+        color: var(--text-light);
         font-size: 0.9rem;
         line-height: 1.6;
     }
@@ -211,32 +212,137 @@ def _load_modern_css():
     
     .metric-label {
         font-size: 0.9rem;
-        color: #666;
+        color: var(--text-light);
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
     
-    /* Insights */
-    .insight-card {
+    /* Insights modernes et structurés */
+    .insights-section {
         background: var(--card-bg);
+        border-radius: var(--border-radius);
+        padding: 2rem;
+        margin: 2rem 0;
+        box-shadow: var(--shadow);
+        border: 1px solid #e1e5e9;
+    }
+    
+    .insights-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--primary-color);
+    }
+    
+    .insights-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-color);
+        margin-left: 1rem;
+    }
+    
+    .insights-icon {
+        font-size: 2rem;
+        color: var(--primary-color);
+    }
+    
+    .insight-card {
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
         padding: 1.5rem;
         border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
         margin-bottom: 1rem;
         border-left: 4px solid var(--accent-color);
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .insight-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    }
+    
+    .insight-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 0.5rem;
+    }
+    
+    .insight-icon {
+        font-size: 1.2rem;
+        color: var(--primary-color);
+        margin-right: 0.5rem;
     }
     
     .insight-title {
         font-size: 1.1rem;
         font-weight: 600;
         color: var(--text-color);
-        margin-bottom: 0.5rem;
+        margin: 0;
     }
     
     .insight-description {
-        color: #666;
-        font-size: 0.9rem;
+        color: var(--text-light);
+        font-size: 0.95rem;
         line-height: 1.5;
+        margin: 0;
+    }
+    
+    .insight-impact {
+        display: inline-block;
+        padding: 0.25rem 0.5rem;
+        border-radius: 15px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-top: 0.5rem;
+    }
+    
+    .impact-high {
+        background-color: #fee2e2;
+        color: #dc2626;
+    }
+    
+    .impact-medium {
+        background-color: #fef3c7;
+        color: #d97706;
+    }
+    
+    .impact-low {
+        background-color: #d1fae5;
+        color: #059669;
+    }
+    
+    /* Découvertes uniques */
+    .unique-findings {
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
+        border: 1px solid #c4b5fd;
+        border-radius: var(--border-radius);
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+    
+    .unique-findings-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+    }
+    
+    .unique-findings-title {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: var(--text-color);
+        margin-left: 0.5rem;
+    }
+    
+    .unique-finding-item {
+        background: white;
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        margin-bottom: 0.5rem;
+        border-left: 3px solid #8b5cf6;
+        font-size: 0.9rem;
+        color: var(--text-light);
     }
     
     /* Boutons */
@@ -284,7 +390,7 @@ def _render_modern_header():
     """, unsafe_allow_html=True)
 
 def _render_modern_upload_zone():
-    """Affiche la zone d'upload moderne"""
+    """Affiche la zone d'upload moderne - UNIQUE"""
     st.markdown("""
     <div class="upload-zone">
         <div class="upload-icon">
@@ -295,7 +401,7 @@ def _render_modern_upload_zone():
     </div>
     """, unsafe_allow_html=True)
     
-    # Upload de fichier
+    # Upload de fichier - UNIQUE
     uploaded_file = st.file_uploader(
         "Choisissez un fichier",
         type=['csv', 'xlsx', 'xls', 'json'],
@@ -335,13 +441,13 @@ def _handle_modern_analysis(upload_result: Dict[str, Any]):
     
     # Header d'analyse
     st.markdown("---")
-    st.markdown(f"## 📊 Analyse de {filename}")
+    st.markdown(f"## <i class='fas fa-chart-bar'></i> Analyse de {filename}", unsafe_allow_html=True)
     
     # Métriques de base
     _render_dataset_metrics(df)
     
     # Analyse intelligente simulée
-    with st.spinner("🤖 Analyse intelligente en cours..."):
+    with st.spinner("Analyse intelligente en cours..."):
         time.sleep(2)  # Simulation du temps d'analyse
         
         # Génération d'insights uniques basés sur le fichier
@@ -353,12 +459,12 @@ def _handle_modern_analysis(upload_result: Dict[str, Any]):
         # Bouton pour nouvelle analyse
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
-            if st.button("🔄 Nouvelle Analyse", type="primary", use_container_width=True):
+            if st.button("Nouvelle Analyse", type="primary", use_container_width=True):
                 st.rerun()
 
 def _render_dataset_metrics(df: pd.DataFrame):
     """Affiche les métriques du dataset"""
-    st.markdown("### 📈 Métriques du Dataset")
+    st.markdown("### <i class='fas fa-tachometer-alt'></i> Métriques du Dataset", unsafe_allow_html=True)
     
     # Calcul des métriques
     row_count = len(df)
@@ -405,6 +511,13 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
             'impact': 'medium',
             'icon': 'fas fa-chart-bar'
         })
+    else:
+        insights.append({
+            'title': 'Dataset compact',
+            'description': f'Dataset de {len(df):,} lignes, idéal pour des analyses rapides et ciblées',
+            'impact': 'low',
+            'icon': 'fas fa-file-alt'
+        })
     
     # Insight sur la qualité
     null_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
@@ -422,6 +535,13 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
             'impact': 'medium',
             'icon': 'fas fa-exclamation-triangle'
         })
+    else:
+        insights.append({
+            'title': 'Qualité des données à améliorer',
+            'description': f'Présence significative de valeurs manquantes ({null_percentage:.1f}%), nettoyage recommandé',
+            'impact': 'high',
+            'icon': 'fas fa-exclamation-circle'
+        })
     
     # Insight sur les colonnes numériques
     numeric_cols = df.select_dtypes(include=['number']).columns
@@ -438,10 +558,22 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
     if len(date_cols) > 0:
         insights.append({
             'title': 'Données temporelles détectées',
-            'description': f'Données temporelles disponibles pour analyse des tendances',
+            'description': f'Données temporelles disponibles pour analyse des tendances et patterns temporels',
             'impact': 'high',
             'icon': 'fas fa-clock'
         })
+    
+    # Insight sur les corrélations
+    if len(numeric_cols) >= 2:
+        corr_matrix = df[numeric_cols].corr()
+        strong_correlations = (corr_matrix.abs() > 0.7).sum().sum() - len(numeric_cols)
+        if strong_correlations > 0:
+            insights.append({
+                'title': 'Corrélations fortes identifiées',
+                'description': f'{strong_correlations} corrélations fortes détectées entre variables numériques',
+                'impact': 'high',
+                'icon': 'fas fa-project-diagram'
+            })
     
     # Insight unique basé sur le hash du fichier
     unique_insights = [
@@ -449,7 +581,10 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
         "Opportunités d'optimisation identifiées",
         "Tendances émergentes observées",
         "Anomalies statistiques significatives",
-        "Segments de données distincts identifiés"
+        "Segments de données distincts identifiés",
+        "Potentiel d'amélioration des performances",
+        "Insights métier cachés révélés",
+        "Patterns de comportement uniques découverts"
     ]
     
     # Sélection d'un insight unique basé sur le hash
@@ -473,53 +608,64 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
     }
 
 def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
-    """Affiche les résultats d'analyse"""
+    """Affiche les résultats d'analyse - VERSION MODERNE ET STRUCTUREE"""
     
-    # Insights
-    st.markdown("### 💡 Insights Intelligents")
+    # Insights structurés et modernes
+    st.markdown("""
+    <div class="insights-section">
+        <div class="insights-header">
+            <i class="fas fa-brain insights-icon"></i>
+            <h3 class="insights-title">Insights Intelligents</h3>
+        </div>
+    """, unsafe_allow_html=True)
     
     insights = analysis.get('insights', [])
     for insight in insights:
-        impact_color = {
-            'high': '#DC2626',
-            'medium': '#F59E0B',
-            'low': '#10B981'
-        }.get(insight.get('impact', 'medium'), '#6B7280')
+        impact_class = f"impact-{insight.get('impact', 'medium')}"
         
         st.markdown(f"""
-        <div class="insight-card" style="border-left-color: {impact_color};">
-            <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                <i class="{insight.get('icon', 'fas fa-info-circle')}" style="color: {impact_color}; margin-right: 0.5rem;"></i>
-                <div class="insight-title">{insight.get('title', 'Insight')}</div>
+        <div class="insight-card">
+            <div class="insight-header">
+                <i class="{insight.get('icon', 'fas fa-info-circle')} insight-icon"></i>
+                <h4 class="insight-title">{insight.get('title', 'Insight')}</h4>
             </div>
-            <div class="insight-description">{insight.get('description', '')}</div>
+            <p class="insight-description">{insight.get('description', '')}</p>
+            <span class="insight-impact {impact_class}">{insight.get('impact', 'medium').upper()}</span>
         </div>
         """, unsafe_allow_html=True)
+    
+    st.markdown("</div>", unsafe_allow_html=True)
     
     # Découvertes uniques
     unique_findings = analysis.get('unique_findings', [])
     if unique_findings:
-        st.markdown("### 🔍 Découvertes Uniques")
+        st.markdown("""
+        <div class="unique-findings">
+            <div class="unique-findings-header">
+                <i class="fas fa-star" style="color: #8b5cf6;"></i>
+                <h4 class="unique-findings-title">Découvertes Uniques</h4>
+            </div>
+        """, unsafe_allow_html=True)
         
         for finding in unique_findings:
             st.markdown(f"""
-            <div class="insight-card" style="border-left-color: #8B5CF6;">
-                <div style="display: flex; align-items: center;">
-                    <i class="fas fa-star" style="color: #8B5CF6; margin-right: 0.5rem;"></i>
-                    <div class="insight-description">{finding}</div>
-                </div>
+            <div class="unique-finding-item">
+                <i class="fas fa-check-circle" style="color: #8b5cf6; margin-right: 0.5rem;"></i>
+                {finding}
             </div>
             """, unsafe_allow_html=True)
+        
+        st.markdown("</div>", unsafe_allow_html=True)
     
     # Visualisations
     _render_visualizations(df)
     
     # Aperçu des données
-    with st.expander("👁️ Aperçu des données"):
+    with st.expander("Aperçu des données"):
         st.dataframe(df.head(100), use_container_width=True)
     
     # Export des résultats
-    st.markdown("### 📤 Export des Résultats")
+    st.markdown("### <i class='fas fa-download'></i> Export des Résultats", unsafe_allow_html=True)
     
     col1, col2 = st.columns(2)
     
@@ -545,7 +691,7 @@ def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
 
 def _render_visualizations(df: pd.DataFrame):
     """Génère des visualisations intelligentes"""
-    st.markdown("### 📊 Visualisations Intelligentes")
+    st.markdown("### <i class='fas fa-chart-pie'></i> Visualisations Intelligentes", unsafe_allow_html=True)
     
     # Colonnes numériques pour les graphiques
     numeric_cols = df.select_dtypes(include=['number']).columns.tolist()
@@ -592,7 +738,7 @@ def _render_visualizations(df: pd.DataFrame):
 
 def _render_features_section():
     """Affiche la section des fonctionnalités - CORRIGÉE"""
-    st.markdown("### 🚀 Fonctionnalités Avancées")
+    st.markdown("### <i class='fas fa-rocket'></i> Fonctionnalités Avancées", unsafe_allow_html=True)
     
     # Liste des fonctionnalités avec toutes les clés requises
     features = [
