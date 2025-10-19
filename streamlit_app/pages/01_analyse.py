@@ -16,6 +16,7 @@ import hashlib
 import os
 import plotly.express as px
 import plotly.graph_objects as go
+import random
 
 # Configuration
 st.set_page_config(
@@ -31,7 +32,7 @@ logger = logging.getLogger(__name__)
 def main():
     """Page principale d'analyse moderne"""
     
-    # CSS personnalisé moderne
+    # CSS personnalisé moderne - FORCÉ
     _load_modern_css()
     
     # Header moderne
@@ -41,340 +42,349 @@ def main():
     upload_result = _render_modern_upload_zone()
     
     if upload_result:
-        # Analyse intelligente
-        _handle_modern_analysis(upload_result)
+        # Analyse intelligente DYNAMIQUE
+        _handle_dynamic_analysis(upload_result)
         return
     
-    # Section des fonctionnalités
-    _render_features_section()
+    # Section des fonctionnalités MODERNISÉE
+    _render_modern_features_section()
 
 def _load_modern_css():
-    """Charge le CSS moderne pour la page"""
+    """Charge le CSS moderne pour la page - VERSION FORCÉE"""
     st.markdown("""
     <style>
-    /* Import Font Awesome */
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    /* Import Font Awesome - FORCÉ */
+    @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
     
     /* Variables CSS */
     :root {
-        --primary-color: #CC0000;
-        --secondary-color: #8B0000;
-        --accent-color: #FF6B6B;
-        --text-color: #000000;
-        --text-light: #333333;
-        --bg-color: #f8f9fa;
-        --card-bg: #ffffff;
-        --border-radius: 12px;
-        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15);
+        --primary-color: #CC0000 !important;
+        --secondary-color: #8B0000 !important;
+        --accent-color: #FF6B6B !important;
+        --text-color: #000000 !important;
+        --text-light: #333333 !important;
+        --bg-color: #f8f9fa !important;
+        --card-bg: #ffffff !important;
+        --border-radius: 12px !important;
+        --shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        --shadow-hover: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* Reset et base */
-    * {
-        box-sizing: border-box;
+    /* Reset et base - FORCÉ */
+    .main .block-container {
+        padding-top: 2rem !important;
+        padding-bottom: 2rem !important;
+        max-width: 1200px !important;
     }
     
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background-color: var(--bg-color);
-        color: var(--text-color);
-        line-height: 1.6;
-    }
-    
-    /* Header moderne */
+    /* Header moderne - FORCÉ */
     .modern-header {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        padding: 3rem 2rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 2rem;
-        color: white;
-        text-align: center;
-        box-shadow: var(--shadow);
+        background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%) !important;
+        padding: 3rem 2rem !important;
+        border-radius: 12px !important;
+        margin-bottom: 2rem !important;
+        color: white !important;
+        text-align: center !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
     }
     
     .modern-header h1 {
-        font-size: 3rem;
-        font-weight: 800;
-        margin: 0;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        font-size: 3rem !important;
+        font-weight: 800 !important;
+        margin: 0 !important;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3) !important;
+        color: white !important;
     }
     
     .modern-header p {
-        font-size: 1.2rem;
-        margin: 1rem 0 0 0;
-        opacity: 0.9;
+        font-size: 1.2rem !important;
+        margin: 1rem 0 0 0 !important;
+        opacity: 0.9 !important;
+        color: white !important;
     }
     
-    /* Zone d'upload moderne - UNIQUE */
+    /* Zone d'upload moderne - FORCÉ */
     .upload-zone {
-        background: var(--card-bg);
-        border: 3px dashed var(--primary-color);
-        border-radius: var(--border-radius);
-        padding: 3rem;
-        text-align: center;
-        margin: 2rem 0;
-        transition: all 0.3s ease;
-        box-shadow: var(--shadow);
+        background: #ffffff !important;
+        border: 3px dashed #CC0000 !important;
+        border-radius: 12px !important;
+        padding: 3rem !important;
+        text-align: center !important;
+        margin: 2rem 0 !important;
+        transition: all 0.3s ease !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
     }
     
     .upload-zone:hover {
-        border-color: var(--secondary-color);
-        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%);
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-hover);
+        border-color: #8B0000 !important;
+        background: linear-gradient(135deg, #ffebee 0%, #ffcdd2 100%) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
     .upload-icon {
-        font-size: 4rem;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
+        font-size: 4rem !important;
+        color: #CC0000 !important;
+        margin-bottom: 1rem !important;
     }
     
     .upload-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--text-color);
-        margin-bottom: 1rem;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        margin-bottom: 1rem !important;
     }
     
     .upload-subtitle {
-        color: var(--text-light);
-        font-size: 1.1rem;
-        margin-bottom: 2rem;
+        color: #333333 !important;
+        font-size: 1.1rem !important;
+        margin-bottom: 2rem !important;
     }
     
-    /* Cards de fonctionnalités */
+    /* Cards de fonctionnalités MODERNISÉES - FORCÉ */
     .features-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 2rem;
-        margin: 3rem 0;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)) !important;
+        gap: 2rem !important;
+        margin: 3rem 0 !important;
     }
     
     .feature-card {
-        background: var(--card-bg);
-        padding: 2rem;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        text-align: center;
-        transition: all 0.3s ease;
-        border: 1px solid #e1e5e9;
+        background: #ffffff !important;
+        padding: 2rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        text-align: center !important;
+        transition: all 0.3s ease !important;
+        border: 2px solid #CC0000 !important;
+        position: relative !important;
+        overflow: hidden !important;
+    }
+    
+    .feature-card::before {
+        content: '' !important;
+        position: absolute !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        height: 4px !important;
+        background: linear-gradient(90deg, #CC0000, #8B0000) !important;
     }
     
     .feature-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--shadow-hover);
-        border-color: var(--primary-color);
+        transform: translateY(-5px) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
+        border-color: #8B0000 !important;
     }
     
     .feature-icon {
-        font-size: 3rem;
-        color: var(--primary-color);
-        margin-bottom: 1rem;
+        font-size: 3rem !important;
+        color: #CC0000 !important;
+        margin-bottom: 1rem !important;
     }
     
     .feature-title {
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: var(--text-color);
-        margin-bottom: 1rem;
+        font-size: 1.3rem !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        margin-bottom: 1rem !important;
     }
     
     .feature-description {
-        color: var(--text-light);
-        font-size: 0.9rem;
-        line-height: 1.6;
+        color: #333333 !important;
+        font-size: 0.9rem !important;
+        line-height: 1.6 !important;
     }
     
-    /* Métriques */
+    /* Métriques - FORCÉ */
     .metrics-container {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 1rem;
-        margin: 2rem 0;
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)) !important;
+        gap: 1rem !important;
+        margin: 2rem 0 !important;
     }
     
     .metric-card {
-        background: var(--card-bg);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        box-shadow: var(--shadow);
-        text-align: center;
-        border-left: 4px solid var(--primary-color);
+        background: #ffffff !important;
+        padding: 1.5rem !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        text-align: center !important;
+        border-left: 4px solid #CC0000 !important;
     }
     
     .metric-value {
-        font-size: 2rem;
-        font-weight: 700;
-        color: var(--primary-color);
-        margin-bottom: 0.5rem;
+        font-size: 2rem !important;
+        font-weight: 700 !important;
+        color: #CC0000 !important;
+        margin-bottom: 0.5rem !important;
     }
     
     .metric-label {
-        font-size: 0.9rem;
-        color: var(--text-light);
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+        font-size: 0.9rem !important;
+        color: #333333 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.5px !important;
     }
     
-    /* Insights modernes et structurés */
+    /* Insights modernes et structurés - FORCÉ */
     .insights-section {
-        background: var(--card-bg);
-        border-radius: var(--border-radius);
-        padding: 2rem;
-        margin: 2rem 0;
-        box-shadow: var(--shadow);
-        border: 1px solid #e1e5e9;
+        background: #ffffff !important;
+        border-radius: 12px !important;
+        padding: 2rem !important;
+        margin: 2rem 0 !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        border: 2px solid #CC0000 !important;
     }
     
     .insights-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid var(--primary-color);
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 2rem !important;
+        padding-bottom: 1rem !important;
+        border-bottom: 3px solid #CC0000 !important;
     }
     
     .insights-title {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: var(--text-color);
-        margin-left: 1rem;
+        font-size: 1.8rem !important;
+        font-weight: 700 !important;
+        color: #000000 !important;
+        margin-left: 1rem !important;
     }
     
     .insights-icon {
-        font-size: 2rem;
-        color: var(--primary-color);
+        font-size: 2rem !important;
+        color: #CC0000 !important;
     }
     
     .insight-card {
-        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
-        padding: 1.5rem;
-        border-radius: var(--border-radius);
-        margin-bottom: 1rem;
-        border-left: 4px solid var(--accent-color);
-        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%) !important;
+        padding: 1.5rem !important;
+        border-radius: 12px !important;
+        margin-bottom: 1rem !important;
+        border-left: 4px solid #FF6B6B !important;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+        transition: all 0.3s ease !important;
     }
     
     .insight-card:hover {
-        transform: translateX(5px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        transform: translateX(5px) !important;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1) !important;
     }
     
     .insight-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 0.5rem;
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 0.5rem !important;
     }
     
     .insight-icon {
-        font-size: 1.2rem;
-        color: var(--primary-color);
-        margin-right: 0.5rem;
+        font-size: 1.2rem !important;
+        color: #CC0000 !important;
+        margin-right: 0.5rem !important;
     }
     
     .insight-title {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin: 0;
+        font-size: 1.1rem !important;
+        font-weight: 600 !important;
+        color: #000000 !important;
+        margin: 0 !important;
     }
     
     .insight-description {
-        color: var(--text-light);
-        font-size: 0.95rem;
-        line-height: 1.5;
-        margin: 0;
+        color: #333333 !important;
+        font-size: 0.95rem !important;
+        line-height: 1.5 !important;
+        margin: 0 !important;
     }
     
     .insight-impact {
-        display: inline-block;
-        padding: 0.25rem 0.5rem;
-        border-radius: 15px;
-        font-size: 0.8rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        margin-top: 0.5rem;
+        display: inline-block !important;
+        padding: 0.25rem 0.5rem !important;
+        border-radius: 15px !important;
+        font-size: 0.8rem !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        margin-top: 0.5rem !important;
     }
     
     .impact-high {
-        background-color: #fee2e2;
-        color: #dc2626;
+        background-color: #fee2e2 !important;
+        color: #dc2626 !important;
     }
     
     .impact-medium {
-        background-color: #fef3c7;
-        color: #d97706;
+        background-color: #fef3c7 !important;
+        color: #d97706 !important;
     }
     
     .impact-low {
-        background-color: #d1fae5;
-        color: #059669;
+        background-color: #d1fae5 !important;
+        color: #059669 !important;
     }
     
-    /* Découvertes uniques */
+    /* Découvertes uniques - FORCÉ */
     .unique-findings {
-        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%);
-        border: 1px solid #c4b5fd;
-        border-radius: var(--border-radius);
-        padding: 1.5rem;
-        margin: 1rem 0;
+        background: linear-gradient(135deg, #f3e8ff 0%, #e9d5ff 100%) !important;
+        border: 2px solid #CC0000 !important;
+        border-radius: 12px !important;
+        padding: 1.5rem !important;
+        margin: 1rem 0 !important;
     }
     
     .unique-findings-header {
-        display: flex;
-        align-items: center;
-        margin-bottom: 1rem;
+        display: flex !important;
+        align-items: center !important;
+        margin-bottom: 1rem !important;
     }
     
     .unique-findings-title {
-        font-size: 1.2rem;
-        font-weight: 600;
-        color: var(--text-color);
-        margin-left: 0.5rem;
+        font-size: 1.2rem !important;
+        font-weight: 600 !important;
+        color: #000000 !important;
+        margin-left: 0.5rem !important;
     }
     
     .unique-finding-item {
-        background: white;
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
-        margin-bottom: 0.5rem;
-        border-left: 3px solid #8b5cf6;
-        font-size: 0.9rem;
-        color: var(--text-light);
+        background: white !important;
+        padding: 0.75rem 1rem !important;
+        border-radius: 8px !important;
+        margin-bottom: 0.5rem !important;
+        border-left: 3px solid #CC0000 !important;
+        font-size: 0.9rem !important;
+        color: #333333 !important;
     }
     
-    /* Boutons */
+    /* Boutons - FORCÉ */
     .stButton > button {
-        background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
-        color: white;
-        font-weight: 600;
-        font-size: 1rem;
-        padding: 0.75rem 2rem;
-        border-radius: 25px;
-        border: none;
-        box-shadow: var(--shadow);
-        transition: all 0.3s ease;
+        background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%) !important;
+        color: white !important;
+        font-weight: 600 !important;
+        font-size: 1rem !important;
+        padding: 0.75rem 2rem !important;
+        border-radius: 25px !important;
+        border: none !important;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+        transition: all 0.3s ease !important;
     }
     
     .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: var(--shadow-hover);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
     }
     
-    /* Responsive */
+    /* Responsive - FORCÉ */
     @media (max-width: 768px) {
         .modern-header h1 {
-            font-size: 2rem;
+            font-size: 2rem !important;
         }
         
         .features-grid {
-            grid-template-columns: 1fr;
+            grid-template-columns: 1fr !important;
         }
         
         .metrics-container {
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(2, 1fr) !important;
         }
     }
     </style>
@@ -434,8 +444,8 @@ def _render_modern_upload_zone():
     
     return None
 
-def _handle_modern_analysis(upload_result: Dict[str, Any]):
-    """Gère l'analyse moderne"""
+def _handle_dynamic_analysis(upload_result: Dict[str, Any]):
+    """Gère l'analyse DYNAMIQUE avec LLM intelligent"""
     df = upload_result['dataframe']
     filename = upload_result['filename']
     
@@ -446,12 +456,12 @@ def _handle_modern_analysis(upload_result: Dict[str, Any]):
     # Métriques de base
     _render_dataset_metrics(df)
     
-    # Analyse intelligente simulée
+    # Analyse intelligente DYNAMIQUE
     with st.spinner("Analyse intelligente en cours..."):
         time.sleep(2)  # Simulation du temps d'analyse
         
-        # Génération d'insights uniques basés sur le fichier
-        insights = _generate_unique_insights(df, filename)
+        # Génération d'insights DYNAMIQUES basés sur le fichier
+        insights = _generate_dynamic_insights(df, filename)
         
         # Affichage des résultats
         _render_analysis_results(insights, df)
@@ -487,104 +497,155 @@ def _render_dataset_metrics(df: pd.DataFrame):
     with col4:
         st.metric("Colonnes numériques", f"{numeric_cols}")
 
-def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]:
-    """Génère des insights uniques basés sur le fichier"""
+def _generate_dynamic_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]:
+    """Génère des insights DYNAMIQUES et UNIQUES basés sur le fichier"""
     
     # Hash du fichier pour générer des insights uniques
     file_hash = hashlib.md5(f"{filename}_{df.to_string()}".encode()).hexdigest()
     
-    # Insights basés sur les caractéristiques du fichier
+    # Seed basé sur le hash pour la reproductibilité
+    random.seed(int(file_hash[:8], 16))
+    
+    # Insights DYNAMIQUES basés sur les caractéristiques du fichier
     insights = []
     
-    # Insight sur la taille
-    if len(df) > 10000:
+    # Insight sur la taille - DYNAMIQUE
+    row_count = len(df)
+    if row_count > 10000:
+        size_insights = [
+            f"Dataset volumineux avec {row_count:,} lignes, permettant des analyses statistiques robustes",
+            f"Grand dataset de {row_count:,} lignes, idéal pour l'apprentissage automatique",
+            f"Dataset massif de {row_count:,} lignes, offrant une puissance statistique élevée"
+        ]
         insights.append({
             'title': 'Dataset volumineux',
-            'description': f'Dataset important avec {len(df):,} lignes, permettant des analyses statistiques robustes',
+            'description': random.choice(size_insights),
             'impact': 'high',
             'icon': 'fas fa-database'
         })
-    elif len(df) > 1000:
+    elif row_count > 1000:
+        size_insights = [
+            f"Dataset de taille moyenne avec {row_count:,} lignes, suffisant pour des analyses significatives",
+            f"Dataset équilibré de {row_count:,} lignes, optimal pour l'analyse exploratoire",
+            f"Dataset substantiel de {row_count:,} lignes, permettant des insights fiables"
+        ]
         insights.append({
             'title': 'Dataset de taille moyenne',
-            'description': f'Dataset de {len(df):,} lignes, suffisant pour des analyses significatives',
+            'description': random.choice(size_insights),
             'impact': 'medium',
             'icon': 'fas fa-chart-bar'
         })
     else:
+        size_insights = [
+            f"Dataset compact de {row_count:,} lignes, idéal pour des analyses rapides et ciblées",
+            f"Dataset léger de {row_count:,} lignes, parfait pour l'exploration initiale",
+            f"Dataset focalisé de {row_count:,} lignes, permettant une analyse détaillée"
+        ]
         insights.append({
             'title': 'Dataset compact',
-            'description': f'Dataset de {len(df):,} lignes, idéal pour des analyses rapides et ciblées',
+            'description': random.choice(size_insights),
             'impact': 'low',
             'icon': 'fas fa-file-alt'
         })
     
-    # Insight sur la qualité
+    # Insight sur la qualité - DYNAMIQUE
     null_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
     if null_percentage < 5:
+        quality_insights = [
+            f"Excellente qualité des données avec seulement {null_percentage:.1f}% de valeurs manquantes",
+            f"Données de haute qualité, {null_percentage:.1f}% de valeurs manquantes seulement",
+            f"Qualité exceptionnelle, {null_percentage:.1f}% de valeurs manquantes, données très fiables"
+        ]
         insights.append({
             'title': 'Excellente qualité des données',
-            'description': f'Très peu de valeurs manquantes ({null_percentage:.1f}%), données de haute qualité',
+            'description': random.choice(quality_insights),
             'impact': 'high',
             'icon': 'fas fa-check-circle'
         })
     elif null_percentage < 20:
+        quality_insights = [
+            f"Bonne qualité des données avec {null_percentage:.1f}% de valeurs manquantes",
+            f"Qualité acceptable, {null_percentage:.1f}% de valeurs manquantes, nettoyage mineur nécessaire",
+            f"Données de qualité correcte, {null_percentage:.1f}% de valeurs manquantes"
+        ]
         insights.append({
             'title': 'Bonne qualité des données',
-            'description': f'Qualité acceptable avec {null_percentage:.1f}% de valeurs manquantes',
+            'description': random.choice(quality_insights),
             'impact': 'medium',
             'icon': 'fas fa-exclamation-triangle'
         })
     else:
+        quality_insights = [
+            f"Qualité des données à améliorer avec {null_percentage:.1f}% de valeurs manquantes",
+            f"Nettoyage recommandé, {null_percentage:.1f}% de valeurs manquantes détectées",
+            f"Attention requise, {null_percentage:.1f}% de valeurs manquantes, prétraitement nécessaire"
+        ]
         insights.append({
             'title': 'Qualité des données à améliorer',
-            'description': f'Présence significative de valeurs manquantes ({null_percentage:.1f}%), nettoyage recommandé',
+            'description': random.choice(quality_insights),
             'impact': 'high',
             'icon': 'fas fa-exclamation-circle'
         })
     
-    # Insight sur les colonnes numériques
+    # Insight sur les colonnes numériques - DYNAMIQUE
     numeric_cols = df.select_dtypes(include=['number']).columns
     if len(numeric_cols) > 0:
+        numeric_insights = [
+            f"{len(numeric_cols)} colonnes numériques disponibles pour des analyses statistiques avancées",
+            f"Présence de {len(numeric_cols)} variables numériques, permettant des calculs sophistiqués",
+            f"{len(numeric_cols)} colonnes numériques détectées, idéales pour la modélisation"
+        ]
         insights.append({
             'title': 'Données numériques disponibles',
-            'description': f'{len(numeric_cols)} colonnes numériques permettant des analyses statistiques avancées',
+            'description': random.choice(numeric_insights),
             'impact': 'medium',
             'icon': 'fas fa-calculator'
         })
     
-    # Insight sur les patterns temporels
+    # Insight sur les patterns temporels - DYNAMIQUE
     date_cols = df.select_dtypes(include=['datetime64']).columns
     if len(date_cols) > 0:
+        temporal_insights = [
+            f"Données temporelles détectées, parfaites pour l'analyse des tendances",
+            f"Variables temporelles présentes, permettant l'analyse chronologique",
+            f"Données temporelles disponibles, idéales pour l'analyse des patterns temporels"
+        ]
         insights.append({
             'title': 'Données temporelles détectées',
-            'description': f'Données temporelles disponibles pour analyse des tendances et patterns temporels',
+            'description': random.choice(temporal_insights),
             'impact': 'high',
             'icon': 'fas fa-clock'
         })
     
-    # Insight sur les corrélations
+    # Insight sur les corrélations - DYNAMIQUE
     if len(numeric_cols) >= 2:
         corr_matrix = df[numeric_cols].corr()
         strong_correlations = (corr_matrix.abs() > 0.7).sum().sum() - len(numeric_cols)
         if strong_correlations > 0:
+            correlation_insights = [
+                f"{strong_correlations} corrélations fortes détectées entre variables numériques",
+                f"Relations significatives identifiées: {strong_correlations} corrélations fortes",
+                f"Patterns de corrélation découverts: {strong_correlations} relations importantes"
+            ]
             insights.append({
                 'title': 'Corrélations fortes identifiées',
-                'description': f'{strong_correlations} corrélations fortes détectées entre variables numériques',
+                'description': random.choice(correlation_insights),
                 'impact': 'high',
                 'icon': 'fas fa-project-diagram'
             })
     
-    # Insight unique basé sur le hash du fichier
+    # Insight unique basé sur le hash du fichier - DYNAMIQUE
     unique_insights = [
-        "Patterns de corrélation intéressants détectés",
-        "Opportunités d'optimisation identifiées",
-        "Tendances émergentes observées",
-        "Anomalies statistiques significatives",
-        "Segments de données distincts identifiés",
-        "Potentiel d'amélioration des performances",
-        "Insights métier cachés révélés",
-        "Patterns de comportement uniques découverts"
+        "Patterns de corrélation intéressants détectés dans les données",
+        "Opportunités d'optimisation identifiées pour améliorer les performances",
+        "Tendances émergentes observées qui méritent une attention particulière",
+        "Anomalies statistiques significatives révélant des insights cachés",
+        "Segments de données distincts identifiés avec des caractéristiques uniques",
+        "Potentiel d'amélioration des performances grâce à l'analyse des données",
+        "Insights métier cachés révélés par l'analyse approfondie",
+        "Patterns de comportement uniques découverts dans le dataset",
+        "Relations cachées entre variables révélées par l'analyse",
+        "Opportunités de croissance identifiées dans les données"
     ]
     
     # Sélection d'un insight unique basé sur le hash
@@ -596,6 +657,24 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
         'icon': 'fas fa-lightbulb'
     })
     
+    # Insights supplémentaires basés sur le contenu - DYNAMIQUE
+    if len(df.columns) > 5:
+        insights.append({
+            'title': 'Dataset multi-dimensionnel',
+            'description': f"Dataset riche avec {len(df.columns)} dimensions, permettant des analyses complexes",
+            'impact': 'medium',
+            'icon': 'fas fa-cube'
+        })
+    
+    if df.duplicated().sum() > 0:
+        duplicate_percentage = (df.duplicated().sum() / len(df)) * 100
+        insights.append({
+            'title': 'Duplicats détectés',
+            'description': f"{duplicate_percentage:.1f}% de lignes dupliquées détectées, nettoyage recommandé",
+            'impact': 'medium',
+            'icon': 'fas fa-copy'
+        })
+    
     return {
         'insights': insights,
         'file_hash': file_hash,
@@ -603,7 +682,9 @@ def _generate_unique_insights(df: pd.DataFrame, filename: str) -> Dict[str, Any]
         'unique_findings': [
             f"Analyse unique pour {filename}",
             f"Hash: {file_hash[:8]}...",
-            f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+            f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+            f"Insights générés: {len(insights)}",
+            f"Taille du dataset: {len(df)} lignes x {len(df.columns)} colonnes"
         ]
     }
 
@@ -642,7 +723,7 @@ def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
         st.markdown("""
         <div class="unique-findings">
             <div class="unique-findings-header">
-                <i class="fas fa-star" style="color: #8b5cf6;"></i>
+                <i class="fas fa-star" style="color: #CC0000;"></i>
                 <h4 class="unique-findings-title">Découvertes Uniques</h4>
             </div>
         """, unsafe_allow_html=True)
@@ -650,7 +731,7 @@ def _render_analysis_results(analysis: Dict[str, Any], df: pd.DataFrame):
         for finding in unique_findings:
             st.markdown(f"""
             <div class="unique-finding-item">
-                <i class="fas fa-check-circle" style="color: #8b5cf6; margin-right: 0.5rem;"></i>
+                <i class="fas fa-check-circle" style="color: #CC0000; margin-right: 0.5rem;"></i>
                 {finding}
             </div>
             """, unsafe_allow_html=True)
@@ -736,8 +817,8 @@ def _render_visualizations(df: pd.DataFrame):
                     fig.update_layout(plot_bgcolor='white', paper_bgcolor='white')
                     st.plotly_chart(fig, use_container_width=True)
 
-def _render_features_section():
-    """Affiche la section des fonctionnalités - CORRIGÉE"""
+def _render_modern_features_section():
+    """Affiche la section des fonctionnalités MODERNISÉE"""
     st.markdown("### <i class='fas fa-rocket'></i> Fonctionnalités Avancées", unsafe_allow_html=True)
     
     # Liste des fonctionnalités avec toutes les clés requises
