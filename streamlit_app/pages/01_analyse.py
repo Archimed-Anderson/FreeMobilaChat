@@ -24,6 +24,7 @@ try:
     from services.intelligent_data_inspector import IntelligentDataInspector
     from services.dynamic_prompt_generator import DynamicPromptGenerator
     from services.smart_visualization_engine import SmartVisualizationEngine
+    from services.real_llm_engine import RealLLMEngine
     INTELLIGENT_ANALYSIS_AVAILABLE = True
 except ImportError as e:
     print(f"Modules d'analyse intelligente non disponibles: {e}")
@@ -626,31 +627,27 @@ def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
             status_text.text(step)
             time.sleep(0.3)  # Simulation du temps de traitement
         
-        # Analyse réelle
+        # Analyse RÉELLE avec LLM
         try:
             # Initialisation des composants d'analyse
             inspector = IntelligentDataInspector()
-            prompt_generator = DynamicPromptGenerator()
             viz_engine = SmartVisualizationEngine()
+            real_llm_engine = RealLLMEngine()
             
             # Phase 1: Inspection des données
             status_text.text("🔍 Analyse contextuelle des données...")
             context = inspector.analyze_dataset_context(df)
             
-            # Phase 2: Génération du prompt
-            status_text.text("📝 Création du prompt personnalisé...")
-            custom_prompt = prompt_generator.create_analysis_prompt(df, context, filename)
+            # Phase 2: Analyse LLM RÉELLE avec API calls
+            status_text.text("🤖 Analyse IA réelle en cours...")
+            analysis_results = await real_llm_engine.analyze_with_llm(df, filename, context)
             
-            # Phase 3: Analyse simulée (en attendant l'implémentation LLM complète)
-            status_text.text("🤖 Analyse IA en cours...")
-            analysis_results = _simulate_llm_analysis(df, context, filename)
-            
-            # Phase 4: Génération des visualisations
+            # Phase 3: Génération des visualisations
             status_text.text("📊 Création des visualisations...")
             visualizations = viz_engine.generate_contextual_charts(analysis_results, df)
             analysis_results['visualizations'] = visualizations
             
-            # Phase 5: Finalisation
+            # Phase 4: Finalisation
             status_text.text("🎯 Finalisation de l'analyse...")
             analysis_results['context'] = context
             analysis_results['metadata'] = {
@@ -694,294 +691,7 @@ def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
         logger.error(f"Erreur dans _handle_intelligent_analysis: {e}")
         st.error(f"Erreur lors du traitement: {str(e)}")
 
-def _simulate_llm_analysis(df: pd.DataFrame, context: Dict[str, Any], filename: str) -> Dict[str, Any]:
-    """
-    Simule une analyse LLM basée sur l'inspection des données
-    """
-    try:
-        # Détection du domaine
-        domain = context.get('domain_analysis', {}).get('detected_domain', 'general')
-        confidence = context.get('domain_analysis', {}).get('confidence_score', 0.7)
-        
-        # Métriques de base
-        basic_metrics = context.get('basic_info', {})
-        row_count = basic_metrics.get('row_count', len(df))
-        column_count = basic_metrics.get('column_count', len(df.columns))
-        
-        # Génération d'insights basés sur les données
-        insights = _generate_contextual_insights(df, context)
-        
-        # Génération de métriques clés
-        key_metrics = _generate_key_metrics(df, context)
-        
-        # Génération de recommandations
-        recommendations = _generate_recommendations(df, context)
-        
-        return {
-            'classification': {
-                'domain': domain.title(),
-                'data_type': 'Dataset Analysis',
-                'business_context': context.get('domain_analysis', {}).get('business_context', 'Analyse de données'),
-                'confidence_score': confidence
-            },
-            'key_metrics': key_metrics,
-            'insights': insights,
-            'recommendations': recommendations,
-            'correlations': context.get('correlation_analysis', {}).get('strong_correlations', []),
-            'anomalies': context.get('pattern_analysis', {}).get('anomalies', []),
-            'dataset_metrics': {
-                'row_count': row_count,
-                'column_count': column_count,
-                'memory_usage': df.memory_usage(deep=True).sum(),
-                'completeness': (1 - df.isnull().sum().sum() / (row_count * column_count)) * 100
-            },
-            'data_quality': {
-                'null_percentage': (df.isnull().sum().sum() / (row_count * column_count)) * 100,
-                'duplicate_percentage': (df.duplicated().sum() / row_count) * 100,
-                'numeric_columns': len(df.select_dtypes(include=['number']).columns),
-                'categorical_columns': len(df.select_dtypes(include=['object']).columns),
-                'datetime_columns': len(df.select_dtypes(include=['datetime64']).columns)
-            }
-        }
-        
-    except Exception as e:
-        logger.error(f"Erreur lors de la simulation d'analyse LLM: {e}")
-        return _get_fallback_analysis(df, filename)
-
-def _generate_contextual_insights(df: pd.DataFrame, context: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Génère des insights contextuels basés sur l'analyse des données"""
-    insights = []
-    
-    try:
-        # Insight sur la taille du dataset
-        row_count = len(df)
-        if row_count > 10000:
-            insights.append({
-                'title': 'Dataset volumineux',
-                'description': f'Dataset important avec {row_count:,} lignes, permettant des analyses statistiques robustes',
-                'impact': 'high',
-                'evidence': f'{row_count:,} lignes de données',
-                'confidence': 0.9
-            })
-        elif row_count > 1000:
-            insights.append({
-                'title': 'Dataset de taille moyenne',
-                'description': f'Dataset de {row_count:,} lignes, suffisant pour des analyses significatives',
-                'impact': 'medium',
-                'evidence': f'{row_count:,} lignes de données',
-                'confidence': 0.8
-            })
-        
-        # Insight sur la qualité des données
-        null_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
-        if null_percentage < 5:
-            insights.append({
-                'title': 'Excellente qualité des données',
-                'description': f'Très peu de valeurs manquantes ({null_percentage:.1f}%), données de haute qualité',
-                'impact': 'high',
-                'evidence': f'{null_percentage:.1f}% de valeurs manquantes',
-                'confidence': 0.9
-            })
-        elif null_percentage < 20:
-            insights.append({
-                'title': 'Bonne qualité des données',
-                'description': f'Qualité acceptable avec {null_percentage:.1f}% de valeurs manquantes',
-                'impact': 'medium',
-                'evidence': f'{null_percentage:.1f}% de valeurs manquantes',
-                'confidence': 0.7
-            })
-        
-        # Insight sur les colonnes numériques
-        numeric_cols = df.select_dtypes(include=['number']).columns
-        if len(numeric_cols) > 0:
-            insights.append({
-                'title': 'Données numériques disponibles',
-                'description': f'{len(numeric_cols)} colonnes numériques permettant des analyses statistiques avancées',
-                'impact': 'medium',
-                'evidence': f'{len(numeric_cols)} colonnes numériques',
-                'confidence': 0.8
-            })
-        
-        # Insight sur les patterns temporels
-        temporal_info = context.get('temporal_analysis', {})
-        if temporal_info.get('has_temporal_data'):
-            insights.append({
-                'title': 'Données temporelles détectées',
-                'description': f'Données temporelles disponibles pour analyse des tendances ({temporal_info.get("granularity", "Inconnue")})',
-                'impact': 'high',
-                'evidence': f'Période: {temporal_info.get("time_period", "Non spécifiée")}',
-                'confidence': 0.8
-            })
-        
-        # Insight sur les corrélations
-        correlation_info = context.get('correlation_analysis', {})
-        strong_correlations = correlation_info.get('strong_correlations', [])
-        if len(strong_correlations) > 0:
-            insights.append({
-                'title': 'Corrélations fortes identifiées',
-                'description': f'{len(strong_correlations)} corrélations fortes détectées entre variables',
-                'impact': 'high',
-                'evidence': f'{len(strong_correlations)} corrélations significatives',
-                'confidence': 0.8
-            })
-        
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération des insights: {e}")
-    
-    return insights
-
-def _generate_key_metrics(df: pd.DataFrame, context: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Génère des métriques clés basées sur les données"""
-    metrics = []
-    
-    try:
-        # Métriques de base
-        metrics.append({
-            'name': 'Nombre de lignes',
-            'column': 'total_rows',
-            'type': 'count',
-            'value': len(df),
-            'importance': 0.9
-        })
-        
-        metrics.append({
-            'name': 'Nombre de colonnes',
-            'column': 'total_columns',
-            'type': 'count',
-            'value': len(df.columns),
-            'importance': 0.8
-        })
-        
-        # Métriques de qualité
-        null_count = df.isnull().sum().sum()
-        metrics.append({
-            'name': 'Valeurs manquantes',
-            'column': 'null_values',
-            'type': 'count',
-            'value': null_count,
-            'importance': 0.7
-        })
-        
-        # Métriques numériques
-        numeric_cols = df.select_dtypes(include=['number']).columns
-        if len(numeric_cols) > 0:
-            for col in numeric_cols[:3]:  # Limiter à 3 colonnes
-                if not df[col].isna().all():
-                    metrics.append({
-                        'name': f'Moyenne {col}',
-                        'column': col,
-                        'type': 'mean',
-                        'value': df[col].mean(),
-                        'importance': 0.6
-                    })
-                    
-                    metrics.append({
-                        'name': f'Total {col}',
-                        'column': col,
-                        'type': 'sum',
-                        'value': df[col].sum(),
-                        'importance': 0.5
-                    })
-        
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération des métriques: {e}")
-    
-    return metrics
-
-def _generate_recommendations(df: pd.DataFrame, context: Dict[str, Any]) -> List[Dict[str, Any]]:
-    """Génère des recommandations basées sur l'analyse des données"""
-    recommendations = []
-    
-    try:
-        # Recommandation sur la qualité des données
-        null_percentage = (df.isnull().sum().sum() / (len(df) * len(df.columns))) * 100
-        if null_percentage > 20:
-            recommendations.append({
-                'action': 'Nettoyer les données manquantes',
-                'priority': 'high',
-                'expected_impact': 'Amélioration significative de la qualité des analyses'
-            })
-        
-        # Recommandation sur les colonnes numériques
-        numeric_cols = df.select_dtypes(include=['number']).columns
-        if len(numeric_cols) >= 2:
-            recommendations.append({
-                'action': 'Analyser les corrélations entre variables numériques',
-                'priority': 'medium',
-                'expected_impact': 'Découverte de relations cachées dans les données'
-            })
-        
-        # Recommandation sur les données temporelles
-        temporal_info = context.get('temporal_analysis', {})
-        if temporal_info.get('has_temporal_data'):
-            recommendations.append({
-                'action': 'Analyser les tendances temporelles',
-                'priority': 'high',
-                'expected_impact': 'Identification des patterns et tendances temporelles'
-            })
-        
-        # Recommandation générale
-        recommendations.append({
-            'action': 'Effectuer une analyse exploratoire approfondie',
-            'priority': 'medium',
-            'expected_impact': 'Découverte d\'insights supplémentaires'
-        })
-        
-    except Exception as e:
-        logger.error(f"Erreur lors de la génération des recommandations: {e}")
-    
-    return recommendations
-
-def _get_fallback_analysis(df: pd.DataFrame, filename: str) -> Dict[str, Any]:
-    """Analyse de fallback en cas d'erreur"""
-    return {
-        'classification': {
-            'domain': 'General',
-            'data_type': 'Dataset Analysis',
-            'business_context': 'Analyse de données générale',
-            'confidence_score': 0.5
-        },
-        'key_metrics': [
-            {
-                'name': 'Nombre de lignes',
-                'column': 'total_rows',
-                'type': 'count',
-                'value': len(df),
-                'importance': 0.8
-            }
-        ],
-        'insights': [
-            {
-                'title': 'Dataset analysé',
-                'description': f'Dataset de {len(df)} lignes et {len(df.columns)} colonnes analysé avec succès',
-                'impact': 'medium',
-                'evidence': 'Analyse de base effectuée',
-                'confidence': 0.6
-            }
-        ],
-        'recommendations': [
-            {
-                'action': 'Effectuer une analyse plus approfondie',
-                'priority': 'medium',
-                'expected_impact': 'Découverte d\'insights supplémentaires'
-            }
-        ],
-        'correlations': [],
-        'anomalies': [],
-        'dataset_metrics': {
-            'row_count': len(df),
-            'column_count': len(df.columns),
-            'memory_usage': df.memory_usage(deep=True).sum(),
-            'completeness': 100
-        },
-        'data_quality': {
-            'null_percentage': 0,
-            'duplicate_percentage': 0,
-            'numeric_columns': len(df.select_dtypes(include=['number']).columns),
-            'categorical_columns': len(df.select_dtypes(include=['object']).columns),
-            'datetime_columns': len(df.select_dtypes(include=['datetime64']).columns)
-        }
-    }
+# Les fonctions de simulation ont été supprimées car remplacées par le vrai moteur LLM
 
 def _render_analysis_header_modern(df: pd.DataFrame, filename: str) -> None:
     """Affiche le header moderne de l'analyse"""

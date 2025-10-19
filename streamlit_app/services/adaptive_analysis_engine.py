@@ -19,6 +19,7 @@ from pathlib import Path
 
 from .intelligent_data_inspector import IntelligentDataInspector
 from .dynamic_prompt_generator import DynamicPromptGenerator
+from .real_llm_engine import RealLLMEngine
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +31,7 @@ class AdaptiveAnalysisEngine:
     def __init__(self, llm_provider: str = "openai"):
         self.inspector = IntelligentDataInspector()
         self.prompt_generator = DynamicPromptGenerator()
+        self.real_llm_engine = RealLLMEngine()
         self.llm_provider = llm_provider
         self.llm_client = self._initialize_llm(llm_provider)
         self.cache_dir = Path("streamlit_app/cache/analysis")
@@ -117,9 +119,9 @@ class AdaptiveAnalysisEngine:
             logger.info("Phase 2: Génération du prompt personnalisé")
             custom_prompt = self.prompt_generator.create_analysis_prompt(df, context, filename)
             
-            # Phase 3: Analyse LLM avec retry et validation
-            logger.info("Phase 3: Analyse LLM adaptative")
-            analysis_result = await self._execute_llm_analysis(custom_prompt, df)
+            # Phase 3: Analyse LLM RÉELLE avec API calls
+            logger.info("Phase 3: Analyse LLM réelle avec API calls")
+            analysis_result = await self.real_llm_engine.analyze_with_llm(df, filename, context)
             
             # Phase 4: Post-traitement intelligent
             logger.info("Phase 4: Post-traitement et enrichissement")
