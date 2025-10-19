@@ -402,31 +402,44 @@ def render_features():
     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 3rem; text-align: center; margin: 3rem 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
         <h2 style="color: #CC0000; font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Accès Rapide aux Analyses</h2>
         <p style="color: #666; font-size: 1.2rem; margin-bottom: 3rem; font-weight: 400; line-height: 1.6;">Choisissez votre type d'analyse et commencez immédiatement</p>
-        
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 2rem;">
-            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #CC0000;">
-                <i class="fas fa-brain" style="font-size: 2.5rem; color: #CC0000; margin-bottom: 1rem;"></i>
-                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Intelligente</h3>
-                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">IA avancée avec LLM pour des insights uniques</p>
-                <a href="/analyse_intelligente" style="background: #CC0000; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Commencer →</a>
-            </div>
-            
-            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #28a745;">
-                <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;"></i>
-                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Classique</h3>
-                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Analyse traditionnelle avec visualisations</p>
-                <a href="/analyse_old" style="background: #28a745; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Commencer →</a>
-            </div>
-            
-            <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8;">
-                <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;"></i>
-                <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Résultats</h3>
-                <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Visualisez et explorez vos résultats</p>
-                <a href="/resultat" style="background: #17a2b8; color: white; padding: 0.8rem 1.5rem; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block; transition: all 0.3s;">Voir →</a>
-            </div>
-        </div>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Cartes de navigation avec composants Streamlit natifs
+    col1, col2, col3 = st.columns(3, gap="large")
+    
+    with col1:
+        st.markdown("""
+        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #CC0000; text-align: center;">
+            <i class="fas fa-brain" style="font-size: 2.5rem; color: #CC0000; margin-bottom: 1rem;"></i>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Intelligente</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">IA avancée avec LLM pour des insights uniques</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Commencer l'Analyse Intelligente", type="primary", use_container_width=True):
+            st.switch_page("pages/01_analyse_intelligente.py")
+    
+    with col2:
+        st.markdown("""
+        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #28a745; text-align: center;">
+            <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;"></i>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Classique</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Analyse traditionnelle avec visualisations</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Commencer l'Analyse Classique", type="secondary", use_container_width=True):
+            st.switch_page("pages/02_analyse_old.py")
+    
+    with col3:
+        st.markdown("""
+        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8; text-align: center;">
+            <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;"></i>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Résultats</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Visualisez et explorez vos résultats</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Voir les Résultats", type="secondary", use_container_width=True):
+            st.switch_page("pages/03_resultat.py")
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
