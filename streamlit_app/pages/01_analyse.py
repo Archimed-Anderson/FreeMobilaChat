@@ -11,6 +11,11 @@ import pandas as pd
 import numpy as np
 from typing import Dict, Any, Optional
 from datetime import datetime
+import asyncio
+
+# Import des nouveaux composants d'analyse intelligente
+from streamlit_app.components.dynamic_analysis_ui import DynamicAnalysisUI
+from streamlit_app.services.adaptive_analysis_engine import AdaptiveAnalysisEngine
 
 # Configuration
 st.set_page_config(
@@ -43,8 +48,8 @@ def main():
     upload_result = _render_modern_upload_zone()
     
     if upload_result:
-        # Redirection automatique après upload réussi
-        _handle_successful_upload(upload_result)
+        # Analyse intelligente avec le nouveau système
+        _handle_intelligent_analysis(upload_result)
         return
     
     # Affichage des analyses en cours
@@ -563,6 +568,85 @@ def _render_features_section():
             <p style="color: #666; font-size: 0.9rem; line-height: 1.6;">Graphiques interactifs et dashboards</p>
         </div>
         """, unsafe_allow_html=True)
+
+def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
+    """
+    Gère l'analyse intelligente avec le nouveau système LLM adaptatif
+    """
+    try:
+        # Récupération des données uploadées
+        df = upload_result.get('dataframe')
+        filename = upload_result.get('filename', 'dataset.csv')
+        
+        if df is None or df.empty:
+            st.error("Aucune donnée valide à analyser")
+            return
+        
+        # Initialisation de l'interface d'analyse dynamique
+        dynamic_ui = DynamicAnalysisUI()
+        
+        # Affichage du header d'analyse
+        st.markdown("---")
+        st.markdown("## Analyse Intelligente en Cours")
+        
+        # Barre de progression
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        
+        # Étapes de l'analyse
+        steps = [
+            "Inspection intelligente des données...",
+            "Génération du prompt personnalisé...",
+            "Analyse IA adaptative...",
+            "Enrichissement des résultats...",
+            "Génération des visualisations...",
+            "Finalisation de l'analyse..."
+        ]
+        
+        # Simulation de la progression (en attendant l'implémentation async)
+        for i, step in enumerate(steps):
+            progress_bar.progress((i + 1) / len(steps))
+            status_text.text(step)
+            time.sleep(0.5)  # Simulation du temps de traitement
+        
+        # Analyse réelle (version synchrone pour l'instant)
+        try:
+            # Initialisation du moteur d'analyse
+            analysis_engine = AdaptiveAnalysisEngine()
+            
+            # Analyse du dataset
+            analysis_results = asyncio.run(analysis_engine.analyze_dataset(df, filename))
+            
+            # Stockage des résultats en session state
+            st.session_state['analysis_results'] = analysis_results
+            st.session_state['analysis_completed'] = True
+            st.session_state['current_dataset'] = df
+            st.session_state['current_filename'] = filename
+            
+            # Affichage des résultats
+            dynamic_ui.render_dynamic_dashboard(analysis_results)
+            
+            # Bouton pour nouvelle analyse
+            col1, col2, col3 = st.columns([1, 2, 1])
+            with col2:
+                if st.button("Nouvelle Analyse", type="primary", use_container_width=True):
+                    # Nettoyage de la session
+                    for key in ['analysis_results', 'analysis_completed', 'current_dataset', 'current_filename']:
+                        if key in st.session_state:
+                            del st.session_state[key]
+                    st.rerun()
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse intelligente: {e}")
+            st.error(f"Erreur lors de l'analyse: {str(e)}")
+            
+            # Fallback vers l'ancien système
+            st.warning("Utilisation du système d'analyse de base...")
+            _handle_successful_upload(upload_result)
+    
+    except Exception as e:
+        logger.error(f"Erreur dans _handle_intelligent_analysis: {e}")
+        st.error(f"Erreur lors du traitement: {str(e)}")
 
 if __name__ == "__main__":
     main()
