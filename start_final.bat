@@ -28,8 +28,6 @@ echo - Analyse Intelligente: http://localhost:8501/analyse_intelligente
 echo - Analyse Classique: http://localhost:8501/analyse_old
 echo - Resultats: http://localhost:8501/resultat
 echo.
-echo Test automatique des URLs...
-cd ..
-python test_urls.py
+echo Pour tester: python test_app.py
 echo.
 pause
