@@ -67,7 +67,7 @@ def render_hero():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Commencer Maintenant", type="primary", use_container_width=True):
-            st.switch_page("pages/01_analyse_intelligente.py")
+            st.switch_page("pages/analyse_intelligente.py")
     
     # Indicateur de scroll
     st.markdown("""
@@ -417,7 +417,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Commencer l'Analyse Intelligente", type="primary", use_container_width=True):
-            st.switch_page("pages/01_analyse_intelligente.py")
+            st.switch_page("pages/analyse_intelligente.py")
     
     with col2:
         st.markdown("""
@@ -428,7 +428,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Commencer l'Analyse Classique", type="secondary", use_container_width=True):
-            st.switch_page("pages/02_analyse_old.py")
+            st.switch_page("pages/analyse_old.py")
     
     with col3:
         st.markdown("""
@@ -439,7 +439,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Voir les Résultats", type="secondary", use_container_width=True):
-            st.switch_page("pages/03_resultat.py")
+            st.switch_page("pages/resultat.py")
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
