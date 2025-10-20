@@ -90,7 +90,7 @@ def main():
         col1, col2, col3 = st.columns([1, 2, 1])
         with col2:
             if st.button("Aller a la page d'analyse", type="primary", use_container_width=True):
-                st.switch_page("pages/01_analyse.py")
+                st.switch_page("pages/analyse_intelligente.py")
         return
     
     data = st.session_state.analyzed_data
@@ -400,7 +400,7 @@ def render_quick_actions():
         if st.button("Nouvelle Analyse", use_container_width=True, type="primary"):
             st.session_state.analyzed_data = None
             st.session_state.file_info = None
-            st.switch_page("pages/01_analyse.py")
+            st.switch_page("pages/analyse_intelligente.py")
     
     with col2:
         if st.button("Actualiser Dashboard", use_container_width=True):
@@ -408,7 +408,7 @@ def render_quick_actions():
     
     with col3:
         if st.button("Paramètres", use_container_width=True):
-            st.switch_page("pages/03_settings.py")
+            st.info("Page de parametres en cours de developpement")
 
 if __name__ == "__main__":
     main()

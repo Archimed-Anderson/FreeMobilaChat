@@ -680,7 +680,7 @@ def render_footer():
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
-                    <a href="/pages/01_analyse.py" style="color: #333; 
+                    <a href="/pages/analyse_intelligente.py" style="color: #333; 
                                                           text-decoration: none; 
                                                           font-size: 1.1rem;
                                                           font-weight: 500;
