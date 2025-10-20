@@ -1,58 +1,62 @@
+#!/usr/bin/env python3
 """
-Script pour déployer l'application sur Streamlit Cloud
-Alternative recommandée à Vercel pour les applications Streamlit
+Script de déploiement sur Streamlit Cloud
 """
 
-import os
 import subprocess
 import sys
+import time
 
-def deploy_to_streamlit_cloud():
-    """Déploie l'application sur Streamlit Cloud"""
+def deploy_streamlit_cloud():
+    """Déploiement sur Streamlit Cloud"""
+    print("=" * 60)
+    print("    DEPLOIEMENT STREAMLIT CLOUD")
+    print("=" * 60)
     
-    print("🚀 Déploiement sur Streamlit Cloud...")
-    
-    # Vérifier que nous sommes dans le bon répertoire
-    if not os.path.exists("streamlit_app/app.py"):
-        print("❌ Erreur: streamlit_app/app.py non trouvé")
+    print("\n[1/3] Vérification du repository GitHub...")
+    try:
+        result = subprocess.run(["git", "remote", "-v"], capture_output=True, text=True)
+        if "github.com" in result.stdout:
+            print("✓ Repository GitHub configuré")
+        else:
+            print("✗ Repository GitHub non trouvé")
+            return False
+    except Exception as e:
+        print(f"✗ Erreur: {e}")
         return False
     
-    # Créer un fichier de configuration pour Streamlit Cloud
-    config_content = """
-[server]
-headless = true
-port = 8501
-enableCORS = false
-enableXsrfProtection = false
-
-[browser]
-gatherUsageStats = false
-
-[theme]
-primaryColor = "#CC0000"
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#262730"
-"""
+    print("\n[2/3] Vérification de la structure du projet...")
+    required_files = [
+        "streamlit_app/app.py",
+        "streamlit_app/pages/analyse_intelligente.py",
+        "streamlit_app/pages/analyse_old.py",
+        "streamlit_app/pages/resultat.py",
+        "streamlit_app/.streamlit/config.toml"
+    ]
     
-    # Créer le dossier .streamlit s'il n'existe pas
-    os.makedirs(".streamlit", exist_ok=True)
+    for file in required_files:
+        try:
+            with open(file, 'r') as f:
+                print(f"✓ {file}")
+        except FileNotFoundError:
+            print(f"✗ {file} manquant")
+            return False
     
-    # Écrire la configuration
-    with open(".streamlit/config.toml", "w") as f:
-        f.write(config_content)
+    print("\n[3/3] Instructions de déploiement...")
+    print("\n" + "=" * 60)
+    print("    INSTRUCTIONS STREAMLIT CLOUD")
+    print("=" * 60)
+    print("\n1. Aller sur https://share.streamlit.io")
+    print("2. Se connecter avec votre compte GitHub")
+    print("3. Cliquer sur 'New app'")
+    print("4. Sélectionner le repository: Archimed-Anderson/FreeMobilaChat")
+    print("5. Sélectionner la branche: main")
+    print("6. Chemin principal: streamlit_app/app.py")
+    print("7. Cliquer sur 'Deploy'")
+    print("\nURL de déploiement: https://freemobilachat.streamlit.app")
     
-    print("✅ Configuration Streamlit créée")
-    
-    # Instructions pour le déploiement manuel
-    print("\n📋 Instructions pour déployer sur Streamlit Cloud:")
-    print("1. Allez sur https://share.streamlit.io/")
-    print("2. Connectez votre compte GitHub")
-    print("3. Sélectionnez le repository: Archimed-Anderson/FreeMobilaChat")
-    print("4. Définissez le chemin principal: streamlit_app/app.py")
-    print("5. Cliquez sur 'Deploy'")
-    
+    print("\n✓ Déploiement Streamlit Cloud prêt !")
     return True
 
 if __name__ == "__main__":
-    deploy_to_streamlit_cloud()
+    deploy_streamlit_cloud()
