@@ -39,7 +39,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 class SimplePipeline:
     """Simple tweet analysis pipeline for demonstration"""
     
@@ -200,7 +199,6 @@ class SimplePipeline:
         
         print("\n" + "="*80)
 
-
 async def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='Run simple tweet analysis pipeline demo')
@@ -236,7 +234,6 @@ async def main():
     
     # Exit with appropriate code
     sys.exit(0 if results['overall_success'] else 1)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

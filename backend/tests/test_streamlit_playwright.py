@@ -50,9 +50,9 @@ def test_streamlit_interface():
         },
         {
             "name": "Initialisation chatbot",
-            "description": "Cliquer sur '🚀 Initialiser le chatbot'",
+            "description": "Cliquer sur ' Initialiser le chatbot'",
             "action": "click_button",
-            "target": "🚀 Initialiser le chatbot"
+            "target": " Initialiser le chatbot"
         },
         {
             "name": "Envoi message test",
@@ -85,7 +85,7 @@ def test_streamlit_interface():
         print(f"  {i}. {test['name']} - {test['description']}")
     
     print("\n" + "=" * 60)
-    print("⚠️  INSTRUCTIONS POUR EXÉCUTION MANUELLE:")
+    print("  INSTRUCTIONS POUR EXÉCUTION MANUELLE:")
     print("=" * 60)
     print("1. Utiliser les outils Playwright disponibles:")
     print("   - browser_navigate_Playwright")
@@ -128,7 +128,7 @@ def generate_test_report(results: List[Dict[str, Any]]) -> str:
     """Génère un rapport de test formaté."""
     
     report = []
-    report.append("# 📊 RAPPORT DE TESTS PLAYWRIGHT - CHATBOT SAV")
+    report.append("#  RAPPORT DE TESTS PLAYWRIGHT - CHATBOT SAV")
     report.append("=" * 60)
     report.append(f"📅 Date: {time.strftime('%Y-%m-%d %H:%M:%S')}")
     report.append(f"🌐 URL testée: http://localhost:8501")
@@ -141,15 +141,15 @@ def generate_test_report(results: List[Dict[str, Any]]) -> str:
     failed_tests = total_tests - passed_tests
     
     report.append("## 📈 RÉSUMÉ")
-    report.append(f"- ✅ Tests réussis: {passed_tests}/{total_tests}")
-    report.append(f"- ❌ Tests échoués: {failed_tests}/{total_tests}")
-    report.append(f"- 📊 Taux de réussite: {(passed_tests/total_tests)*100:.1f}%")
+    report.append(f"-  Tests réussis: {passed_tests}/{total_tests}")
+    report.append(f"-  Tests échoués: {failed_tests}/{total_tests}")
+    report.append(f"-  Taux de réussite: {(passed_tests/total_tests)*100:.1f}%")
     report.append("")
     
     # Détails des tests
     report.append("## 🔍 DÉTAILS DES TESTS")
     for i, result in enumerate(results, 1):
-        status_icon = "✅" if result.get('status') == 'PASS' else "❌"
+        status_icon = "" if result.get('status') == 'PASS' else ""
         report.append(f"### {i}. {status_icon} {result.get('name', 'Test')}")
         report.append(f"**Description:** {result.get('description', 'N/A')}")
         report.append(f"**Statut:** {result.get('status', 'UNKNOWN')}")
@@ -166,15 +166,15 @@ def generate_test_report(results: List[Dict[str, Any]]) -> str:
         report.append("")
     
     # Recommandations
-    report.append("## 🎯 RECOMMANDATIONS")
+    report.append("##  RECOMMANDATIONS")
     if failed_tests > 0:
-        report.append("### ⚠️ Problèmes identifiés:")
+        report.append("###  Problèmes identifiés:")
         for result in results:
             if result.get('status') == 'FAIL':
                 report.append(f"- {result.get('name')}: {result.get('error', 'Erreur inconnue')}")
         report.append("")
     
-    report.append("### 🔧 Améliorations suggérées:")
+    report.append("###  Améliorations suggérées:")
     report.append("- Optimiser les temps de chargement")
     report.append("- Améliorer la responsivité mobile")
     report.append("- Ajouter des indicateurs de chargement")
@@ -187,5 +187,5 @@ if __name__ == "__main__":
     # Exécution du script de test
     tests = test_streamlit_interface()
     
-    print("\n🚀 Pour exécuter les tests, utilisez les outils Playwright disponibles")
-    print("📝 Documentez les résultats pour générer le rapport final")
+    print("\n Pour exécuter les tests, utilisez les outils Playwright disponibles")
+    print(" Documentez les résultats pour générer le rapport final")

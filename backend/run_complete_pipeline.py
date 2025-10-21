@@ -37,7 +37,6 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 class CompletePipeline:
     """Complete tweet analysis pipeline orchestrator"""
     
@@ -294,7 +293,6 @@ class CompletePipeline:
 
         print("\n" + "="*80)
 
-
 async def main():
     """Main function"""
     parser = argparse.ArgumentParser(description='Run complete tweet analysis pipeline')
@@ -330,7 +328,6 @@ async def main():
     
     # Exit with appropriate code
     sys.exit(0 if results['overall_success'] else 1)
-
 
 if __name__ == "__main__":
     asyncio.run(main())

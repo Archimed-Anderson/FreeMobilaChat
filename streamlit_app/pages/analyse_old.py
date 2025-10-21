@@ -601,7 +601,7 @@ def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
         
         # Vérification de la disponibilité des modules d'analyse intelligente
         if not INTELLIGENT_ANALYSIS_AVAILABLE:
-            st.warning("⚠️ Modules d'analyse intelligente non disponibles. Utilisation de l'analyse de base.")
+            st.warning(" Modules d'analyse intelligente non disponibles. Utilisation de l'analyse de base.")
             _handle_successful_upload(upload_result)
             return
         
@@ -614,11 +614,11 @@ def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
         # Étapes de l'analyse
         steps = [
             "🔍 Inspection intelligente des données...",
-            "📝 Génération du prompt personnalisé...",
+            " Génération du prompt personnalisé...",
             "🤖 Analyse IA adaptative...",
-            "✨ Enrichissement des résultats...",
-            "📊 Génération des visualisations...",
-            "🎯 Finalisation de l'analyse..."
+            " Enrichissement des résultats...",
+            " Génération des visualisations...",
+            " Finalisation de l'analyse..."
         ]
         
         # Simulation de la progression
@@ -643,12 +643,12 @@ def _handle_intelligent_analysis(upload_result: Dict[str, Any]) -> None:
             analysis_results = asyncio.run(real_llm_engine.analyze_with_llm(df, filename, context))
             
             # Phase 3: Génération des visualisations
-            status_text.text("📊 Création des visualisations...")
+            status_text.text(" Création des visualisations...")
             visualizations = viz_engine.generate_contextual_charts(analysis_results, df)
             analysis_results['visualizations'] = visualizations
             
             # Phase 4: Finalisation
-            status_text.text("🎯 Finalisation de l'analyse...")
+            status_text.text(" Finalisation de l'analyse...")
             analysis_results['context'] = context
             analysis_results['metadata'] = {
                 'filename': filename,

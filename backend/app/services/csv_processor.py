@@ -15,7 +15,6 @@ from ..utils.cleaning import TextCleaner
 
 logger = logging.getLogger(__name__)
 
-
 class CSVProcessor:
     """
     Traitement et nettoyage CSV tweets

@@ -15,11 +15,11 @@ def test_import(module_name: str, description: str) -> Tuple[bool, str]:
         __import__(module_name)
         end_time = time.time()
         duration = end_time - start_time
-        return True, f"✅ {description} ({duration:.2f}s)"
+        return True, f" {description} ({duration:.2f}s)"
     except ImportError as e:
-        return False, f"❌ {description} - Erreur: {str(e)}"
+        return False, f" {description} - Erreur: {str(e)}"
     except Exception as e:
-        return False, f"⚠️ {description} - Erreur inattendue: {str(e)}"
+        return False, f" {description} - Erreur inattendue: {str(e)}"
 
 def test_basic_imports() -> List[Tuple[bool, str]]:
     """Test des imports de base."""
@@ -50,7 +50,7 @@ def test_sentence_transformers() -> List[Tuple[bool, str]]:
         from sentence_transformers import SentenceTransformer
         end_time = time.time()
         duration = end_time - start_time
-        results.append((True, f"✅ Embeddings (sentence-transformers) - Import réussi ({duration:.2f}s)"))
+        results.append((True, f" Embeddings (sentence-transformers) - Import réussi ({duration:.2f}s)"))
         
         # Test de création d'un modèle (plus lourd)
         try:
@@ -58,7 +58,7 @@ def test_sentence_transformers() -> List[Tuple[bool, str]]:
             model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
             end_time = time.time()
             duration = end_time - start_time
-            results.append((True, f"✅ Modèle multilingue - Chargement réussi ({duration:.2f}s)"))
+            results.append((True, f" Modèle multilingue - Chargement réussi ({duration:.2f}s)"))
             
             # Test d'encoding rapide
             try:
@@ -66,17 +66,17 @@ def test_sentence_transformers() -> List[Tuple[bool, str]]:
                 embeddings = model.encode(["Test de fonctionnement"])
                 end_time = time.time()
                 duration = end_time - start_time
-                results.append((True, f"✅ Encoding de test - Fonctionnel ({duration:.2f}s, dim={len(embeddings[0])})"))
+                results.append((True, f" Encoding de test - Fonctionnel ({duration:.2f}s, dim={len(embeddings[0])})"))
             except Exception as e:
-                results.append((False, f"⚠️ Encoding de test - Erreur: {str(e)}"))
+                results.append((False, f" Encoding de test - Erreur: {str(e)}"))
                 
         except Exception as e:
-            results.append((False, f"⚠️ Modèle multilingue - Erreur de chargement: {str(e)}"))
+            results.append((False, f" Modèle multilingue - Erreur de chargement: {str(e)}"))
             
     except ImportError as e:
-        results.append((False, f"❌ Embeddings (sentence-transformers) - Erreur: {str(e)}"))
+        results.append((False, f" Embeddings (sentence-transformers) - Erreur: {str(e)}"))
     except Exception as e:
-        results.append((False, f"⚠️ Embeddings (sentence-transformers) - Erreur inattendue: {str(e)}"))
+        results.append((False, f" Embeddings (sentence-transformers) - Erreur inattendue: {str(e)}"))
     
     return results
 
@@ -86,21 +86,21 @@ def test_chatbot_services() -> List[Tuple[bool, str]]:
     
     try:
         from app.services.documentation_scraper import DocumentationScraper
-        results.append((True, "✅ DocumentationScraper - Import réussi"))
+        results.append((True, " DocumentationScraper - Import réussi"))
     except Exception as e:
-        results.append((False, f"❌ DocumentationScraper - Erreur: {str(e)}"))
+        results.append((False, f" DocumentationScraper - Erreur: {str(e)}"))
     
     try:
         from app.services.chatbot_service import ChatbotService
-        results.append((True, "✅ ChatbotService - Import réussi"))
+        results.append((True, " ChatbotService - Import réussi"))
     except Exception as e:
-        results.append((False, f"❌ ChatbotService - Erreur: {str(e)}"))
+        results.append((False, f" ChatbotService - Erreur: {str(e)}"))
     
     try:
         from app.models import ChatMessage, Conversation, KnowledgeDocument, ChatFeedback
-        results.append((True, "✅ Modèles Chatbot - Import réussi"))
+        results.append((True, " Modèles Chatbot - Import réussi"))
     except Exception as e:
-        results.append((False, f"❌ Modèles Chatbot - Erreur: {str(e)}"))
+        results.append((False, f" Modèles Chatbot - Erreur: {str(e)}"))
     
     return results
 
@@ -138,14 +138,14 @@ def main():
     total_duration = total_end_time - total_start_time
     
     print("\n" + "=" * 50)
-    print(f"📊 RÉSUMÉ: {success_count}/{total_count} tests réussis")
-    print(f"⏱️ DURÉE TOTALE: {total_duration:.2f}s")
+    print(f" RÉSUMÉ: {success_count}/{total_count} tests réussis")
+    print(f"⏱ DURÉE TOTALE: {total_duration:.2f}s")
     
     if success_count == total_count:
-        print("🎉 TOUS LES TESTS SONT RÉUSSIS!")
+        print(" TOUS LES TESTS SONT RÉUSSIS!")
         sys.exit(0)
     else:
-        print("⚠️ CERTAINS TESTS ONT ÉCHOUÉ")
+        print(" CERTAINS TESTS ONT ÉCHOUÉ")
         sys.exit(1)
 
 if __name__ == "__main__":

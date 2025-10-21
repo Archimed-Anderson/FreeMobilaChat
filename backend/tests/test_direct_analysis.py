@@ -29,10 +29,10 @@ async def test_analysis():
         url="https://twitter.com/test/status/123"
     )
     
-    print(f"📝 Tweet: {test_tweet.text}")
+    print(f" Tweet: {test_tweet.text}")
     
     # Initialize analyzer with Ollama
-    print("🔧 Initializing LLMAnalyzer with Ollama...")
+    print(" Initializing LLMAnalyzer with Ollama...")
     analyzer = LLMAnalyzer(provider="ollama", batch_size=1)
     print(f"   Provider: {analyzer.provider}")
     print(f"   Clients: {list(analyzer.clients.keys())}")
@@ -43,7 +43,7 @@ async def test_analysis():
         result = await analyzer.analyze_tweet(test_tweet)
         
         if result:
-            print("\n✅ Analysis successful!")
+            print("\n Analysis successful!")
             print(f"   Sentiment: {result.sentiment.value}")
             print(f"   Category: {result.category.value}")
             print(f"   Priority: {result.priority.value}")
@@ -52,10 +52,10 @@ async def test_analysis():
             print(f"   Needs response: {result.needs_response}")
             return True
         else:
-            print("\n❌ Analysis returned None")
+            print("\n Analysis returned None")
             return False
     except Exception as e:
-        print(f"\n❌ Analysis failed with exception: {e}")
+        print(f"\n Analysis failed with exception: {e}")
         import traceback
         traceback.print_exc()
         return False

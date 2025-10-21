@@ -8,7 +8,6 @@ from pathlib import Path
 from typing import Optional
 from dataclasses import dataclass
 
-
 @dataclass
 class FastGraphRAGConfig:
     """Configuration pour Fast-GraphRAG"""
@@ -73,15 +72,12 @@ class FastGraphRAGConfig:
         """Chemin complet vers le fichier de métadonnées"""
         return self.storage_dir / self.metadata_file
 
-
 # Instance globale de configuration
 config = FastGraphRAGConfig()
-
 
 def get_config() -> FastGraphRAGConfig:
     """Récupérer la configuration Fast-GraphRAG"""
     return config
-
 
 def update_config(**kwargs) -> FastGraphRAGConfig:
     """

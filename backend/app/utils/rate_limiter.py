@@ -11,7 +11,6 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-
 class RateLimiter:
     """
     Async rate limiter using token bucket algorithm
@@ -96,7 +95,6 @@ class RateLimiter:
             'utilization_percent': (len(self.calls) / self.max_calls) * 100
         }
 
-
 class MultiProviderRateLimiter:
     """
     Rate limiter for multiple API providers
@@ -176,7 +174,6 @@ class MultiProviderRateLimiter:
                 name: limiter.get_stats() 
                 for name, limiter in self.limiters.items()
             }
-
 
 class AdaptiveRateLimiter:
     """
@@ -258,11 +255,9 @@ class AdaptiveRateLimiter:
         })
         return base_stats
 
-
 # Global rate limiter instances
 _global_limiter = None
 _multi_provider_limiter = None
-
 
 def get_rate_limiter(max_calls: int = 30, time_window: int = 60) -> RateLimiter:
     """
@@ -281,7 +276,6 @@ def get_rate_limiter(max_calls: int = 30, time_window: int = 60) -> RateLimiter:
         _global_limiter = RateLimiter(max_calls, time_window)
     
     return _global_limiter
-
 
 def get_multi_provider_limiter() -> MultiProviderRateLimiter:
     """

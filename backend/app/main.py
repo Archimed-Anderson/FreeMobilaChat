@@ -63,7 +63,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-logger.info(f"📝 Logging configured: level={config.log_level}, file={log_file}")
+logger.info(f" Logging configured: level={config.log_level}, file={log_file}")
 
 # Initialize FastAPI app with configuration
 app = FastAPI(
@@ -121,20 +121,19 @@ db_manager = get_database_manager()
 async def startup_event():
     """Initialize database and application components"""
     try:
-        logger.info("🚀 Initializing FreeMobilaChat Application")
+        logger.info(" Initializing FreeMobilaChat Application")
         await db_manager.initialize_database()
-        logger.info("✅ Database initialized successfully")
+        logger.info(" Database initialized successfully")
 
         # Create necessary directories
         config.data_raw_dir.mkdir(parents=True, exist_ok=True)
         config.data_processed_dir.mkdir(parents=True, exist_ok=True)
         config.upload_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info("✅ Application startup completed")
+        logger.info(" Application startup completed")
     except Exception as e:
-        logger.error(f"❌ Application startup failed: {e}")
+        logger.error(f" Application startup failed: {e}")
         raise
-
 
 # Health check endpoints
 @app.get("/health", tags=["Health"])
@@ -146,7 +145,6 @@ async def health_check():
         "version": config.app_version,
         "environment": config.environment.value
     }
-
 
 @app.get("/health/detailed", tags=["Health"])
 async def detailed_health_check():
@@ -164,7 +162,6 @@ async def detailed_health_check():
                 "timestamp": datetime.now(UTC).isoformat()
             }
         )
-
 
 @app.get("/database/info", tags=["Debug"])
 async def database_info():
@@ -185,7 +182,6 @@ async def database_info():
         logger.error(f"Error getting database info: {e}")
         return {"error": str(e)}
 
-
 @app.get("/health/history", tags=["Health"])
 async def health_check_history():
     """Get health check history"""
@@ -194,7 +190,6 @@ async def health_check_history():
         "timestamp": datetime.now(UTC).isoformat()
     }
 
-
 # Pydantic models for API requests/responses
 class AnalysisRequest(BaseModel):
     """Request model for tweet analysis"""
@@ -202,7 +197,6 @@ class AnalysisRequest(BaseModel):
     max_tweets: int = 500
     batch_size: int = 10
     user_role: UserRole = UserRole.AGENT
-
 
 class AnalysisResponse(BaseModel):
     """Response model for analysis results"""
@@ -215,14 +209,12 @@ class AnalysisResponse(BaseModel):
     processing_time: float = 0.0
     estimated_cost: float = 0.0
 
-
 class KPIResponse(BaseModel):
     """Response model for KPI data"""
     kpis: KPIMetrics
     advanced_metrics: Dict[str, Any]
     insights: List[str]
     generated_at: datetime
-
 
 @app.get("/test-config", tags=["Testing"])
 async def test_config():
@@ -236,7 +228,6 @@ async def test_config():
         "working_directory": os.getcwd(),
         "env_file_exists": os.path.exists(".env")
     }
-
 
 @app.post("/test-analyze-single")
 async def test_analyze_single(text: str = "Merci Free pour votre excellent service!", provider: str = "ollama"):
@@ -273,7 +264,7 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
             date=datetime.now(UTC),
             url="https://twitter.com/test/status/123"
         )
-        logger.info(f"✅ Test tweet created successfully")
+        logger.info(f" Test tweet created successfully")
         logger.info(f"   - Tweet ID: {test_tweet.tweet_id}")
         logger.info(f"   - Author: {test_tweet.author}")
         logger.info(f"   - Text: {test_tweet.text[:100]}...")
@@ -285,7 +276,7 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
 
         analyzer = LLMAnalyzer(provider=provider, batch_size=1)
 
-        logger.info(f"✅ LLMAnalyzer initialized successfully")
+        logger.info(f" LLMAnalyzer initialized successfully")
         logger.info(f"   - Analyzer provider: {analyzer.provider}")
         logger.info(f"   - Analyzer provider type: {type(analyzer.provider)}")
 
@@ -300,7 +291,7 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
         logger.info(f"   - Result is None: {result is None}")
 
         if result:
-            logger.info(f"✅ Analysis successful!")
+            logger.info(f" Analysis successful!")
             logger.info(f"   - Sentiment: {result.sentiment.value}")
             logger.info(f"   - Category: {result.category.value}")
             logger.info(f"   - Priority: {result.priority.value}")
@@ -321,7 +312,7 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
                 }
             }
         else:
-            logger.warning(f"⚠️ Analysis returned None")
+            logger.warning(f" Analysis returned None")
             logger.warning(f"   - This means the LLM call failed or returned invalid data")
             logger.warning(f"   - Check the logs above for Ollama API errors")
             logger.info("=" * 80)
@@ -333,7 +324,7 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
 
     except Exception as e:
         logger.error("=" * 80)
-        logger.error(f"❌ EXCEPTION in /test-analyze-single")
+        logger.error(f" EXCEPTION in /test-analyze-single")
         logger.error(f"   - Exception type: {type(e).__name__}")
         logger.error(f"   - Exception message: {str(e)}")
         logger.error(f"   - Full traceback:", exc_info=True)
@@ -344,7 +335,6 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
             "error": str(e),
             "error_type": type(e).__name__
         }
-
 
 # File upload endpoint
 @app.post("/upload-csv", response_model=AnalysisResponse)
@@ -446,8 +436,8 @@ async def upload_csv(
             user_role
         )
 
-        logger.info(f"✅ CSV upload successful: {safe_filename}, batch_id: {batch_id}")
-        logger.info(f"📊 Background analysis task queued for {max_tweets} tweets")
+        logger.info(f" CSV upload successful: {safe_filename}, batch_id: {batch_id}")
+        logger.info(f" Background analysis task queued for {max_tweets} tweets")
 
         # Return immediately - analysis runs in background
         return AnalysisResponse(
@@ -465,7 +455,6 @@ async def upload_csv(
         logger.error(f"Error uploading CSV: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-
 async def process_csv_analysis(file_path: str, batch_id: str, llm_provider: str, max_tweets: int, batch_size: int, user_role: str):
     """
     Background task for processing CSV analysis
@@ -481,7 +470,7 @@ async def process_csv_analysis(file_path: str, batch_id: str, llm_provider: str,
     start_time = datetime.now(UTC)
 
     try:
-        logger.info(f"🚀 Starting analysis for batch {batch_id}")
+        logger.info(f" Starting analysis for batch {batch_id}")
         logger.info(f"📋 Configuration: provider={llm_provider}, max_tweets={max_tweets}, batch_size={batch_size}")
 
         # Load and clean CSV
@@ -494,12 +483,12 @@ async def process_csv_analysis(file_path: str, batch_id: str, llm_provider: str,
             logger.info(f"Limited to {len(tweets_raw)} tweets")
 
         # Initialize LLM analyzer
-        logger.info(f"🔧 Initializing LLMAnalyzer with provider: {llm_provider}")
+        logger.info(f" Initializing LLMAnalyzer with provider: {llm_provider}")
         llm_analyzer = LLMAnalyzer(
             provider=llm_provider,
             batch_size=batch_size
         )
-        logger.info(f"✅ LLMAnalyzer initialized successfully")
+        logger.info(f" LLMAnalyzer initialized successfully")
         
         # Analyze tweets
         analyzed_tweets = await llm_analyzer.analyze_batch(tweets_raw)
@@ -554,7 +543,6 @@ async def process_csv_analysis(file_path: str, batch_id: str, llm_provider: str,
         except:
             pass
 
-
 @app.get("/analysis-status/{batch_id}")
 async def get_analysis_status(batch_id: str):
     """
@@ -593,7 +581,6 @@ async def get_analysis_status(batch_id: str):
     except Exception as e:
         logger.error(f"Error getting analysis status: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving analysis status: {str(e)}")
-
 
 @app.get("/kpis/{batch_id}", response_model=KPIResponse)
 async def get_kpis(batch_id: str, user_role: UserRole = UserRole.AGENT):
@@ -663,7 +650,6 @@ async def get_kpis(batch_id: str, user_role: UserRole = UserRole.AGENT):
     except Exception as e:
         logger.error(f"Error retrieving tweets for KPIs: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving analysis data: {str(e)}")
-
 
 @app.get("/tweets/{batch_id}")
 async def get_analyzed_tweets(
@@ -749,7 +735,6 @@ async def get_analyzed_tweets(
         logger.error(f"Error retrieving tweets: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving tweets: {str(e)}")
 
-
 @app.get("/dashboard-config/{user_role}")
 async def get_dashboard_config(user_role: UserRole):
     """
@@ -766,7 +751,6 @@ async def get_dashboard_config(user_role: UserRole):
         raise HTTPException(status_code=404, detail="Role configuration not found")
     
     return config
-
 
 @app.get("/analysis-logs")
 async def get_analysis_logs(limit: int = 50):
@@ -785,7 +769,6 @@ async def get_analysis_logs(limit: int = 50):
     except Exception as e:
         logger.error(f"Error retrieving analysis logs: {e}")
         raise HTTPException(status_code=500, detail=f"Error retrieving analysis logs: {str(e)}")
-
 
 @app.delete("/analysis/{batch_id}")
 async def delete_analysis(batch_id: str):
@@ -817,10 +800,7 @@ async def delete_analysis(batch_id: str):
         logger.error(f"Error deleting analysis: {e}")
         raise HTTPException(status_code=500, detail=f"Error deleting analysis: {str(e)}")
 
-
-# =============================================================================
 # CHATBOT SAV ENDPOINTS - Endpoints pour le chatbot SAV intelligent
-# =============================================================================
 
 # Modèles Pydantic pour les requêtes API
 class ChatMessageRequest(BaseModel):
@@ -830,7 +810,6 @@ class ChatMessageRequest(BaseModel):
     session_id: str = Field(description="ID de session utilisateur")
     llm_provider: str = Field(default="mistral", description="Fournisseur LLM à utiliser")
     user_id: Optional[str] = Field(None, description="ID utilisateur (optionnel)")
-
 
 class ChatMessageResponse(BaseModel):
     """Réponse du chatbot"""
@@ -845,7 +824,6 @@ class ChatMessageResponse(BaseModel):
     documents_found: int = 0
     error: Optional[str] = None
 
-
 class FeedbackRequest(BaseModel):
     """Requête pour enregistrer un feedback"""
     conversation_id: str
@@ -855,10 +833,8 @@ class FeedbackRequest(BaseModel):
     comment: Optional[str] = Field(None, max_length=1000)
     session_id: str
 
-
 # Initialiser le service chatbot
 chatbot_service = ChatbotService(db_manager=db_manager)
-
 
 @app.post("/api/chatbot/message", response_model=ChatMessageResponse)
 async def send_message(request: ChatMessageRequest):
@@ -899,16 +875,15 @@ async def send_message(request: ChatMessageRequest):
             error=result.get('error')
         )
 
-        logger.info(f"✅ Réponse générée en {result.get('processing_time', 0):.2f}s")
+        logger.info(f" Réponse générée en {result.get('processing_time', 0):.2f}s")
         return response
 
     except Exception as e:
-        logger.error(f"❌ Erreur lors du traitement du message: {e}")
+        logger.error(f" Erreur lors du traitement du message: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Erreur lors du traitement du message: {str(e)}"
         )
-
 
 @app.get("/api/chatbot/conversations/{user_id}")
 async def get_user_conversations(user_id: str, limit: int = 20):
@@ -936,12 +911,11 @@ async def get_user_conversations(user_id: str, limit: int = 20):
         }
 
     except Exception as e:
-        logger.error(f"❌ Erreur lors de la récupération des conversations: {e}")
+        logger.error(f" Erreur lors de la récupération des conversations: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Erreur lors de la récupération des conversations: {str(e)}"
         )
-
 
 @app.delete("/api/chatbot/conversations/{conversation_id}")
 async def delete_conversation(conversation_id: str):
@@ -956,7 +930,7 @@ async def delete_conversation(conversation_id: str):
     """
     try:
         # Marquer la conversation comme supprimée dans la base de données
-        logger.info(f"🗑️ Suppression de la conversation: {conversation_id}")
+        logger.info(f"🗑 Suppression de la conversation: {conversation_id}")
 
         # Mettre à jour le statut de la conversation à 'deleted'
         try:
@@ -978,12 +952,11 @@ async def delete_conversation(conversation_id: str):
         }
 
     except Exception as e:
-        logger.error(f"❌ Erreur lors de la suppression: {e}")
+        logger.error(f" Erreur lors de la suppression: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Erreur lors de la suppression: {str(e)}"
         )
-
 
 @app.post("/api/chatbot/feedback")
 async def submit_feedback(request: FeedbackRequest):
@@ -997,7 +970,7 @@ async def submit_feedback(request: FeedbackRequest):
         Confirmation d'enregistrement
     """
     try:
-        logger.info(f"👍 Nouveau feedback: {request.feedback_type} pour message {request.message_id}")
+        logger.info(f" Nouveau feedback: {request.feedback_type} pour message {request.message_id}")
 
         # Stocker le feedback dans la base de données
         feedback_data = {
@@ -1025,12 +998,11 @@ async def submit_feedback(request: FeedbackRequest):
         }
 
     except Exception as e:
-        logger.error(f"❌ Erreur lors de l'enregistrement du feedback: {e}")
+        logger.error(f" Erreur lors de l'enregistrement du feedback: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Erreur lors de l'enregistrement du feedback: {str(e)}"
         )
-
 
 @app.post("/api/chatbot/initialize")
 async def initialize_chatbot():
@@ -1041,24 +1013,23 @@ async def initialize_chatbot():
         Résultat de l'initialisation
     """
     try:
-        logger.info("🚀 Initialisation de la base de connaissances du chatbot")
+        logger.info(" Initialisation de la base de connaissances du chatbot")
 
         result = await chatbot_service.initialize_knowledge_base()
 
         if result['success']:
-            logger.info("✅ Base de connaissances initialisée avec succès")
+            logger.info(" Base de connaissances initialisée avec succès")
         else:
-            logger.error(f"❌ Échec de l'initialisation: {result.get('error')}")
+            logger.error(f" Échec de l'initialisation: {result.get('error')}")
 
         return result
 
     except Exception as e:
-        logger.error(f"❌ Erreur lors de l'initialisation: {e}")
+        logger.error(f" Erreur lors de l'initialisation: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Erreur lors de l'initialisation: {str(e)}"
         )
-
 
 # Error handlers
 @app.exception_handler(HTTPException)
@@ -1069,7 +1040,6 @@ async def http_exception_handler(request, exc):
         content={"error": exc.detail, "timestamp": datetime.now(UTC).isoformat()}
     )
 
-
 @app.exception_handler(Exception)
 async def general_exception_handler(request, exc):
     """Handle general exceptions"""
@@ -1078,7 +1048,6 @@ async def general_exception_handler(request, exc):
         status_code=500,
         content={"error": "Internal server error", "timestamp": datetime.now(UTC).isoformat()}
     )
-
 
 if __name__ == "__main__":
     import uvicorn

@@ -300,9 +300,7 @@ CREATE INDEX IF NOT EXISTS idx_analysis_results_provider ON analysis_results (pr
 CREATE INDEX IF NOT EXISTS idx_analysis_results_total_tweets ON analysis_results (total_tweets);
 """
 
-# =============================================================================
 # CHATBOT SAV SCHEMA - Schémas pour le chatbot SAV intelligent
-# =============================================================================
 
 CHATBOT_SCHEMA = """
 -- Enable UUID extension for PostgreSQL

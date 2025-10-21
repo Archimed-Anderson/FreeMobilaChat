@@ -15,7 +15,6 @@ from app.config_pkg.fast_graphrag_config import get_config, FastGraphRAGConfig
 # Configuration du logger
 logger = logging.getLogger(__name__)
 
-
 class FastGraphRAGService:
     """
     Service de récupération de contexte basé sur Fast-GraphRAG
@@ -34,7 +33,7 @@ class FastGraphRAGService:
         self.embedding_model = None
         self.is_initialized = False
         
-        logger.info("🚀 Initialisation du service Fast-GraphRAG")
+        logger.info(" Initialisation du service Fast-GraphRAG")
         logger.info(f"   - Modèle d'embedding: {self.config.embedding_model}")
         logger.info(f"   - LLM Provider: {self.config.llm_provider}")
         logger.info(f"   - Stockage: {self.config.storage_dir}")
@@ -43,7 +42,7 @@ class FastGraphRAGService:
         try:
             self._initialize()
         except Exception as e:
-            logger.error(f"❌ Erreur lors de l'initialisation Fast-GraphRAG: {e}")
+            logger.error(f" Erreur lors de l'initialisation Fast-GraphRAG: {e}")
             if not self.config.fallback_on_error:
                 raise
     
@@ -67,10 +66,10 @@ class FastGraphRAGService:
                 self.graph = self._create_new_graph()
             
             self.is_initialized = True
-            logger.info("✅ Service Fast-GraphRAG initialisé avec succès")
+            logger.info(" Service Fast-GraphRAG initialisé avec succès")
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors de l'initialisation des composants: {e}")
+            logger.error(f" Erreur lors de l'initialisation des composants: {e}")
             self.is_initialized = False
             if not self.config.fallback_on_error:
                 raise
@@ -103,10 +102,10 @@ class FastGraphRAGService:
         try:
             with open(self.config.graph_path, 'rb') as f:
                 graph = pickle.load(f)
-            logger.info(f"✅ Graphe chargé: {graph.get('metadata', {}).get('num_documents', 0)} documents")
+            logger.info(f" Graphe chargé: {graph.get('metadata', {}).get('num_documents', 0)} documents")
             return graph
         except Exception as e:
-            logger.error(f"❌ Erreur lors du chargement du graphe: {e}")
+            logger.error(f" Erreur lors du chargement du graphe: {e}")
             return self._create_new_graph()
     
     def _save_graph(self):
@@ -116,7 +115,7 @@ class FastGraphRAGService:
                 pickle.dump(self.graph, f)
             logger.info(f"💾 Graphe sauvegardé dans {self.config.graph_path}")
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la sauvegarde du graphe: {e}")
+            logger.error(f" Erreur lors de la sauvegarde du graphe: {e}")
     
     async def build_graph_from_documents(self, documents: List[str]) -> bool:
         """
@@ -129,10 +128,10 @@ class FastGraphRAGService:
             True si succès, False sinon
         """
         if not self.is_initialized:
-            logger.warning("⚠️ Service non initialisé, tentative de réinitialisation")
+            logger.warning(" Service non initialisé, tentative de réinitialisation")
             self._initialize()
             if not self.is_initialized:
-                logger.error("❌ Impossible d'initialiser le service")
+                logger.error(" Impossible d'initialiser le service")
                 return False
         
         try:
@@ -153,11 +152,11 @@ class FastGraphRAGService:
             self.graph["metadata"]["num_documents"] = len(documents)
             self._save_graph()
             
-            logger.info(f"✅ Graphe construit avec succès: {len(documents)} documents")
+            logger.info(f" Graphe construit avec succès: {len(documents)} documents")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la construction du graphe: {e}")
+            logger.error(f" Erreur lors de la construction du graphe: {e}")
             return False
     
     async def query_graph(self, query: str, top_k: int = 5) -> List[Dict[str, Any]]:
@@ -172,7 +171,7 @@ class FastGraphRAGService:
             Liste de contextes pertinents avec leurs scores
         """
         if not self.is_initialized or self.graph is None:
-            logger.warning("⚠️ Graphe non disponible, retour d'une liste vide")
+            logger.warning(" Graphe non disponible, retour d'une liste vide")
             return []
         
         try:
@@ -203,11 +202,11 @@ class FastGraphRAGService:
             results.sort(key=lambda x: x["score"], reverse=True)
             results = results[:top_k]
             
-            logger.info(f"✅ Trouvé {len(results)} résultats pertinents")
+            logger.info(f" Trouvé {len(results)} résultats pertinents")
             return results
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la recherche dans le graphe: {e}")
+            logger.error(f" Erreur lors de la recherche dans le graphe: {e}")
             return []
     
     async def update_graph(self, new_documents: List[str]) -> bool:
@@ -221,7 +220,7 @@ class FastGraphRAGService:
             True si succès, False sinon
         """
         if not self.config.enable_incremental_updates:
-            logger.info("⚠️ Mises à jour incrémentales désactivées")
+            logger.info(" Mises à jour incrémentales désactivées")
             return False
         
         try:
@@ -243,11 +242,11 @@ class FastGraphRAGService:
             self.graph["metadata"]["num_documents"] += len(new_documents)
             self._save_graph()
             
-            logger.info(f"✅ Graphe mis à jour: {self.graph['metadata']['num_documents']} documents au total")
+            logger.info(f" Graphe mis à jour: {self.graph['metadata']['num_documents']} documents au total")
             return True
             
         except Exception as e:
-            logger.error(f"❌ Erreur lors de la mise à jour du graphe: {e}")
+            logger.error(f" Erreur lors de la mise à jour du graphe: {e}")
             return False
     
     def get_graph_stats(self) -> Dict[str, Any]:

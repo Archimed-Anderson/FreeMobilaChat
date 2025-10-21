@@ -376,7 +376,7 @@ def _render_sidebar_config():
         ]
         
         for lib_name, available in libraries:
-            status = "✅" if available else "❌"
+            status = "" if available else ""
             st.markdown(f"{status} {lib_name}")
 
 def _render_multiple_upload_zone():

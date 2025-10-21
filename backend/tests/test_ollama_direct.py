@@ -29,11 +29,11 @@ try:
     
     if response.status_code == 200:
         result = response.json()
-        print("✅ Ollama API works!")
+        print(" Ollama API works!")
         print(f"Response: {json.dumps(result, indent=2)}")
     else:
-        print(f"❌ Error: {response.status_code}")
+        print(f" Error: {response.status_code}")
         print(f"Response: {response.text}")
 except Exception as e:
-    print(f"❌ Exception: {e}")
+    print(f" Exception: {e}")
 

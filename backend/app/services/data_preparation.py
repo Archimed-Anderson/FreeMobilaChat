@@ -18,7 +18,6 @@ from ..utils.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
-
 class DataPreparationService:
     """Service for preparing training datasets and managing ground truth data"""
     
@@ -407,7 +406,6 @@ class DataPreparationService:
                 'error': str(e)
             }
 
-
 async def main():
     """Main function for testing data preparation"""
     service = DataPreparationService()
@@ -419,14 +417,13 @@ async def main():
     )
     
     if results['success']:
-        print("✅ Data preparation completed successfully!")
-        print(f"📊 Total samples: {results['total_samples']}")
+        print(" Data preparation completed successfully!")
+        print(f" Total samples: {results['total_samples']}")
         print(f"📈 Training: {results['splits']['train']} samples")
         print(f"📉 Validation: {results['splits']['validation']} samples")
         print(f"🧪 Test: {results['splits']['test']} samples")
     else:
-        print(f"❌ Data preparation failed: {results['error']}")
-
+        print(f" Data preparation failed: {results['error']}")
 
 if __name__ == "__main__":
     import asyncio

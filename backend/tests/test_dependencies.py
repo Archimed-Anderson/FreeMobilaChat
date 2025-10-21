@@ -12,11 +12,11 @@ def test_import(module_name: str, description: str) -> Tuple[bool, str]:
     """Test l'import d'un module et retourne le résultat."""
     try:
         __import__(module_name)
-        return True, f"✅ {description}"
+        return True, f" {description}"
     except ImportError as e:
-        return False, f"❌ {description} - Erreur: {str(e)}"
+        return False, f" {description} - Erreur: {str(e)}"
     except Exception as e:
-        return False, f"⚠️ {description} - Erreur inattendue: {str(e)}"
+        return False, f" {description} - Erreur inattendue: {str(e)}"
 
 def test_specific_imports() -> List[Tuple[bool, str]]:
     """Test des imports spécifiques pour le chatbot."""
@@ -30,19 +30,19 @@ def test_specific_imports() -> List[Tuple[bool, str]]:
     # Test de sentence-transformers (le plus lourd)
     try:
         from sentence_transformers import SentenceTransformer
-        results.append((True, "✅ Embeddings (sentence-transformers) - Import réussi"))
+        results.append((True, " Embeddings (sentence-transformers) - Import réussi"))
         
         # Test de création d'un modèle
         try:
             model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-            results.append((True, "✅ Modèle multilingue - Chargement réussi"))
+            results.append((True, " Modèle multilingue - Chargement réussi"))
         except Exception as e:
-            results.append((False, f"⚠️ Modèle multilingue - Erreur de chargement: {str(e)}"))
+            results.append((False, f" Modèle multilingue - Erreur de chargement: {str(e)}"))
             
     except ImportError as e:
-        results.append((False, f"❌ Embeddings (sentence-transformers) - Erreur: {str(e)}"))
+        results.append((False, f" Embeddings (sentence-transformers) - Erreur: {str(e)}"))
     except Exception as e:
-        results.append((False, f"⚠️ Embeddings (sentence-transformers) - Erreur inattendue: {str(e)}"))
+        results.append((False, f" Embeddings (sentence-transformers) - Erreur inattendue: {str(e)}"))
     
     # Test des dépendances scientifiques
     results.append(test_import("numpy", "Calculs vectoriels (numpy)"))
@@ -56,31 +56,31 @@ def test_chatbot_services() -> List[Tuple[bool, str]]:
     
     try:
         from app.services.documentation_scraper import DocumentationScraper
-        results.append((True, "✅ DocumentationScraper - Import réussi"))
+        results.append((True, " DocumentationScraper - Import réussi"))
         
         # Test d'instanciation
         try:
             scraper = DocumentationScraper()
-            results.append((True, "✅ DocumentationScraper - Instanciation réussie"))
+            results.append((True, " DocumentationScraper - Instanciation réussie"))
         except Exception as e:
-            results.append((False, f"⚠️ DocumentationScraper - Erreur d'instanciation: {str(e)}"))
+            results.append((False, f" DocumentationScraper - Erreur d'instanciation: {str(e)}"))
             
     except ImportError as e:
-        results.append((False, f"❌ DocumentationScraper - Erreur d'import: {str(e)}"))
+        results.append((False, f" DocumentationScraper - Erreur d'import: {str(e)}"))
     
     try:
         from app.services.chatbot_service import ChatbotService
-        results.append((True, "✅ ChatbotService - Import réussi"))
+        results.append((True, " ChatbotService - Import réussi"))
         
         # Test d'instanciation
         try:
             chatbot = ChatbotService()
-            results.append((True, "✅ ChatbotService - Instanciation réussie"))
+            results.append((True, " ChatbotService - Instanciation réussie"))
         except Exception as e:
-            results.append((False, f"⚠️ ChatbotService - Erreur d'instanciation: {str(e)}"))
+            results.append((False, f" ChatbotService - Erreur d'instanciation: {str(e)}"))
             
     except ImportError as e:
-        results.append((False, f"❌ ChatbotService - Erreur d'import: {str(e)}"))
+        results.append((False, f" ChatbotService - Erreur d'import: {str(e)}"))
     
     return results
 
@@ -107,13 +107,13 @@ def main():
     total_count = len(all_results)
     
     print("\n" + "=" * 60)
-    print(f"📊 RÉSUMÉ: {success_count}/{total_count} tests réussis")
+    print(f" RÉSUMÉ: {success_count}/{total_count} tests réussis")
     
     if success_count == total_count:
-        print("🎉 Tous les tests sont passés ! Le chatbot est prêt.")
+        print(" Tous les tests sont passés ! Le chatbot est prêt.")
         return 0
     else:
-        print("⚠️ Certains tests ont échoué. Vérifiez les erreurs ci-dessus.")
+        print(" Certains tests ont échoué. Vérifiez les erreurs ci-dessus.")
         return 1
 
 if __name__ == "__main__":

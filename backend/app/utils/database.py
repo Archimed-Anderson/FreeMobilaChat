@@ -29,7 +29,6 @@ from ..schemas import get_database_schema, get_postgresql_optimizations
 
 logger = logging.getLogger(__name__)
 
-
 class DatabaseManager:
     """
     Database manager for tweet analysis platform
@@ -713,9 +712,9 @@ class DatabaseManager:
             logger.error(f"Error storing analysis results: {e}")
             return False
 
-    # =============================================================================
+    
     # CHATBOT SAV METHODS - Méthodes pour le chatbot SAV intelligent
-    # =============================================================================
+    
 
     async def store_knowledge_document(self, document: Dict[str, Any]) -> Optional[str]:
         """
@@ -1122,10 +1121,8 @@ class DatabaseManager:
             logger.error(f"Error getting conversations: {e}")
             return []
 
-
 # Global database manager instance
 _db_manager = None
-
 
 def get_database_manager() -> DatabaseManager:
     """Get global database manager instance"""

@@ -28,7 +28,7 @@ try:
     import torch
     GPU_AVAILABLE = True
 except ImportError as e:
-    print(f"❌ GPU training dependencies not available: {e}")
+    print(f" GPU training dependencies not available: {e}")
     print("Run: python setup_gpu_training.py")
     sys.exit(1)
 
@@ -43,7 +43,6 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-
 
 class TrainingPipeline:
     """Complete GPU training pipeline"""
@@ -63,20 +62,20 @@ class TrainingPipeline:
         # Check GPU
         gpu_info = self.gpu_trainer.check_gpu_memory()
         if not gpu_info.get("gpu_available", False):
-            logger.warning("⚠️ No GPU detected. Training will be very slow on CPU.")
+            logger.warning(" No GPU detected. Training will be very slow on CPU.")
         else:
-            logger.info(f"✅ GPU detected: {gpu_info}")
+            logger.info(f" GPU detected: {gpu_info}")
         
         # Check CUDA
         if torch.cuda.is_available():
-            logger.info(f"✅ CUDA available: {torch.version.cuda}")
-            logger.info(f"✅ GPU count: {torch.cuda.device_count()}")
+            logger.info(f" CUDA available: {torch.version.cuda}")
+            logger.info(f" GPU count: {torch.cuda.device_count()}")
             for i in range(torch.cuda.device_count()):
                 name = torch.cuda.get_device_name(i)
                 memory = torch.cuda.get_device_properties(i).total_memory / 1024**3
                 logger.info(f"   GPU {i}: {name} ({memory:.1f} GB)")
         else:
-            logger.warning("⚠️ CUDA not available")
+            logger.warning(" CUDA not available")
         
         # Check training data
         data_dir = Path("data/training")
@@ -84,10 +83,10 @@ class TrainingPipeline:
         
         for file in required_files:
             if not (data_dir / file).exists():
-                logger.error(f"❌ Missing training data: {data_dir / file}")
+                logger.error(f" Missing training data: {data_dir / file}")
                 return False
         
-        logger.info("✅ All training data files found")
+        logger.info(" All training data files found")
         return True
     
     def prepare_data_if_needed(self, csv_path: str = "data/raw/free_tweet_export.csv") -> bool:
@@ -98,7 +97,7 @@ class TrainingPipeline:
             logger.info("Preparing training data...")
             
             if not Path(csv_path).exists():
-                logger.error(f"❌ Raw data file not found: {csv_path}")
+                logger.error(f" Raw data file not found: {csv_path}")
                 return False
             
             results = self.data_prep_service.prepare_training_data(
@@ -107,10 +106,10 @@ class TrainingPipeline:
             )
             
             if not results['success']:
-                logger.error(f"❌ Data preparation failed: {results['error']}")
+                logger.error(f" Data preparation failed: {results['error']}")
                 return False
             
-            logger.info("✅ Data preparation completed")
+            logger.info(" Data preparation completed")
             logger.info(f"   Total samples: {results['total_samples']}")
             logger.info(f"   Training: {results['splits']['train']} samples")
             logger.info(f"   Validation: {results['splits']['validation']} samples")
@@ -120,7 +119,7 @@ class TrainingPipeline:
     
     async def run_training(self, output_dir: str = None) -> dict:
         """Run the complete training pipeline"""
-        logger.info("🚀 Starting GPU training pipeline")
+        logger.info(" Starting GPU training pipeline")
         start_time = datetime.now()
         
         try:
@@ -133,7 +132,7 @@ class TrainingPipeline:
                 return {'success': False, 'error': 'Data preparation failed'}
             
             # Run training
-            logger.info("🔥 Starting model training...")
+            logger.info(" Starting model training...")
             results = await self.gpu_trainer.train_model(
                 data_dir="data/training",
                 output_dir=output_dir
@@ -143,7 +142,7 @@ class TrainingPipeline:
                 end_time = datetime.now()
                 duration = end_time - start_time
                 
-                logger.info("🎉 Training completed successfully!")
+                logger.info(" Training completed successfully!")
                 logger.info(f"   Duration: {duration}")
                 logger.info(f"   Model saved to: {results['model_path']}")
                 logger.info(f"   Final train loss: {results.get('train_loss', 'N/A')}")
@@ -153,14 +152,13 @@ class TrainingPipeline:
                 results['start_time'] = start_time.isoformat()
                 results['end_time'] = end_time.isoformat()
             else:
-                logger.error(f"❌ Training failed: {results['error']}")
+                logger.error(f" Training failed: {results['error']}")
             
             return results
             
         except Exception as e:
-            logger.error(f"❌ Training pipeline failed: {e}")
+            logger.error(f" Training pipeline failed: {e}")
             return {'success': False, 'error': str(e)}
-
 
 def main():
     """Main training function"""
@@ -181,13 +179,13 @@ def main():
         logger.info("🔍 Checking prerequisites only...")
         success = pipeline.check_prerequisites()
         if success:
-            logger.info("✅ System ready for training!")
+            logger.info(" System ready for training!")
         else:
-            logger.error("❌ System not ready for training")
+            logger.error(" System not ready for training")
         sys.exit(0 if success else 1)
     
     # Run training
-    logger.info("🚀 FreeMobilaChat GPU Training")
+    logger.info(" FreeMobilaChat GPU Training")
     logger.info("=" * 60)
     logger.info(f"Model: {pipeline.model_name}")
     logger.info(f"Data: {args.data}")
@@ -198,15 +196,14 @@ def main():
     results = asyncio.run(pipeline.run_training(output_dir=args.output))
     
     if results['success']:
-        logger.info("\n🎉 Training completed successfully!")
+        logger.info("\n Training completed successfully!")
         logger.info("Next steps:")
         logger.info("1. Test the model: python test_trained_model.py")
         logger.info("2. Compare with API models: python compare_models.py")
         logger.info("3. Deploy for inference: Update model_training.py to use local model")
     else:
-        logger.error(f"\n❌ Training failed: {results['error']}")
+        logger.error(f"\n Training failed: {results['error']}")
         sys.exit(1)
-
 
 if __name__ == "__main__":
     main()

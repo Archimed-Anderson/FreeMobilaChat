@@ -43,16 +43,16 @@ def test_simple_message():
         
         if response.status_code == 200:
             data = response.json()
-            print("✅ Réponse reçue:")
+            print(" Réponse reçue:")
             print(json.dumps(data, indent=2, ensure_ascii=False))
             return True
         else:
-            print(f"❌ Erreur: {response.status_code}")
+            print(f" Erreur: {response.status_code}")
             print(f"Réponse: {response.text}")
             return False
             
     except Exception as e:
-        print(f"❌ Exception: {e}")
+        print(f" Exception: {e}")
         return False
 
 if __name__ == "__main__":

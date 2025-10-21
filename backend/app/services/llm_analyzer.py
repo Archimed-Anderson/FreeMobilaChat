@@ -35,14 +35,12 @@ from ..utils.rate_limiter import RateLimiter
 
 logger = logging.getLogger(__name__)
 
-
 class LLMProvider(str, Enum):
     """Supported LLM providers"""
     OPENAI = "openai"
     MISTRAL = "mistral"
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
-
 
 class LLMAnalyzer:
     """
@@ -65,7 +63,7 @@ class LLMAnalyzer:
             rate_limit_per_minute: Rate limit for API calls
         """
         self.provider = LLMProvider(provider)
-        logger.info(f"🔧 LLMAnalyzer initialized with provider: {self.provider} (type: {type(self.provider)})")
+        logger.info(f" LLMAnalyzer initialized with provider: {self.provider} (type: {type(self.provider)})")
         self.batch_size = batch_size
         self.max_concurrent = max_concurrent
 
@@ -94,7 +92,7 @@ class LLMAnalyzer:
     
     def _initialize_clients(self):
         """Initialize LLM API clients"""
-        logger.info(f"🔧 Initializing clients for provider: {self.provider}")
+        logger.info(f" Initializing clients for provider: {self.provider}")
         try:
             # OpenAI client
             if self.provider == LLMProvider.OPENAI and AsyncOpenAI:
@@ -124,9 +122,9 @@ class LLMAnalyzer:
                     logger.warning("Anthropic API key not found")
 
             # Ollama client (using httpx for API calls)
-            logger.info(f"🔧 Checking Ollama condition: {self.provider} == {LLMProvider.OLLAMA} = {self.provider == LLMProvider.OLLAMA}")
+            logger.info(f" Checking Ollama condition: {self.provider} == {LLMProvider.OLLAMA} = {self.provider == LLMProvider.OLLAMA}")
             if self.provider == LLMProvider.OLLAMA:
-                logger.info("🔧 Initializing Ollama client...")
+                logger.info(" Initializing Ollama client...")
                 import httpx
                 base_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
                 api_key = os.getenv("OLLAMA_API_KEY")  # Optional for local Ollama
@@ -141,7 +139,7 @@ class LLMAnalyzer:
                     headers=headers,
                     timeout=60.0  # Increase timeout for local LLM
                 )
-                logger.info(f"✅ Ollama client initialized with base_url: {base_url}")
+                logger.info(f" Ollama client initialized with base_url: {base_url}")
 
         except Exception as e:
             logger.error(f"Error initializing LLM clients: {e}")
@@ -291,10 +289,10 @@ RÈGLES:
             # Step 1: Verify client initialization
             client = self.clients.get('ollama')
             if not client:
-                logger.error("❌ Ollama client not initialized")
+                logger.error(" Ollama client not initialized")
                 raise ValueError("Ollama client not initialized")
 
-            logger.info(f"✅ Ollama client found")
+            logger.info(f" Ollama client found")
             logger.info(f"   - Base URL: {client.base_url}")
             logger.info(f"   - Client type: {type(client)}")
 
@@ -327,7 +325,7 @@ RÈGLES:
             logger.info(f"   - Prompt preview: {prompt[:200]}...")
 
             # Step 3: Make the API call
-            logger.info(f"🚀 Sending request to Ollama...")
+            logger.info(f" Sending request to Ollama...")
             full_url = f"{client.base_url}/v1/chat/completions"
             logger.info(f"   - Full URL: {full_url}")
 
@@ -339,7 +337,7 @@ RÈGLES:
             logger.info(f"   - Headers: {dict(response.headers)}")
 
             response.raise_for_status()
-            logger.info(f"✅ Status check passed (2xx)")
+            logger.info(f" Status check passed (2xx)")
 
             # Step 5: Parse response
             logger.info(f"🔍 Parsing response JSON...")
@@ -371,7 +369,7 @@ RÈGLES:
                             logger.info(f"🔍 Parsing JSON content...")
                             try:
                                 parsed_json = json.loads(content)
-                                logger.info(f"✅ JSON parsed successfully")
+                                logger.info(f" JSON parsed successfully")
                                 logger.info(f"   - Parsed keys: {list(parsed_json.keys())}")
                                 logger.info(f"   - Parsed data: {json.dumps(parsed_json, indent=2, ensure_ascii=False)}")
 
@@ -379,32 +377,32 @@ RÈGLES:
                                 self.stats['total_cost'] += 0.0001  # Minimal cost
 
                                 logger.info("=" * 80)
-                                logger.info("✅ OLLAMA API CALL - SUCCESS")
+                                logger.info(" OLLAMA API CALL - SUCCESS")
                                 logger.info("=" * 80)
 
                                 return parsed_json
 
                             except json.JSONDecodeError as json_err:
-                                logger.error(f"❌ JSON parsing failed: {json_err}")
+                                logger.error(f" JSON parsing failed: {json_err}")
                                 logger.error(f"   - Content that failed to parse: {content}")
                                 return None
                         else:
-                            logger.error(f"❌ No 'content' in message")
+                            logger.error(f" No 'content' in message")
                             return None
                     else:
-                        logger.error(f"❌ No 'message' in choice[0]")
+                        logger.error(f" No 'message' in choice[0]")
                         return None
                 else:
-                    logger.error(f"❌ Empty choices array")
+                    logger.error(f" Empty choices array")
                     return None
             else:
-                logger.error(f"❌ No 'choices' in response")
+                logger.error(f" No 'choices' in response")
                 logger.error(f"   - Full response: {json.dumps(data, indent=2)}")
                 return None
 
         except httpx.HTTPStatusError as http_err:
             logger.error("=" * 80)
-            logger.error(f"❌ HTTP Error: {http_err}")
+            logger.error(f" HTTP Error: {http_err}")
             logger.error(f"   - Status code: {http_err.response.status_code}")
             logger.error(f"   - Response text: {http_err.response.text}")
             logger.error("=" * 80)
@@ -412,7 +410,7 @@ RÈGLES:
 
         except Exception as e:
             logger.error("=" * 80)
-            logger.error(f"❌ Ollama API error: {e}")
+            logger.error(f" Ollama API error: {e}")
             logger.error(f"   - Exception type: {type(e).__name__}")
             logger.error(f"   - Exception details:", exc_info=True)
             logger.error("=" * 80)

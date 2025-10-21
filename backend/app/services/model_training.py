@@ -43,7 +43,6 @@ from ..config_pkg import gpu_config as config
 
 logger = logging.getLogger(__name__)
 
-
 class ModelTrainingService:
     """Service for training and evaluating LLM models on tweet analysis tasks"""
     
@@ -115,10 +114,10 @@ class ModelTrainingService:
                         logger.warning(f"Invalid priority values in {split}: {invalid_priorities}")
 
                     datasets[split] = df
-                    logger.info(f"✅ Loaded {split} dataset: {len(df)} samples")
+                    logger.info(f" Loaded {split} dataset: {len(df)} samples")
 
                 except Exception as e:
-                    logger.error(f"❌ Error loading {split} dataset from {file_path}: {e}")
+                    logger.error(f" Error loading {split} dataset from {file_path}: {e}")
                     raise ValueError(f"Failed to load {split} dataset: {e}")
             else:
                 logger.warning(f"Dataset file not found: {file_path}")
@@ -478,7 +477,6 @@ class ModelTrainingService:
                 'error': str(e)
             }
 
-
 if GPU_AVAILABLE:
     from torch.utils.data import Dataset as TorchDataset
 
@@ -524,7 +522,6 @@ if GPU_AVAILABLE:
                 'category_labels': torch.tensor(self.category_to_id[self.category_labels[idx]], dtype=torch.long),
                 'priority_labels': torch.tensor(self.priority_to_id[self.priority_labels[idx]], dtype=torch.long)
             }
-
 
     class MultiTaskModel(nn.Module):
         """Multi-task model for sentiment, category, and priority classification"""
@@ -589,7 +586,6 @@ else:
     class MultiTaskModel:
         def __init__(self, *args, **kwargs):
             raise ImportError("GPU training dependencies not available. Install torch, transformers, etc.")
-
 
 class GPUModelTrainer:
     """GPU-accelerated model training service"""
@@ -727,7 +723,7 @@ class GPUModelTrainer:
             output_dir = config.gpu_training.output_dir
 
         try:
-            self.logger.info("🚀 Starting GPU model training")
+            self.logger.info(" Starting GPU model training")
 
             # Check GPU status and memory
             gpu_info = self.check_gpu_memory()
@@ -740,7 +736,7 @@ class GPUModelTrainer:
             Path(output_dir).mkdir(parents=True, exist_ok=True)
 
             # Load and validate datasets
-            self.logger.info("📊 Loading training datasets...")
+            self.logger.info(" Loading training datasets...")
             data_path = Path(data_dir)
 
             # Check if dataset files exist
@@ -756,10 +752,10 @@ class GPUModelTrainer:
             except Exception as e:
                 raise ValueError(f"Failed to load dataset files: {e}")
 
-            self.logger.info(f"✅ Loaded datasets - Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
+            self.logger.info(f" Loaded datasets - Train: {len(train_df)}, Val: {len(val_df)}, Test: {len(test_df)}")
 
             # Prepare datasets with validation
-            self.logger.info("🔧 Preparing datasets for training...")
+            self.logger.info(" Preparing datasets for training...")
             try:
                 train_dataset, val_dataset, test_dataset, tokenizer = self.prepare_datasets(
                     train_df, val_df, test_df, config.gpu_training.model_name
@@ -853,39 +849,39 @@ class GPUModelTrainer:
             with open(results_file, 'w', encoding='utf-8') as f:
                 json.dump(results, f, indent=2, default=str)
 
-            self.logger.info(f"✅ Training completed successfully. Model saved to: {output_dir}")
+            self.logger.info(f" Training completed successfully. Model saved to: {output_dir}")
             return results
 
         except torch.cuda.OutOfMemoryError as e:
-            self.logger.error(f"❌ GPU out of memory during training: {e}")
+            self.logger.error(f" GPU out of memory during training: {e}")
             return {
                 'success': False,
                 'error': f"GPU out of memory: {e}",
                 'error_type': 'OutOfMemoryError'
             }
         except FileNotFoundError as e:
-            self.logger.error(f"❌ Required files not found: {e}")
+            self.logger.error(f" Required files not found: {e}")
             return {
                 'success': False,
                 'error': str(e),
                 'error_type': 'FileNotFoundError'
             }
         except ValueError as e:
-            self.logger.error(f"❌ Data validation error: {e}")
+            self.logger.error(f" Data validation error: {e}")
             return {
                 'success': False,
                 'error': str(e),
                 'error_type': 'ValueError'
             }
         except RuntimeError as e:
-            self.logger.error(f"❌ Runtime error during training: {e}")
+            self.logger.error(f" Runtime error during training: {e}")
             return {
                 'success': False,
                 'error': str(e),
                 'error_type': 'RuntimeError'
             }
         except Exception as e:
-            self.logger.error(f"❌ Unexpected error during training: {e}")
+            self.logger.error(f" Unexpected error during training: {e}")
             return {
                 'success': False,
                 'error': str(e),
@@ -896,7 +892,6 @@ class GPUModelTrainer:
             if torch.cuda.is_available():
                 torch.cuda.empty_cache()
                 self.logger.info("🧹 GPU memory cache cleared")
-
 
 if GPU_AVAILABLE:
     class MultiTaskTrainer(Trainer):
@@ -911,7 +906,6 @@ else:
     class MultiTaskTrainer:
         def __init__(self, *args, **kwargs):
             raise ImportError("GPU training dependencies not available. Install torch, transformers, etc.")
-
 
 class LocalModelInference:
     """Inference service for locally fine-tuned models"""
@@ -948,7 +942,7 @@ class LocalModelInference:
             self.model.to(self.device)
             self.model.eval()
 
-            self.logger.info("✅ Model loaded successfully")
+            self.logger.info(" Model loaded successfully")
 
         except Exception as e:
             self.logger.error(f"Failed to load model: {e}")
@@ -986,7 +980,6 @@ class LocalModelInference:
             self.logger.error(f"Prediction failed: {e}")
             return None
 
-
 async def main():
     """Main function for testing model training"""
     service = ModelTrainingService()
@@ -1002,7 +995,6 @@ async def main():
         print(f"[INFO] Report: {results['files']['report']}")
     else:
         print(f"[ERROR] Model evaluation failed: {results['error']}")
-
 
 if __name__ == "__main__":
     asyncio.run(main())

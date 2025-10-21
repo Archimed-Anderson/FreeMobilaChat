@@ -24,18 +24,17 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-
 async def initialize_application():
     """Initialize application components"""
     try:
-        logger.info("🚀 Initializing FreeMobilaChat Backend for Production")
+        logger.info(" Initializing FreeMobilaChat Backend for Production")
         logger.info(f"Environment: {config.environment}")
         logger.info(f"Database: {config.database.type}")
         
         # Initialize database
         db_manager = get_database_manager()
         await db_manager.initialize_database()
-        logger.info("✅ Database initialized successfully")
+        logger.info(" Database initialized successfully")
         
         # Create necessary directories
         config.data_raw_dir.mkdir(parents=True, exist_ok=True)
@@ -46,12 +45,11 @@ async def initialize_application():
         logs_dir = Path("./logs")
         logs_dir.mkdir(parents=True, exist_ok=True)
         
-        logger.info("✅ Application initialization completed")
+        logger.info(" Application initialization completed")
         
     except Exception as e:
-        logger.error(f"❌ Application initialization failed: {e}")
+        logger.error(f" Application initialization failed: {e}")
         raise
-
 
 def run_production_server():
     """Run the production server with Gunicorn"""
@@ -64,7 +62,7 @@ def run_production_server():
     port = int(os.getenv("FASTAPI_PORT", "8000"))
     workers = int(os.getenv("FASTAPI_WORKERS", "4"))
     
-    logger.info("🚀 Starting Production Server")
+    logger.info(" Starting Production Server")
     logger.info(f"📡 Server will be available at: http://{host}:{port}")
     logger.info(f"👥 Workers: {workers}")
     logger.info(f"🔒 Environment: {config.environment}")
@@ -110,7 +108,6 @@ def run_production_server():
             reload=False,
             loop="asyncio"
         )
-
 
 if __name__ == "__main__":
     run_production_server()

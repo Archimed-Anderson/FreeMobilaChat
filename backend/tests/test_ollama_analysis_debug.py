@@ -26,15 +26,15 @@ try:
     
     if response.status_code == 200:
         result = response.json()
-        print(f"\n✅ SUCCESS!")
-        print(f"\n📊 Result:")
+        print(f"\n SUCCESS!")
+        print(f"\n Result:")
         print(json.dumps(result, indent=2, ensure_ascii=False))
     else:
-        print(f"\n❌ ERROR: {response.status_code}")
+        print(f"\n ERROR: {response.status_code}")
         print(f"Response: {response.text}")
         
 except Exception as e:
-    print(f"\n❌ Exception: {e}")
+    print(f"\n Exception: {e}")
     import traceback
     traceback.print_exc()
 

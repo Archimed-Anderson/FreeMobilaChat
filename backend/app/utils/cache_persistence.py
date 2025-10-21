@@ -15,7 +15,6 @@ from ..models import TweetAnalyzed, AnalysisLog
 
 logger = logging.getLogger(__name__)
 
-
 class DateTimeEncoder(json.JSONEncoder):
     """Custom JSON encoder that handles datetime and Pandas Timestamp objects"""
 
@@ -38,7 +37,6 @@ class DateTimeEncoder(json.JSONEncoder):
 
         # Fallback to string representation
         return str(obj)
-
 
 def safe_datetime_convert(obj):
     """Safely convert datetime-like objects to ISO strings"""
@@ -73,7 +71,6 @@ def safe_datetime_convert(obj):
 
     # Fallback to string representation
     return str(obj)
-
 
 class CachePersistence:
     """Handles persistence of cache data to disk"""

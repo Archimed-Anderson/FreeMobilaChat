@@ -8,7 +8,6 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 
-
 @dataclass
 class GPUTrainingConfig:
     """Configuration for GPU training"""
@@ -47,7 +46,6 @@ class GPUTrainingConfig:
     logging_steps: int = 50
     early_stopping_patience: int = 3
 
-
 @dataclass
 class DatabaseConfig:
     """Configuration for database"""
@@ -59,7 +57,6 @@ class DatabaseConfig:
     postgres_user: str = field(default_factory=lambda: os.getenv("POSTGRES_USER", "postgres"))
     postgres_password: str = field(default_factory=lambda: os.getenv("POSTGRES_PASSWORD", ""))
 
-
 @dataclass
 class LLMConfig:
     """Configuration for LLM providers"""
@@ -67,7 +64,6 @@ class LLMConfig:
     provider: str = field(default_factory=lambda: os.getenv("LLM_PROVIDER", "ollama"))
     ollama_base_url: str = field(default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://host.docker.internal:11434"))
     mistral_api_key: Optional[str] = field(default_factory=lambda: os.getenv("MISTRAL_API_KEY"))
-
 
 @dataclass
 class AppConfig:
@@ -86,7 +82,6 @@ class AppConfig:
     data_dir: Path = Path("data")
     models_dir: Path = Path("models")
     logs_dir: Path = Path("logs")
-
 
 # Global configuration instance
 config = AppConfig()

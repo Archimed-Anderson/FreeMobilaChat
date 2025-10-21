@@ -8,7 +8,6 @@ import html
 from typing import List, Dict, Optional
 import unicodedata
 
-
 class TextCleaner:
     """Advanced text cleaning for tweet analysis"""
     

@@ -17,7 +17,6 @@ from app.services.chatbot_service import ChatbotService
 from app.services.fast_graphrag_service import FastGraphRAGService
 from app.models import KnowledgeDocument
 
-
 class TestFastGraphRAGIntegration:
     """Tests d'intégration Fast-GraphRAG + ChatbotService"""
     
@@ -241,7 +240,6 @@ class TestFastGraphRAGIntegration:
             results = await service._search_relevant_documents(query, max_results=5)
         
         assert len(results) > 0  # Fallback fonctionne
-
 
 if __name__ == '__main__':
     pytest.main([__file__, '-v', '-s'])

@@ -17,9 +17,9 @@ print("\n1. Test des imports...")
 try:
     from agno.models.ollama import Ollama
     from agno.agent import Agent
-    print("✅ Imports réussis")
+    print(" Imports réussis")
 except Exception as e:
-    print(f"❌ Erreur d'import: {e}")
+    print(f" Erreur d'import: {e}")
     sys.exit(1)
 
 # Test 2: Création du modèle Ollama
@@ -29,9 +29,9 @@ try:
     print(f"   URL Ollama: {ollama_url}")
     
     model = Ollama(id="mistral:latest", host=ollama_url)
-    print("✅ Modèle Ollama créé")
+    print(" Modèle Ollama créé")
 except Exception as e:
-    print(f"❌ Erreur création modèle: {e}")
+    print(f" Erreur création modèle: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
@@ -45,9 +45,9 @@ try:
         markdown=True,
         description="Agent de test"
     )
-    print("✅ Agent Agno créé")
+    print(" Agent Agno créé")
 except Exception as e:
-    print(f"❌ Erreur création agent: {e}")
+    print(f" Erreur création agent: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
@@ -66,10 +66,10 @@ try:
     else:
         response_text = str(response)
     
-    print(f"✅ Réponse reçue ({len(response_text)} caractères):")
+    print(f" Réponse reçue ({len(response_text)} caractères):")
     print(f"   {response_text[:200]}{'...' if len(response_text) > 200 else ''}")
 except Exception as e:
-    print(f"❌ Erreur génération réponse: {e}")
+    print(f" Erreur génération réponse: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
@@ -88,15 +88,15 @@ try:
     else:
         response_text = str(response)
     
-    print(f"✅ Réponse reçue ({len(response_text)} caractères):")
+    print(f" Réponse reçue ({len(response_text)} caractères):")
     print(f"   {response_text[:300]}{'...' if len(response_text) > 300 else ''}")
 except Exception as e:
-    print(f"❌ Erreur génération réponse: {e}")
+    print(f" Erreur génération réponse: {e}")
     import traceback
     traceback.print_exc()
     sys.exit(1)
 
 print("\n" + "=" * 80)
-print("✅ TOUS LES TESTS SONT PASSÉS")
+print(" TOUS LES TESTS SONT PASSÉS")
 print("=" * 80)
 

@@ -8,7 +8,6 @@ from datetime import datetime, UTC
 from typing import Optional, List, Literal, Dict, Tuple, Union, Any
 from enum import Enum
 
-
 class SentimentType(str, Enum):
     """Sentiment classification for tweets"""
     POSITIVE = "positive"
@@ -16,14 +15,12 @@ class SentimentType(str, Enum):
     NEGATIVE = "negative"
     UNKNOWN = "unknown"
 
-
 class PriorityLevel(str, Enum):
     """Priority levels for customer service response"""
     CRITICAL = "critique"      # Panne majeure, service down
     HIGH = "haute"             # Problème urgent
     MEDIUM = "moyenne"         # Demande standard
     LOW = "basse"              # Question simple
-
 
 class CategoryType(str, Enum):
     """Tweet categorization for customer service"""
@@ -36,14 +33,12 @@ class CategoryType(str, Enum):
     QUESTION = "question"
     OTHER = "autre"
 
-
 class UserRole(str, Enum):
     """User roles for dashboard access control"""
     AGENT = "agent_sav"
     MANAGER = "manager"
     ANALYST = "analyste"
     ADMIN = "admin"
-
 
 class TweetRaw(BaseModel):
     """Tweet brut depuis CSV - Raw tweet data from CSV import"""
@@ -69,7 +64,6 @@ class TweetRaw(BaseModel):
         if not v or not v.strip():
             raise ValueError("Tweet ID cannot be empty")
         return v.strip()
-
 
 class TweetAnalyzed(BaseModel):
     """Tweet après analyse LLM - Tweet after LLM analysis"""
@@ -115,7 +109,6 @@ class TweetAnalyzed(BaseModel):
             raise ValueError("Resolution time must be positive")
         return v
 
-
 class KPIMetrics(BaseModel):
     """Métriques agrégées pour dashboard - Aggregated metrics for dashboard"""
     total_tweets: int = Field(ge=0, description="Total number of tweets analyzed")
@@ -159,7 +152,6 @@ class KPIMetrics(BaseModel):
                 raise ValueError(f"Percentage for {sentiment} must be between 0 and 100")
         return v
 
-
 class DashboardView(BaseModel):
     """Configuration vue par rôle utilisateur - Dashboard view configuration by user role"""
     role: UserRole
@@ -179,7 +171,6 @@ class DashboardView(BaseModel):
             if metric not in valid_metrics:
                 raise ValueError(f"Invalid metric: {metric}")
         return v
-
 
 # Configuration par défaut pour chaque rôle - Default configuration for each role
 DEFAULT_DASHBOARD_CONFIGS = {
@@ -211,7 +202,6 @@ DEFAULT_DASHBOARD_CONFIGS = {
     )
 }
 
-
 class AnalysisLog(BaseModel):
     """Log d'analyse pour traçabilité - Analysis log for traceability"""
     batch_id: str
@@ -231,7 +221,6 @@ class AnalysisLog(BaseModel):
             raise ValueError("Batch ID cannot be empty")
         return v.strip()
 
-
 class User(BaseModel):
     """Utilisateur système - System user"""
     id: Optional[int] = None
@@ -250,17 +239,13 @@ class User(BaseModel):
             raise ValueError("Username can only contain letters, numbers, hyphens, and underscores")
         return v.strip().lower()
 
-
-# =============================================================================
 # CHATBOT SAV MODELS - Modèles pour le chatbot SAV intelligent
-# =============================================================================
 
 class MessageRole(str, Enum):
     """Rôles des messages dans une conversation"""
     USER = "user"
     ASSISTANT = "assistant"
     SYSTEM = "system"
-
 
 class ChatMessage(BaseModel):
     """Message individuel dans une conversation chatbot"""
@@ -283,13 +268,11 @@ class ChatMessage(BaseModel):
             raise ValueError("Le contenu du message ne peut pas être vide")
         return v.strip()
 
-
 class ConversationStatus(str, Enum):
     """Statut d'une conversation"""
     ACTIVE = "active"
     ARCHIVED = "archived"
     DELETED = "deleted"
-
 
 class Conversation(BaseModel):
     """Conversation complète avec un utilisateur"""
@@ -319,7 +302,6 @@ class Conversation(BaseModel):
             raise ValueError("L'ID de session ne peut pas être vide")
         return v.strip()
 
-
 class DocumentType(str, Enum):
     """Types de documents dans la base de connaissances"""
     FAQ = "faq"
@@ -328,7 +310,6 @@ class DocumentType(str, Enum):
     TROUBLESHOOTING = "troubleshooting"
     GENERAL = "general"
     GRAPHRAG = "graphrag"  # Documents provenant de Fast-GraphRAG
-
 
 class KnowledgeDocument(BaseModel):
     """Document dans la base de connaissances SAV"""
@@ -362,14 +343,12 @@ class KnowledgeDocument(BaseModel):
             raise ValueError("Hash du contenu invalide (doit être SHA-256)")
         return v.lower()
 
-
 class FeedbackType(str, Enum):
     """Types de feedback utilisateur"""
     THUMBS_UP = "thumbs_up"
     THUMBS_DOWN = "thumbs_down"
     REPORT_ISSUE = "report_issue"
     SUGGESTION = "suggestion"
-
 
 class ChatFeedback(BaseModel):
     """Feedback utilisateur sur les réponses du chatbot"""

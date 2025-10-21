@@ -13,7 +13,6 @@ from ..exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
-
 class DataValidator:
     """Comprehensive data validation and sanitization"""
     

@@ -42,7 +42,6 @@ from ..utils.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
-
 class ChatbotService:
     """Service principal du chatbot SAV intelligent"""
     
@@ -58,7 +57,7 @@ class ChatbotService:
 
         # Vérifier les dépendances (mode dégradé si non disponibles)
         if not SIMILARITY_AVAILABLE:
-            self.logger.warning("⚠️ Similarity search dependencies not available. Semantic search will be disabled.")
+            self.logger.warning(" Similarity search dependencies not available. Semantic search will be disabled.")
 
         # Initialiser les services
         self.llm_analyzer = LLMAnalyzer(provider="mistral")  # Mistral par défaut pour le français
@@ -70,10 +69,10 @@ class ChatbotService:
         if self.graphrag_enabled:
             try:
                 self.fast_graphrag = FastGraphRAGService()
-                self.logger.info("✅ Fast-GraphRAG initialisé avec succès")
+                self.logger.info(" Fast-GraphRAG initialisé avec succès")
             except Exception as e:
-                self.logger.warning(f"⚠️ Impossible d'initialiser Fast-GraphRAG: {e}")
-                self.logger.warning("⚠️ Fallback vers recherche vectorielle classique")
+                self.logger.warning(f" Impossible d'initialiser Fast-GraphRAG: {e}")
+                self.logger.warning(" Fallback vers recherche vectorielle classique")
                 self.graphrag_enabled = False
 
         # Cache pour les embeddings des documents
@@ -99,7 +98,7 @@ class ChatbotService:
         if self.agno_available:
             self.logger.info(f"🤖 Agno disponible, provider configuré: {self.llm_provider}")
         else:
-            self.logger.warning("⚠️ Agno non disponible, utilisation de réponses simulées")
+            self.logger.warning(" Agno non disponible, utilisation de réponses simulées")
         
         # Prompts système
         self.system_prompts = {
@@ -172,16 +171,16 @@ HISTORIQUE CONVERSATION:
                 # Utiliser Mistral API (cloud)
                 if self.mistral_api_key and self.mistral_api_key != "test_api_key_for_demo_deployment":
                     model = MistralChat(id="mistral-large-latest", api_key=self.mistral_api_key)
-                    self.logger.info("✅ Modèle Mistral API créé")
+                    self.logger.info(" Modèle Mistral API créé")
                 else:
-                    self.logger.warning("⚠️ MISTRAL_API_KEY non configurée, fallback vers Ollama")
+                    self.logger.warning(" MISTRAL_API_KEY non configurée, fallback vers Ollama")
                     self.llm_provider = "ollama"
                     model = Ollama(id="mistral:latest", host=self.ollama_url)
-                    self.logger.info(f"✅ Modèle Ollama créé: {self.ollama_url}")
+                    self.logger.info(f" Modèle Ollama créé: {self.ollama_url}")
             else:
                 # Utiliser Ollama (local)
                 model = Ollama(id="mistral:latest", host=self.ollama_url)
-                self.logger.info(f"✅ Modèle Ollama créé: {self.ollama_url}")
+                self.logger.info(f" Modèle Ollama créé: {self.ollama_url}")
 
             # Créer un nouvel Agent Agno pour chaque requête
             agent = Agent(
@@ -191,12 +190,12 @@ HISTORIQUE CONVERSATION:
                 add_history_to_context=False,  # Désactiver pour éviter le warning
                 description="Assistant SAV intelligent pour Free Mobile"
             )
-            self.logger.info("✅ Agent Agno créé avec succès")
+            self.logger.info(" Agent Agno créé avec succès")
 
             return agent
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la création de l'Agent Agno: {e}")
+            self.logger.error(f" Erreur lors de la création de l'Agent Agno: {e}")
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
             return None
@@ -208,7 +207,7 @@ HISTORIQUE CONVERSATION:
         Returns:
             Résultat de l'initialisation
         """
-        self.logger.info("🚀 Initialisation de la base de connaissances")
+        self.logger.info(" Initialisation de la base de connaissances")
         
         try:
             # Mettre à jour la documentation
@@ -217,11 +216,11 @@ HISTORIQUE CONVERSATION:
             # Recharger le cache
             await self._refresh_knowledge_cache()
             
-            self.logger.info("✅ Base de connaissances initialisée")
+            self.logger.info(" Base de connaissances initialisée")
             return result
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de l'initialisation: {e}")
+            self.logger.error(f" Erreur lors de l'initialisation: {e}")
             return {'success': False, 'error': str(e)}
     
     async def _refresh_knowledge_cache(self):
@@ -234,10 +233,10 @@ HISTORIQUE CONVERSATION:
             self.knowledge_cache = {}
             self.last_cache_update = datetime.now(UTC)
             
-            self.logger.info("✅ Cache rechargé")
+            self.logger.info(" Cache rechargé")
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors du rechargement du cache: {e}")
+            self.logger.error(f" Erreur lors du rechargement du cache: {e}")
     
     async def _search_with_graphrag(self, query: str, max_results: int = 5) -> Optional[List[Tuple[KnowledgeDocument, float]]]:
         """
@@ -264,14 +263,14 @@ HISTORIQUE CONVERSATION:
 
             # Vérifier la qualité des résultats
             if not graphrag_results:
-                self.logger.warning("⚠️ Fast-GraphRAG n'a retourné aucun résultat")
+                self.logger.warning(" Fast-GraphRAG n'a retourné aucun résultat")
                 return None
 
             # Filtrer par score minimum
             filtered_results = [r for r in graphrag_results if r.get('score', 0) >= self.graphrag_min_score]
 
             if not filtered_results:
-                self.logger.warning(f"⚠️ Aucun résultat Fast-GraphRAG au-dessus du seuil {self.graphrag_min_score}")
+                self.logger.warning(f" Aucun résultat Fast-GraphRAG au-dessus du seuil {self.graphrag_min_score}")
                 return None
 
             # Convertir en format KnowledgeDocument
@@ -294,14 +293,14 @@ HISTORIQUE CONVERSATION:
                 )
                 documents.append((doc, result.get('score', 0.0)))
 
-            self.logger.info(f"✅ Fast-GraphRAG: {len(documents)} résultats pertinents")
+            self.logger.info(f" Fast-GraphRAG: {len(documents)} résultats pertinents")
             return documents
 
         except asyncio.TimeoutError:
-            self.logger.warning(f"⏱️ Timeout Fast-GraphRAG après {self.graphrag_timeout}s")
+            self.logger.warning(f"⏱ Timeout Fast-GraphRAG après {self.graphrag_timeout}s")
             return None
         except Exception as e:
-            self.logger.error(f"❌ Erreur Fast-GraphRAG: {e}")
+            self.logger.error(f" Erreur Fast-GraphRAG: {e}")
             return None
 
     async def _search_with_vector_db(self, query: str, max_results: int = 5) -> List[Tuple[KnowledgeDocument, float]]:
@@ -321,7 +320,7 @@ HISTORIQUE CONVERSATION:
             # Générer l'embedding de la requête
             query_embedding = self.doc_scraper._generate_embeddings(query)
             if not query_embedding:
-                self.logger.warning("⚠️ Impossible de générer l'embedding de la requête")
+                self.logger.warning(" Impossible de générer l'embedding de la requête")
                 return []
 
             # Rechercher dans la base de données
@@ -352,14 +351,14 @@ HISTORIQUE CONVERSATION:
                     similarity_score = doc_data.get('similarity_score', 0.8)
                     results.append((doc, similarity_score))
 
-                self.logger.info(f"✅ Recherche vectorielle: {len(results)} documents trouvés")
+                self.logger.info(f" Recherche vectorielle: {len(results)} documents trouvés")
                 return results
             else:
-                self.logger.warning("⚠️ Gestionnaire de base de données non disponible")
+                self.logger.warning(" Gestionnaire de base de données non disponible")
                 return []
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la recherche vectorielle: {e}")
+            self.logger.error(f" Erreur lors de la recherche vectorielle: {e}")
             return []
 
     async def _search_relevant_documents(self, query: str, max_results: int = 5) -> List[Tuple[KnowledgeDocument, float]]:
@@ -378,7 +377,7 @@ HISTORIQUE CONVERSATION:
         graphrag_results = await self._search_with_graphrag(query, max_results)
 
         if graphrag_results:
-            self.logger.info(f"✅ Utilisation des résultats Fast-GraphRAG ({len(graphrag_results)} documents)")
+            self.logger.info(f" Utilisation des résultats Fast-GraphRAG ({len(graphrag_results)} documents)")
             return graphrag_results
 
         # Fallback: Recherche vectorielle classique
@@ -570,18 +569,18 @@ HISTORIQUE CONVERSATION:
                         'message_count': 0
                     }
 
-                    self.logger.info(f"📝 Données conversation: {conversation_data}")
+                    self.logger.info(f" Données conversation: {conversation_data}")
 
                     # Essayer de créer la conversation (ignore si elle existe déjà)
                     created_conv_id = await self.db_manager.store_conversation_with_id(conversation_data)
-                    self.logger.info(f"📝 Résultat store_conversation_with_id: {created_conv_id}")
+                    self.logger.info(f" Résultat store_conversation_with_id: {created_conv_id}")
                     if created_conv_id:
-                        self.logger.info(f"✅ Conversation créée: {created_conv_id}")
+                        self.logger.info(f" Conversation créée: {created_conv_id}")
                     else:
-                        self.logger.warning(f"⚠️ Impossible de créer la conversation")
+                        self.logger.warning(f" Impossible de créer la conversation")
 
                 except Exception as conv_error:
-                    self.logger.error(f"⚠️ Erreur lors de la gestion de la conversation: {conv_error}", exc_info=True)
+                    self.logger.error(f" Erreur lors de la gestion de la conversation: {conv_error}", exc_info=True)
 
                 try:
                     # Stocker le message utilisateur
@@ -594,7 +593,7 @@ HISTORIQUE CONVERSATION:
                         'processing_time': None
                     }
                     user_message_id = await self.db_manager.store_message(user_message_data)
-                    self.logger.info(f"📝 Message utilisateur stocké: {user_message_id}")
+                    self.logger.info(f" Message utilisateur stocké: {user_message_id}")
 
                     # Stocker la réponse de l'assistant
                     assistant_message_data = {
@@ -606,12 +605,12 @@ HISTORIQUE CONVERSATION:
                         'processing_time': processing_time
                     }
                     assistant_message_id = await self.db_manager.store_message(assistant_message_data)
-                    self.logger.info(f"📝 Message assistant stocké: {assistant_message_id}")
+                    self.logger.info(f" Message assistant stocké: {assistant_message_id}")
 
                 except Exception as db_error:
-                    self.logger.error(f"⚠️ Erreur lors du stockage des messages: {db_error}", exc_info=True)
+                    self.logger.error(f" Erreur lors du stockage des messages: {db_error}", exc_info=True)
             else:
-                self.logger.warning(f"⚠️ DB Manager non disponible")
+                self.logger.warning(f" DB Manager non disponible")
 
             result = {
                 'success': True,
@@ -625,11 +624,11 @@ HISTORIQUE CONVERSATION:
                 'message_id': assistant_message_id  # ID du message assistant pour le feedback
             }
 
-            self.logger.info(f"✅ Réponse générée en {processing_time:.2f}s")
+            self.logger.info(f" Réponse générée en {processing_time:.2f}s")
             return result
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors du traitement: {e}")
+            self.logger.error(f" Erreur lors du traitement: {e}")
             return {
                 'success': False,
                 'error': str(e),
@@ -673,11 +672,11 @@ HISTORIQUE CONVERSATION:
                 else:
                     response_text = str(response)
 
-                self.logger.info(f"✅ Réponse générée avec succès ({len(response_text)} caractères)")
+                self.logger.info(f" Réponse générée avec succès ({len(response_text)} caractères)")
                 return response_text
 
             # Fallback: réponse simulée si Agno non disponible
-            self.logger.warning("⚠️ Agent Agno non disponible, utilisation de réponse simulée")
+            self.logger.warning(" Agent Agno non disponible, utilisation de réponse simulée")
             response = f"""Bonjour ! Je suis votre assistant SAV Free Mobile.
 
 J'ai bien reçu votre message : "{user_message}"
@@ -695,8 +694,8 @@ Comment puis-je vous aider davantage ?"""
             return response
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la génération LLM: {e}")
-            self.logger.error(f"❌ Type d'erreur: {type(e).__name__}")
+            self.logger.error(f" Erreur lors de la génération LLM: {e}")
+            self.logger.error(f" Type d'erreur: {type(e).__name__}")
             import traceback
             self.logger.error(f"Traceback: {traceback.format_exc()}")
 

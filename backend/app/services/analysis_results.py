@@ -21,7 +21,6 @@ from ..utils.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
-
 class AnalysisResultsService:
     """Service for generating comprehensive analysis results and insights"""
     
@@ -410,7 +409,6 @@ class AnalysisResultsService:
         logger.info(f"Analysis results saved: {results_file}")
         return str(results_file)
 
-
 async def main():
     """Main function for testing analysis results"""
     import asyncio
@@ -431,7 +429,6 @@ async def main():
         print(f"[INFO] Results saved: {results_file}")
     else:
         print(f"[ERROR] Analysis failed: {results['error']}")
-
 
 if __name__ == "__main__":
     import asyncio

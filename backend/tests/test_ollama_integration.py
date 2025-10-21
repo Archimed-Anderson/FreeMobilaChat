@@ -8,7 +8,6 @@ import time
 from datetime import datetime
 from typing import Dict, Any
 
-
 class OllamaIntegrationTester:
     """Testeur d'intégration Ollama"""
     
@@ -25,7 +24,7 @@ class OllamaIntegrationTester:
     
     def print_test_result(self, test_name: str, success: bool, details: str = ""):
         """Afficher le résultat d'un test"""
-        status = "✅ SUCCÈS" if success else "❌ ÉCHEC"
+        status = " SUCCÈS" if success else " ÉCHEC"
         print(f"\n{status}: {test_name}")
         if details:
             print(f"  Détails: {details}")
@@ -237,10 +236,10 @@ class OllamaIntegrationTester:
         print(f"\nRéponse ({len(response_text)} caractères):")
         print(response_text)
         print(f"\nCritères de qualité:")
-        print(f"  - Pas de réponse simulée: {'✅' if is_not_simulated else '❌'}")
-        print(f"  - Structure (points/liste): {'✅' if has_structure else '❌'}")
-        print(f"  - Longueur suffisante (>100 car): {'✅' if has_sufficient_length else '❌'}")
-        print(f"  - Provider Ollama: {'✅' if is_ollama else '❌'}")
+        print(f"  - Pas de réponse simulée: {'' if is_not_simulated else ''}")
+        print(f"  - Structure (points/liste): {'' if has_structure else ''}")
+        print(f"  - Longueur suffisante (>100 car): {'' if has_sufficient_length else ''}")
+        print(f"  - Provider Ollama: {'' if is_ollama else ''}")
         
         success = is_not_simulated and has_structure and has_sufficient_length and is_ollama
         self.print_test_result(
@@ -254,7 +253,7 @@ class OllamaIntegrationTester:
     
     def run_all_tests(self):
         """Exécuter tous les tests"""
-        self.print_header("🚀 TESTS D'INTÉGRATION OLLAMA AVEC AGENT AGNO")
+        self.print_header(" TESTS D'INTÉGRATION OLLAMA AVEC AGENT AGNO")
         
         print(f"\nAPI URL: {self.api_url}")
         print(f"Endpoint: {self.chatbot_endpoint}")
@@ -267,13 +266,13 @@ class OllamaIntegrationTester:
         self.test_response_quality()
         
         # Résumé final
-        self.print_header("📊 RÉSUMÉ DES TESTS")
+        self.print_header(" RÉSUMÉ DES TESTS")
         
         passed = sum(1 for _, success in self.test_results if success)
         total = len(self.test_results)
         
         for test_name, success in self.test_results:
-            status = "✅" if success else "❌"
+            status = "" if success else ""
             print(f"{status} {test_name}")
         
         print("\n" + "=" * 80)
@@ -281,14 +280,13 @@ class OllamaIntegrationTester:
         print("=" * 80)
         
         if passed == total:
-            print("\n🎉 TOUS LES TESTS SONT PASSÉS !")
-            print("✅ L'intégration Ollama avec Agent Agno est 100% fonctionnelle")
+            print("\n TOUS LES TESTS SONT PASSÉS !")
+            print(" L'intégration Ollama avec Agent Agno est 100% fonctionnelle")
             return True
         else:
-            print(f"\n⚠️ {total - passed} TEST(S) ONT ÉCHOUÉ")
-            print("❌ L'intégration nécessite des corrections")
+            print(f"\n {total - passed} TEST(S) ONT ÉCHOUÉ")
+            print(" L'intégration nécessite des corrections")
             return False
-
 
 def main():
     """Fonction principale"""
@@ -296,7 +294,6 @@ def main():
     success = tester.run_all_tests()
     
     exit(0 if success else 1)
-
 
 if __name__ == "__main__":
     main()

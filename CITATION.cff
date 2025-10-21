@@ -1,0 +1,41 @@
+cff-version: 1.2.0
+message: "Si vous utilisez ce logiciel, veuillez le citer comme indiqué ci-dessous."
+type: software
+title: "FreeMobilaChat: Système d'Analyse de Sentiment et Classification de Données Twitter"
+version: 1.0.0
+date-released: 2024-10-21
+authors:
+  - family-names: "Anderson"
+    given-names: "Archimed"
+    email: "archimed.anderson@example.com"
+    affiliation: "Master Data Science"
+repository-code: "https://github.com/Archimed-Anderson/FreeMobilaChat"
+url: "https://freemobilachat.streamlit.app"
+abstract: >-
+  FreeMobilaChat est une application web interactive développée dans le cadre d'un 
+  mémoire de master en Data Science. Ce système propose une analyse automatisée de 
+  sentiment et une classification de données issues de Twitter, intégrant des 
+  techniques avancées de traitement du langage naturel et d'apprentissage automatique. 
+  L'application combine une interface utilisateur moderne développée avec Streamlit 
+  et un backend robuste basé sur FastAPI.
+keywords:
+  - sentiment analysis
+  - text classification
+  - natural language processing
+  - machine learning
+  - twitter analytics
+  - data science
+  - deep learning
+license: MIT
+preferred-citation:
+  type: thesis
+  title: "FreeMobilaChat: Système d'Analyse de Sentiment et Classification de Données Twitter"
+  authors:
+    - family-names: "Anderson"
+      given-names: "Archimed"
+  year: 2025
+  institution:
+    name: "[Votre Université]"
+  thesis-type: "Mémoire de Master"
+  department: "Data Science"
+

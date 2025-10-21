@@ -94,16 +94,16 @@ def install_dependencies():
             subprocess.run([
                 sys.executable, "-m", "pip", "install", "-r", str(requirements_file)
             ], check=True)
-            logger.info("✅ Dépendances installées avec succès")
+            logger.info(" Dépendances installées avec succès")
         else:
-            logger.error("❌ Fichier requirements.txt non trouvé")
+            logger.error(" Fichier requirements.txt non trouvé")
             sys.exit(1)
             
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Erreur lors de l'installation: {e}")
+        logger.error(f" Erreur lors de l'installation: {e}")
         sys.exit(1)
     except Exception as e:
-        logger.error(f"❌ Erreur inattendue: {e}")
+        logger.error(f" Erreur inattendue: {e}")
         sys.exit(1)
 
 def check_configuration():
@@ -121,10 +121,10 @@ def check_configuration():
     for module in required_modules:
         try:
             __import__(module)
-            logger.info(f"✅ {module}")
+            logger.info(f" {module}")
         except ImportError:
             missing_modules.append(module)
-            logger.error(f"❌ {module}")
+            logger.error(f" {module}")
     
     if missing_modules:
         logger.error(f"Modules manquants: {', '.join(missing_modules)}")
@@ -141,10 +141,10 @@ def check_configuration():
     for dir_name in required_dirs:
         dir_path = Path(__file__).parent / dir_name
         if dir_path.exists():
-            logger.info(f"✅ {dir_name}/")
+            logger.info(f" {dir_name}/")
         else:
             missing_dirs.append(dir_name)
-            logger.error(f"❌ {dir_name}/")
+            logger.error(f" {dir_name}/")
     
     if missing_dirs:
         logger.error(f"Dossiers manquants: {', '.join(missing_dirs)}")
@@ -159,16 +159,16 @@ def check_configuration():
     for file_name in required_files:
         file_path = Path(__file__).parent / file_name
         if file_path.exists():
-            logger.info(f"✅ {file_name}")
+            logger.info(f" {file_name}")
         else:
             missing_files.append(file_name)
-            logger.error(f"❌ {file_name}")
+            logger.error(f" {file_name}")
     
     if missing_files:
         logger.error(f"Fichiers manquants: {', '.join(missing_files)}")
         sys.exit(1)
     
-    logger.info("✅ Configuration vérifiée avec succès")
+    logger.info(" Configuration vérifiée avec succès")
 
 def start_application(args):
     """Démarre l'application Streamlit"""
@@ -205,7 +205,7 @@ def start_application(args):
     try:
         subprocess.run(cmd, check=True)
     except subprocess.CalledProcessError as e:
-        logger.error(f"❌ Erreur lors du démarrage de Streamlit: {e}")
+        logger.error(f" Erreur lors du démarrage de Streamlit: {e}")
         sys.exit(1)
     except KeyboardInterrupt:
         logger.info("Arrêt de l'application")

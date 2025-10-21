@@ -14,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from app.services.fast_graphrag_service import FastGraphRAGService
 from app.config.fast_graphrag_config import FastGraphRAGConfig
 
-
 # Documents de test sur Free Mobile
 TEST_DOCUMENTS = [
     "Free Mobile propose des forfaits 4G et 5G avec data illimitée en France métropolitaine.",
@@ -26,7 +25,6 @@ TEST_DOCUMENTS = [
     "Pour configurer votre messagerie vocale, composez le 666 depuis votre mobile Free.",
     "Free Mobile propose une application mobile pour gérer votre compte et consommer votre forfait."
 ]
-
 
 async def test_graph_construction():
     """Test 1: Construction du graphe à partir de documents"""
@@ -50,21 +48,20 @@ async def test_graph_construction():
         
         if success:
             stats = service.get_graph_stats()
-            print(f"\n✅ Graphe construit avec succès:")
+            print(f"\n Graphe construit avec succès:")
             print(f"   - Nœuds: {stats['num_nodes']}")
             print(f"   - Documents: {stats['num_documents']}")
             print(f"   - Stockage: {stats['storage_path']}")
             return True, service
         else:
-            print("\n❌ Échec de la construction du graphe")
+            print("\n Échec de la construction du graphe")
             return False, None
             
     except Exception as e:
-        print(f"\n❌ ERREUR: {e}")
+        print(f"\n ERREUR: {e}")
         import traceback
         traceback.print_exc()
         return False, None
-
 
 async def test_context_retrieval(service: FastGraphRAGService):
     """Test 2: Récupération de contexte avec différentes requêtes"""
@@ -87,20 +84,19 @@ async def test_context_retrieval(service: FastGraphRAGService):
             results = await service.query_graph(query, top_k=3)
             
             if results:
-                print(f"✅ Trouvé {len(results)} résultats:")
+                print(f" Trouvé {len(results)} résultats:")
                 for i, result in enumerate(results, 1):
                     print(f"\n   {i}. Score: {result['score']:.3f}")
                     print(f"      Contenu: {result['content'][:80]}...")
             else:
-                print("⚠️ Aucun résultat trouvé")
+                print(" Aucun résultat trouvé")
                 all_success = False
                 
         except Exception as e:
-            print(f"❌ ERREUR: {e}")
+            print(f" ERREUR: {e}")
             all_success = False
     
     return all_success
-
 
 async def test_incremental_update(service: FastGraphRAGService):
     """Test 3: Mise à jour incrémentale du graphe"""
@@ -124,16 +120,15 @@ async def test_incremental_update(service: FastGraphRAGService):
         if success:
             stats_after = service.get_graph_stats()
             print(f"   Après: {stats_after['num_documents']} documents")
-            print(f"\n✅ Mise à jour réussie (+{stats_after['num_documents'] - stats_before['num_documents']} documents)")
+            print(f"\n Mise à jour réussie (+{stats_after['num_documents'] - stats_before['num_documents']} documents)")
             return True
         else:
-            print("\n❌ Échec de la mise à jour")
+            print("\n Échec de la mise à jour")
             return False
             
     except Exception as e:
-        print(f"\n❌ ERREUR: {e}")
+        print(f"\n ERREUR: {e}")
         return False
-
 
 async def test_fallback_on_error():
     """Test 4: Test du fallback en cas d'erreur"""
@@ -157,21 +152,20 @@ async def test_fallback_on_error():
         
         # Le service devrait retourner une liste vide sans erreur
         if isinstance(results, list):
-            print(f"✅ Fallback fonctionne: retour d'une liste vide ({len(results)} résultats)")
+            print(f" Fallback fonctionne: retour d'une liste vide ({len(results)} résultats)")
             return True
         else:
-            print("❌ Fallback ne fonctionne pas correctement")
+            print(" Fallback ne fonctionne pas correctement")
             return False
             
     except Exception as e:
-        print(f"❌ ERREUR: {e}")
+        print(f" ERREUR: {e}")
         return False
-
 
 async def main():
     """Exécuter tous les tests"""
     print("\n" + "="*80)
-    print("  🚀 TESTS DU SERVICE FAST-GRAPHRAG")
+    print("   TESTS DU SERVICE FAST-GRAPHRAG")
     print("="*80)
     
     results = {
@@ -196,7 +190,7 @@ async def main():
     
     # Résumé
     print("\n" + "="*80)
-    print("  📊 RÉSUMÉ DES TESTS")
+    print("   RÉSUMÉ DES TESTS")
     print("="*80)
     
     test_names = {
@@ -207,7 +201,7 @@ async def main():
     }
     
     for key, name in test_names.items():
-        status = "✅" if results[key] else "❌"
+        status = "" if results[key] else ""
         print(f"{status} {name}")
     
     # Résultat final
@@ -220,14 +214,13 @@ async def main():
     print("="*80)
     
     if passed_tests == total_tests:
-        print("\n🎉 TOUS LES TESTS SONT PASSÉS !")
-        print("✅ Le service Fast-GraphRAG est 100% fonctionnel")
+        print("\n TOUS LES TESTS SONT PASSÉS !")
+        print(" Le service Fast-GraphRAG est 100% fonctionnel")
     else:
-        print(f"\n⚠️ {total_tests - passed_tests} test(s) ont échoué")
-        print("❌ Des corrections sont nécessaires")
+        print(f"\n {total_tests - passed_tests} test(s) ont échoué")
+        print(" Des corrections sont nécessaires")
     
     print()
-
 
 if __name__ == "__main__":
     asyncio.run(main())

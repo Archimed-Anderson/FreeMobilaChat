@@ -16,13 +16,11 @@ from ..services.llm_analyzer import LLMAnalyzer, LLMProvider
 
 logger = logging.getLogger(__name__)
 
-
 class HealthStatus:
     """Health status constants"""
     HEALTHY = "healthy"
     DEGRADED = "degraded"
     UNHEALTHY = "unhealthy"
-
 
 class HealthCheck:
     """Comprehensive health check system"""
@@ -320,7 +318,6 @@ class HealthCheck:
     def get_health_history(self) -> List[Dict[str, Any]]:
         """Get health check history"""
         return self.check_history.copy()
-
 
 # Global health check instance
 health_checker = HealthCheck()

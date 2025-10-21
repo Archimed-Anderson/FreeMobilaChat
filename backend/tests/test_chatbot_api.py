@@ -14,13 +14,13 @@ def test_health():
     try:
         response = requests.get(f"{API_BASE_URL}/health", timeout=5)
         if response.status_code == 200:
-            print("✅ API en ligne")
+            print(" API en ligne")
             return True
         else:
-            print(f"❌ API répond avec le statut {response.status_code}")
+            print(f" API répond avec le statut {response.status_code}")
             return False
     except Exception as e:
-        print(f"❌ Erreur de connexion à l'API: {e}")
+        print(f" Erreur de connexion à l'API: {e}")
         return False
 
 def test_chatbot_message():
@@ -44,14 +44,14 @@ def test_chatbot_message():
         
         if response.status_code == 200:
             result = response.json()
-            print("✅ Endpoint chatbot fonctionne")
+            print(" Endpoint chatbot fonctionne")
             print(f"   - Succès: {result.get('success')}")
             print(f"   - Réponse: {result.get('response', '')[:100]}...")
             print(f"   - Temps de traitement: {result.get('processing_time', 0):.2f}s")
             print(f"   - Conversation ID: {result.get('conversation_id')}")
             return True
         else:
-            print(f"❌ Erreur HTTP {response.status_code}")
+            print(f" Erreur HTTP {response.status_code}")
             try:
                 error_detail = response.json()
                 print(f"   Détail: {error_detail}")
@@ -60,12 +60,12 @@ def test_chatbot_message():
             return False
             
     except Exception as e:
-        print(f"❌ Erreur lors du test: {e}")
+        print(f" Erreur lors du test: {e}")
         return False
 
 def test_chatbot_initialize():
     """Tester l'endpoint d'initialisation du chatbot"""
-    print("\n🚀 Test de l'endpoint d'initialisation...")
+    print("\n Test de l'endpoint d'initialisation...")
     
     try:
         response = requests.post(
@@ -77,7 +77,7 @@ def test_chatbot_initialize():
         
         if response.status_code == 200:
             result = response.json()
-            print("✅ Endpoint d'initialisation fonctionne")
+            print(" Endpoint d'initialisation fonctionne")
             print(f"   - Succès: {result.get('success')}")
             if result.get('success'):
                 print(f"   - Documents scrapés: {result.get('successful_scrapes', 0)}")
@@ -86,7 +86,7 @@ def test_chatbot_initialize():
                 print(f"   - Erreur: {result.get('error')}")
             return True
         else:
-            print(f"❌ Erreur HTTP {response.status_code}")
+            print(f" Erreur HTTP {response.status_code}")
             try:
                 error_detail = response.json()
                 print(f"   Détail: {error_detail}")
@@ -95,7 +95,7 @@ def test_chatbot_initialize():
             return False
             
     except Exception as e:
-        print(f"❌ Erreur lors du test: {e}")
+        print(f" Erreur lors du test: {e}")
         return False
 
 def test_conversations_endpoint():
@@ -112,16 +112,16 @@ def test_conversations_endpoint():
         
         if response.status_code == 200:
             result = response.json()
-            print("✅ Endpoint conversations fonctionne")
+            print(" Endpoint conversations fonctionne")
             print(f"   - Succès: {result.get('success')}")
             print(f"   - Nombre de conversations: {result.get('total', 0)}")
             return True
         else:
-            print(f"❌ Erreur HTTP {response.status_code}")
+            print(f" Erreur HTTP {response.status_code}")
             return False
             
     except Exception as e:
-        print(f"❌ Erreur lors du test: {e}")
+        print(f" Erreur lors du test: {e}")
         return False
 
 def main():
@@ -150,12 +150,12 @@ def main():
     
     # Résumé
     print("\n" + "=" * 50)
-    print(f"📊 RÉSUMÉ: {tests_passed}/{total_tests} tests réussis")
+    print(f" RÉSUMÉ: {tests_passed}/{total_tests} tests réussis")
     
     if tests_passed == total_tests:
-        print("🎉 Tous les tests sont passés ! L'API chatbot est fonctionnelle.")
+        print(" Tous les tests sont passés ! L'API chatbot est fonctionnelle.")
     else:
-        print("⚠️ Certains tests ont échoué. Vérifiez les erreurs ci-dessus.")
+        print(" Certains tests ont échoué. Vérifiez les erreurs ci-dessus.")
     
     return tests_passed == total_tests
 

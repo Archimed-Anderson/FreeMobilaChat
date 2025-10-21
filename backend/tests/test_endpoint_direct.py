@@ -13,10 +13,10 @@ print("=" * 80)
 print("\n📡 Test 1: Checking if server is running...")
 try:
     response = requests.get("http://localhost:8000/health", timeout=5)
-    print(f"✅ Server is running: {response.status_code}")
+    print(f" Server is running: {response.status_code}")
     print(f"   Response: {response.json()}")
 except Exception as e:
-    print(f"❌ Server is not running: {e}")
+    print(f" Server is not running: {e}")
     exit(1)
 
 # Test 2: List all available endpoints
@@ -26,21 +26,21 @@ try:
     if response.status_code == 200:
         openapi = response.json()
         paths = openapi.get("paths", {})
-        print(f"✅ Found {len(paths)} endpoints:")
+        print(f" Found {len(paths)} endpoints:")
         for path in sorted(paths.keys()):
             methods = list(paths[path].keys())
             print(f"   - {path}: {methods}")
             
         # Check if /test-analyze-single exists
         if "/test-analyze-single" in paths:
-            print(f"\n✅ /test-analyze-single endpoint EXISTS")
+            print(f"\n /test-analyze-single endpoint EXISTS")
             print(f"   Methods: {list(paths['/test-analyze-single'].keys())}")
         else:
-            print(f"\n❌ /test-analyze-single endpoint NOT FOUND")
+            print(f"\n /test-analyze-single endpoint NOT FOUND")
     else:
-        print(f"❌ Failed to get OpenAPI spec: {response.status_code}")
+        print(f" Failed to get OpenAPI spec: {response.status_code}")
 except Exception as e:
-    print(f"❌ Error getting OpenAPI spec: {e}")
+    print(f" Error getting OpenAPI spec: {e}")
 
 # Test 3: Call /test-analyze-single with GET (should fail)
 print("\n🧪 Test 3: Calling /test-analyze-single with GET (should fail)...")
@@ -76,7 +76,7 @@ except Exception as e:
     traceback.print_exc()
 
 # Test 5: Wait and check logs
-print("\n📝 Test 5: Checking logs...")
+print("\n Test 5: Checking logs...")
 print("   Waiting 2 seconds for logs to be written...")
 time.sleep(2)
 
@@ -91,6 +91,6 @@ except Exception as e:
     print(f"   Error reading logs: {e}")
 
 print("\n" + "=" * 80)
-print("✅ TEST COMPLETE")
+print(" TEST COMPLETE")
 print("=" * 80)
 

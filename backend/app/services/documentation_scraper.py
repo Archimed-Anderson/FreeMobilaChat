@@ -37,7 +37,6 @@ from ..utils.database import DatabaseManager
 
 logger = logging.getLogger(__name__)
 
-
 class DocumentationScraper:
     """Service pour scraper et indexer la documentation Free Mobile"""
     
@@ -61,10 +60,10 @@ class DocumentationScraper:
         
         # Vérifier les dépendances (mode dégradé si non disponibles)
         if not SCRAPING_AVAILABLE:
-            self.logger.warning("⚠️ Web scraping dependencies not available. Scraping will be disabled.")
+            self.logger.warning(" Web scraping dependencies not available. Scraping will be disabled.")
 
         if not EMBEDDINGS_AVAILABLE:
-            self.logger.warning("⚠️ Embeddings dependencies not available. Semantic search will be disabled.")
+            self.logger.warning(" Embeddings dependencies not available. Semantic search will be disabled.")
         
         # Initialiser le modèle d'embeddings (modèle français optimisé)
         self.embedding_model_name = "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -88,16 +87,16 @@ class DocumentationScraper:
     def _initialize_embedding_model(self):
         """Initialiser le modèle d'embeddings"""
         if not EMBEDDINGS_AVAILABLE:
-            self.logger.warning("⚠️ Modèle d'embeddings non disponible (dépendances manquantes)")
+            self.logger.warning(" Modèle d'embeddings non disponible (dépendances manquantes)")
             self.embedding_model = None
             return
 
         try:
             self.logger.info(f"🤖 Initialisation du modèle d'embeddings: {self.embedding_model_name}")
             self.embedding_model = SentenceTransformer(self.embedding_model_name)
-            self.logger.info("✅ Modèle d'embeddings initialisé avec succès")
+            self.logger.info(" Modèle d'embeddings initialisé avec succès")
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de l'initialisation du modèle d'embeddings: {e}")
+            self.logger.error(f" Erreur lors de l'initialisation du modèle d'embeddings: {e}")
             self.embedding_model = None
     
     def _clean_text(self, text: str) -> str:
@@ -184,7 +183,7 @@ class DocumentationScraper:
             return title, content, document_type
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de l'extraction du contenu de {url}: {e}")
+            self.logger.error(f" Erreur lors de l'extraction du contenu de {url}: {e}")
             return "", "", DocumentType.GENERAL
     
     def _determine_document_type(self, url: str, title: str, content: str) -> DocumentType:
@@ -266,7 +265,7 @@ class DocumentationScraper:
         """
         try:
             if not self.embedding_model:
-                self.logger.error("❌ Modèle d'embeddings non initialisé")
+                self.logger.error(" Modèle d'embeddings non initialisé")
                 return None
             
             # Limiter la taille du texte pour éviter les erreurs de mémoire
@@ -278,7 +277,7 @@ class DocumentationScraper:
             return embeddings.tolist()
             
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la génération des embeddings: {e}")
+            self.logger.error(f" Erreur lors de la génération des embeddings: {e}")
             return None
 
     async def scrape_url(self, url: str) -> Optional[KnowledgeDocument]:
@@ -292,7 +291,7 @@ class DocumentationScraper:
             Document de connaissances ou None si erreur
         """
         if url in self.scraped_urls or url in self.failed_urls:
-            self.logger.info(f"⏭️ URL déjà traitée: {url}")
+            self.logger.info(f"⏭ URL déjà traitée: {url}")
             return None
 
         try:
@@ -301,7 +300,7 @@ class DocumentationScraper:
             async with aiohttp.ClientSession(headers=self.session_headers) as session:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as response:
                     if response.status != 200:
-                        self.logger.warning(f"⚠️ Statut HTTP {response.status} pour {url}")
+                        self.logger.warning(f" Statut HTTP {response.status} pour {url}")
                         self.failed_urls.add(url)
                         return None
 
@@ -311,7 +310,7 @@ class DocumentationScraper:
             title, content, document_type = self._extract_content_from_html(html, url)
 
             if not content or len(content) < 50:
-                self.logger.warning(f"⚠️ Contenu insuffisant pour {url}")
+                self.logger.warning(f" Contenu insuffisant pour {url}")
                 self.failed_urls.add(url)
                 return None
 
@@ -321,7 +320,7 @@ class DocumentationScraper:
             # Générer les embeddings
             embeddings = self._generate_embeddings(content)
             if not embeddings:
-                self.logger.warning(f"⚠️ Impossible de générer les embeddings pour {url}")
+                self.logger.warning(f" Impossible de générer les embeddings pour {url}")
 
             # Extraire le domaine
             parsed_url = urlparse(url)
@@ -340,12 +339,12 @@ class DocumentationScraper:
             )
 
             self.scraped_urls.add(url)
-            self.logger.info(f"✅ Document créé: {title[:50]}... ({len(content)} caractères)")
+            self.logger.info(f" Document créé: {title[:50]}... ({len(content)} caractères)")
 
             return document
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors du scraping de {url}: {e}")
+            self.logger.error(f" Erreur lors du scraping de {url}: {e}")
             self.failed_urls.add(url)
             return None
 
@@ -356,7 +355,7 @@ class DocumentationScraper:
         Returns:
             Liste des documents créés
         """
-        self.logger.info("🚀 Début du scraping de la documentation Free Mobile")
+        self.logger.info(" Début du scraping de la documentation Free Mobile")
 
         documents = []
 
@@ -369,8 +368,8 @@ class DocumentationScraper:
             # Pause entre les requêtes pour être respectueux
             await asyncio.sleep(1)
 
-        self.logger.info(f"✅ Scraping terminé: {len(documents)} documents créés")
-        self.logger.info(f"📊 URLs échouées: {len(self.failed_urls)}")
+        self.logger.info(f" Scraping terminé: {len(documents)} documents créés")
+        self.logger.info(f" URLs échouées: {len(self.failed_urls)}")
 
         return documents
 
@@ -385,7 +384,7 @@ class DocumentationScraper:
             Nombre de documents stockés
         """
         if not self.db_manager:
-            self.logger.error("❌ Gestionnaire de base de données non disponible")
+            self.logger.error(" Gestionnaire de base de données non disponible")
             return 0
 
         stored_count = 0
@@ -396,7 +395,7 @@ class DocumentationScraper:
                 existing = await self._check_existing_document(document.content_hash)
 
                 if existing:
-                    self.logger.info(f"⏭️ Document déjà existant: {document.title[:50]}...")
+                    self.logger.info(f"⏭ Document déjà existant: {document.title[:50]}...")
                     continue
 
                 # Stocker le document
@@ -405,9 +404,9 @@ class DocumentationScraper:
                 self.logger.info(f"💾 Document stocké: {document.title[:50]}...")
 
             except Exception as e:
-                self.logger.error(f"❌ Erreur lors du stockage de {document.title[:50]}...: {e}")
+                self.logger.error(f" Erreur lors du stockage de {document.title[:50]}...: {e}")
 
-        self.logger.info(f"✅ Stockage terminé: {stored_count} nouveaux documents")
+        self.logger.info(f" Stockage terminé: {stored_count} nouveaux documents")
         return stored_count
 
     async def _check_existing_document(self, content_hash: str) -> bool:
@@ -425,7 +424,7 @@ class DocumentationScraper:
             # Pour l'instant, on retourne False (pas de vérification)
             return False
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la vérification d'existence: {e}")
+            self.logger.error(f" Erreur lors de la vérification d'existence: {e}")
             return False
 
     async def _store_single_document(self, document: KnowledgeDocument):
@@ -438,14 +437,14 @@ class DocumentationScraper:
         try:
             # Cette méthode devra être implémentée selon le système de base de données
             # Pour l'instant, on log juste les informations
-            self.logger.info(f"📝 Stockage du document: {document.title}")
+            self.logger.info(f" Stockage du document: {document.title}")
             self.logger.debug(f"   - URL: {document.source_url}")
             self.logger.debug(f"   - Type: {document.document_type}")
             self.logger.debug(f"   - Taille: {len(document.content)} caractères")
             self.logger.debug(f"   - Hash: {document.content_hash}")
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors du stockage: {e}")
+            self.logger.error(f" Erreur lors du stockage: {e}")
             raise
 
     async def update_knowledge_base(self) -> Dict[str, Any]:
@@ -480,13 +479,13 @@ class DocumentationScraper:
                 'failed_urls': list(self.failed_urls)
             }
 
-            self.logger.info(f"✅ Mise à jour terminée en {duration:.1f}s")
-            self.logger.info(f"📊 Résumé: {len(documents)} documents scrapés, {stored_count} stockés")
+            self.logger.info(f" Mise à jour terminée en {duration:.1f}s")
+            self.logger.info(f" Résumé: {len(documents)} documents scrapés, {stored_count} stockés")
 
             return result
 
         except Exception as e:
-            self.logger.error(f"❌ Erreur lors de la mise à jour: {e}")
+            self.logger.error(f" Erreur lors de la mise à jour: {e}")
             return {
                 'success': False,
                 'error': str(e),

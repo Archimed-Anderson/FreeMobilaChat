@@ -30,20 +30,20 @@ async def test_llm_analyzer():
         url="https://twitter.com/test/status/123"
     )
     
-    print(f"\n📝 Test Tweet:")
+    print(f"\n Test Tweet:")
     print(f"   ID: {tweet.tweet_id}")
     print(f"   Author: {tweet.author}")
     print(f"   Text: {tweet.text}")
     
     # Initialize LLMAnalyzer with Ollama
-    print(f"\n🔧 Initializing LLMAnalyzer with provider='ollama'...")
+    print(f"\n Initializing LLMAnalyzer with provider='ollama'...")
     try:
         analyzer = LLMAnalyzer(provider="ollama", batch_size=1)
-        print(f"✅ LLMAnalyzer initialized successfully")
+        print(f" LLMAnalyzer initialized successfully")
         print(f"   Provider: {analyzer.provider}")
         print(f"   Clients: {list(analyzer.clients.keys())}")
     except Exception as e:
-        print(f"❌ Failed to initialize LLMAnalyzer: {e}")
+        print(f" Failed to initialize LLMAnalyzer: {e}")
         return
     
     # Analyze tweet
@@ -52,8 +52,8 @@ async def test_llm_analyzer():
         result = await analyzer.analyze_tweet(tweet)
         
         if result:
-            print(f"✅ Analysis successful!")
-            print(f"\n📊 Results:")
+            print(f" Analysis successful!")
+            print(f"\n Results:")
             print(f"   Sentiment: {result.sentiment}")
             print(f"   Sentiment Score: {result.sentiment_score}")
             print(f"   Category: {result.category}")
@@ -63,10 +63,10 @@ async def test_llm_analyzer():
             print(f"   Needs Response: {result.needs_response}")
             print(f"   Summary: {result.summary}")
         else:
-            print(f"❌ Analysis failed - returned None")
+            print(f" Analysis failed - returned None")
             
     except Exception as e:
-        print(f"❌ Analysis failed with exception: {e}")
+        print(f" Analysis failed with exception: {e}")
         import traceback
         traceback.print_exc()
     

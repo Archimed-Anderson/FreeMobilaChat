@@ -38,13 +38,13 @@ async def test_httpx():
         
         if response.status_code == 200:
             result = response.json()
-            print("✅ httpx works!")
+            print(" httpx works!")
             print(f"Response: {json.dumps(result, indent=2)}")
         else:
-            print(f"❌ Error: {response.status_code}")
+            print(f" Error: {response.status_code}")
             print(f"Response: {response.text}")
     except Exception as e:
-        print(f"❌ Exception: {e}")
+        print(f" Exception: {e}")
         import traceback
         traceback.print_exc()
     finally:

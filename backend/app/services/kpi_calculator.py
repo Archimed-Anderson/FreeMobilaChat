@@ -13,7 +13,6 @@ from ..models import TweetAnalyzed, KPIMetrics, SentimentType, CategoryType, Pri
 
 logger = logging.getLogger(__name__)
 
-
 class KPICalculator:
     """
     Calcul métriques dashboard
@@ -400,9 +399,9 @@ class KPICalculator:
         # Sentiment insights
         negative_pct = kpis.sentiment_percentages.get(SentimentType.NEGATIVE, 0)
         if negative_pct > 50:
-            insights.append(f"⚠️ Taux de sentiment négatif élevé: {negative_pct:.1f}%")
+            insights.append(f" Taux de sentiment négatif élevé: {negative_pct:.1f}%")
         elif negative_pct < 20:
-            insights.append(f"✅ Sentiment globalement positif: {negative_pct:.1f}% de tweets négatifs")
+            insights.append(f" Sentiment globalement positif: {negative_pct:.1f}% de tweets négatifs")
         
         # Priority insights
         if kpis.critical_count > 0:
@@ -418,6 +417,6 @@ class KPICalculator:
         # Category insights
         top_category = max(kpis.category_distribution, key=kpis.category_distribution.get)
         top_category_count = kpis.category_distribution[top_category]
-        insights.append(f"🏷️ Catégorie principale: {top_category.value} ({top_category_count} tweets)")
+        insights.append(f"🏷 Catégorie principale: {top_category.value} ({top_category_count} tweets)")
         
         return insights

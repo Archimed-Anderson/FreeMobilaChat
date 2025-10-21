@@ -13,18 +13,18 @@ from pathlib import Path
 def run_command(command, description=""):
     """Run a command and handle errors"""
     print(f"\n{'='*60}")
-    print(f"🔧 {description}")
+    print(f" {description}")
     print(f"Command: {command}")
     print(f"{'='*60}")
     
     try:
         result = subprocess.run(command, shell=True, check=True, capture_output=True, text=True)
-        print("✅ SUCCESS")
+        print(" SUCCESS")
         if result.stdout:
             print(f"Output: {result.stdout}")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"❌ FAILED: {e}")
+        print(f" FAILED: {e}")
         if e.stdout:
             print(f"Output: {e.stdout}")
         if e.stderr:
@@ -38,27 +38,27 @@ def check_python_version():
     print(f"Python version: {version.major}.{version.minor}.{version.micro}")
     
     if version.major != 3 or version.minor < 8:
-        print("❌ Python 3.8+ required for GPU training")
+        print(" Python 3.8+ required for GPU training")
         return False
     
-    print("✅ Python version compatible")
+    print(" Python version compatible")
     return True
 
 def check_cuda_installation():
     """Check CUDA installation"""
-    print("\n🚀 Checking CUDA installation...")
+    print("\n Checking CUDA installation...")
     
     try:
         result = subprocess.run("nvcc --version", shell=True, capture_output=True, text=True)
         if result.returncode == 0:
-            print("✅ CUDA Toolkit found")
+            print(" CUDA Toolkit found")
             print(result.stdout)
             return True
         else:
-            print("❌ CUDA Toolkit not found")
+            print(" CUDA Toolkit not found")
             return False
     except:
-        print("❌ CUDA Toolkit not found")
+        print(" CUDA Toolkit not found")
         return False
 
 def check_gpu_availability():
@@ -68,19 +68,19 @@ def check_gpu_availability():
     try:
         result = subprocess.run("nvidia-smi", shell=True, capture_output=True, text=True)
         if result.returncode == 0:
-            print("✅ NVIDIA GPU detected")
+            print(" NVIDIA GPU detected")
             print(result.stdout)
             return True
         else:
-            print("❌ NVIDIA GPU not detected")
+            print(" NVIDIA GPU not detected")
             return False
     except:
-        print("❌ nvidia-smi not found")
+        print(" nvidia-smi not found")
         return False
 
 def install_pytorch_cuda():
     """Install PyTorch with CUDA support"""
-    print("\n🔥 Installing PyTorch with CUDA support...")
+    print("\n Installing PyTorch with CUDA support...")
     
     # PyTorch with CUDA 12.1 support
     pytorch_command = (
@@ -109,11 +109,11 @@ def install_training_dependencies():
     for dep in dependencies:
         success = run_command(f"pip install {dep}", f"Installing {dep}")
         if not success:
-            print(f"⚠️ Failed to install {dep}, continuing...")
+            print(f" Failed to install {dep}, continuing...")
 
 def install_optional_dependencies():
     """Install optional monitoring dependencies"""
-    print("\n📊 Installing optional monitoring dependencies...")
+    print("\n Installing optional monitoring dependencies...")
     
     optional_deps = [
         "wandb==0.16.1",  # For experiment tracking
@@ -124,7 +124,7 @@ def install_optional_dependencies():
     for dep in optional_deps:
         success = run_command(f"pip install {dep}", f"Installing {dep} (optional)")
         if not success:
-            print(f"⚠️ Failed to install {dep} (optional), continuing...")
+            print(f" Failed to install {dep} (optional), continuing...")
 
 def verify_installation():
     """Verify the installation"""
@@ -151,14 +151,14 @@ print(f"Transformers version: {transformers.__version__}")
 print(f"PEFT version: {peft.__version__}")
 print(f"Accelerate version: {accelerate.__version__}")
 
-print("\\n✅ All dependencies installed successfully!")
+print("\\n All dependencies installed successfully!")
 '''
     
     try:
         exec(verification_script)
         return True
     except Exception as e:
-        print(f"❌ Verification failed: {e}")
+        print(f" Verification failed: {e}")
         return False
 
 def create_training_directories():
@@ -174,11 +174,11 @@ def create_training_directories():
     
     for dir_path in directories:
         Path(dir_path).mkdir(parents=True, exist_ok=True)
-        print(f"✅ Created directory: {dir_path}")
+        print(f" Created directory: {dir_path}")
 
 def main():
     """Main setup function"""
-    print("🚀 FreeMobilaChat GPU Training Setup")
+    print(" FreeMobilaChat GPU Training Setup")
     print("=" * 60)
     print("This script will set up your environment for GPU-accelerated LLM fine-tuning")
     print("Designed for RTX 4060 with 8GB VRAM")
@@ -186,22 +186,22 @@ def main():
     
     # System checks
     if not check_python_version():
-        print("\n❌ Setup failed: Python version incompatible")
+        print("\n Setup failed: Python version incompatible")
         return False
     
     if not check_cuda_installation():
-        print("\n⚠️ CUDA not found. Please install CUDA Toolkit 12.1 first:")
+        print("\n CUDA not found. Please install CUDA Toolkit 12.1 first:")
         print("https://developer.nvidia.com/cuda-12-1-0-download-archive")
         return False
     
     if not check_gpu_availability():
-        print("\n⚠️ GPU not detected. Training will use CPU (very slow)")
+        print("\n GPU not detected. Training will use CPU (very slow)")
     
     # Install dependencies
-    print("\n🔧 Installing dependencies...")
+    print("\n Installing dependencies...")
     
     if not install_pytorch_cuda():
-        print("\n❌ Failed to install PyTorch with CUDA")
+        print("\n Failed to install PyTorch with CUDA")
         return False
     
     install_training_dependencies()
@@ -209,7 +209,7 @@ def main():
     
     # Verify installation
     if not verify_installation():
-        print("\n❌ Installation verification failed")
+        print("\n Installation verification failed")
         return False
     
     # Create directories
@@ -217,7 +217,7 @@ def main():
     
     # Final instructions
     print("\n" + "=" * 60)
-    print("🎉 GPU Training Setup Complete!")
+    print(" GPU Training Setup Complete!")
     print("=" * 60)
     print("\nNext steps:")
     print("1. Copy settings from backend/.env.gpu_training to your .env file")

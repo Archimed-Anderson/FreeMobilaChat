@@ -25,19 +25,16 @@ if os.path.exists(env_file):
 else:
     load_dotenv()  # Load default .env if exists
 
-
 class Environment(str, Enum):
     """Application environments"""
     DEVELOPMENT = "development"
     TESTING = "testing"
     PRODUCTION = "production"
 
-
 class DatabaseType(str, Enum):
     """Supported database types"""
     SQLITE = "sqlite"
     POSTGRESQL = "postgresql"
-
 
 class LLMProvider(str, Enum):
     """Supported LLM providers"""
@@ -45,7 +42,6 @@ class LLMProvider(str, Enum):
     MISTRAL = "mistral"
     ANTHROPIC = "anthropic"
     OLLAMA = "ollama"
-
 
 @dataclass
 class LLMConfig:
@@ -56,7 +52,6 @@ class LLMConfig:
     temperature: float
     rate_limit: int
     base_url: Optional[str] = None
-
 
 @dataclass
 class DatabaseConfig:
@@ -70,7 +65,6 @@ class DatabaseConfig:
     ssl_mode: Optional[str] = None
     sqlite_path: Optional[str] = None
 
-
 @dataclass
 class PerformanceConfig:
     """Performance and rate limiting configuration"""
@@ -81,7 +75,6 @@ class PerformanceConfig:
     default_batch_size: int
     max_tweets_per_batch: int
     max_tweets_per_run: int
-
 
 @dataclass
 class GPUTrainingConfig:
@@ -119,7 +112,6 @@ class GPUTrainingConfig:
     output_dir: str
     cache_dir: str
 
-
 @dataclass
 class SecurityConfig:
     """Security configuration"""
@@ -129,7 +121,6 @@ class SecurityConfig:
     allowed_origins: List[str]
     allowed_methods: List[str]
     allowed_headers: List[str]
-
 
 class Config:
     """Centralized configuration management"""
@@ -322,10 +313,10 @@ class Config:
             config = self.llm[default]
             # Ollama is configured if it has a base_url, others need api_key
             if default == "ollama" and config.base_url:
-                logger.info(f"✅ Using configured provider: {default} (Ollama with base_url)")
+                logger.info(f" Using configured provider: {default} (Ollama with base_url)")
                 return default
             elif config.api_key:
-                logger.info(f"✅ Using configured provider: {default} (with API key)")
+                logger.info(f" Using configured provider: {default} (with API key)")
                 return default
 
         # Fall back to first configured provider
@@ -339,7 +330,6 @@ class Config:
                 return name
 
         raise ConfigurationError("No LLM providers are configured")
-
 
 # Global configuration instance
 config = Config()
