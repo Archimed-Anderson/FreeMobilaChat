@@ -439,7 +439,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Voir les Résultats", type="secondary", use_container_width=True):
-            st.switch_page("pages/3_resultat.py")
+            st.switch_page("pages/resultat.py")
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
