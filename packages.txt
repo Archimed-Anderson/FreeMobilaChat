@@ -1,3 +1,2 @@
-# Packages système pour Streamlit Cloud
 build-essential
 
