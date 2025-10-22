@@ -606,6 +606,69 @@ class AdaptiveAnalysisEngine:
         return str(output_path)
 
 
+class IntelligentAnalyzer:
+    """
+    Analyseur intelligent simplifié pour le pipeline d'entraînement.
+    """
+    
+    def __init__(self, llm_provider: str = "fallback", api_key: Optional[str] = None):
+        self.llm_provider = llm_provider
+        self.api_key = api_key
+        self.engine = AdaptiveAnalysisEngine(
+            llm_provider=llm_provider,
+            api_key=api_key,
+            use_profiling=False
+        )
+    
+    def analyze_dataframe(self, df: pd.DataFrame) -> Dict[str, Any]:
+        """
+        Analyse un DataFrame et retourne les résultats.
+        
+        Args:
+            df: DataFrame à analyser
+            
+        Returns:
+            Résultats de l'analyse
+        """
+        try:
+            # Analyse basique avec l'inspecteur
+            inspector = IntelligentDataInspector(df, "dataset")
+            inspection = inspector.inspect_dataframe(df)
+            
+            # Analyse avec le moteur adaptatif
+            results = self.engine.analyze_dataframe(df, "dataset")
+            
+            # Combinaison des résultats
+            combined_results = {
+                "inspection": inspection,
+                "analysis": results,
+                "quality_score": inspection.get("quality_score", 85),
+                "executive_summary": results.get("executive_summary", "Analyse automatique des données"),
+                "insights": results.get("insights", []),
+                "recommendations": results.get("recommendations", []),
+                "completeness_score": inspection.get("completeness_score", 90),
+                "uniqueness_score": inspection.get("uniqueness_score", 95),
+                "consistency_score": inspection.get("consistency_score", 88),
+                "column_types": inspection.get("column_types", {})
+            }
+            
+            return combined_results
+            
+        except Exception as e:
+            logger.error(f"Erreur lors de l'analyse: {e}")
+            return {
+                "error": str(e),
+                "quality_score": 50,
+                "executive_summary": "Erreur lors de l'analyse",
+                "insights": ["Erreur détectée dans l'analyse"],
+                "recommendations": ["Vérifier les données d'entrée"],
+                "completeness_score": 0,
+                "uniqueness_score": 0,
+                "consistency_score": 0,
+                "column_types": {}
+            }
+
+
 def analyze_dataset(
     file_path: str,
     llm_provider: str = "fallback",

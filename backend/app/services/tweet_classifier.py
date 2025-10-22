@@ -269,7 +269,11 @@ AUCUN texte en dehors du JSON. Seulement le JSON brut."""
         self.max_tokens = max_tokens
         
         # Initialiser le client LLM
-        if "gpt" in model_name.lower():
+        if model_name.lower() == "fallback":
+            logger.warning("Mode fallback activé, utilisation des règles de classification")
+            self.client = None
+            self.provider = "fallback"
+        elif "gpt" in model_name.lower():
             if not OPENAI_AVAILABLE:
                 raise ImportError("openai package requis. Installez avec: pip install openai")
             self.client = openai.OpenAI(api_key=api_key)

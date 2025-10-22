@@ -104,8 +104,7 @@ def enrich_with_classification(
         text_column = 'text'
     
     tweets = df[text_column].tolist()
-    # Convertir les tweet_ids en string si présents
-    tweet_ids = df['tweet_id'].astype(str).tolist() if 'tweet_id' in df.columns else None
+    tweet_ids = df['tweet_id'].tolist() if 'tweet_id' in df.columns else None
     
     # Classifier tous les tweets
     results = classifier.batch_classify(tweets, tweet_ids)
@@ -321,30 +320,8 @@ def main():
             generate_profiling=args.generate_profiling
         )
         
-        # Sauvegarder les résultats d'analyse (sans tweet_classification pour éviter référence circulaire)
+        # Sauvegarder les résultats d'analyse
         analysis_path = output_dir / 'analysis_results.json'
-        
-        # Créer une copie sans les références circulaires
-        analysis_to_save = {
-            'file_name': analysis_results['file_name'],
-            'timestamp': analysis_results['timestamp'],
-            'file_hash': analysis_results['file_hash'],
-            'inspection': analysis_results['inspection'],
-            'llm_insights': analysis_results.get('llm_insights'),
-            'profiling_report_path': analysis_results.get('profiling_report_path')
-        }
-        
-        # Ajouter statistiques de classification sans les objets complets
-        if analysis_results.get('tweet_classification'):
-            tc = analysis_results['tweet_classification']
-            analysis_to_save['tweet_classification_summary'] = {
-                'total_classified': tc['total_classified'],
-                'reclamations_count': tc['reclamations_count'],
-                'avg_confidence': tc['avg_confidence'],
-                'sentiment_distribution': tc['sentiment_distribution'],
-                'theme_distribution': tc['theme_distribution']
-            }
-        
         with open(analysis_path, 'w', encoding='utf-8') as f:
             # Convertir les types numpy en types Python pour JSON
             def convert_numpy(obj):
@@ -354,13 +331,9 @@ def main():
                     return float(obj)
                 elif isinstance(obj, np.ndarray):
                     return obj.tolist()
-                elif isinstance(obj, dict):
-                    return {k: convert_numpy(v) for k, v in obj.items()}
-                elif isinstance(obj, list):
-                    return [convert_numpy(item) for item in obj]
                 return obj
             
-            json.dump(convert_numpy(analysis_to_save), f, indent=2, ensure_ascii=False)
+            json.dump(analysis_results, f, indent=2, ensure_ascii=False, default=convert_numpy)
         logger.info(f"Résultats d'analyse sauvegardés: {analysis_path}")
         
         # Étape 2: Chargement et nettoyage

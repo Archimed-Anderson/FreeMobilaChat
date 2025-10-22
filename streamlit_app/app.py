@@ -406,7 +406,7 @@ def render_features():
     """, unsafe_allow_html=True)
     
     # Cartes de navigation avec composants Streamlit natifs
-    col1, col2, col3 = st.columns(3, gap="large")
+    col1, col2, col3, col4 = st.columns(4, gap="medium")
     
     with col1:
         st.markdown("""
@@ -440,6 +440,17 @@ def render_features():
         """, unsafe_allow_html=True)
         if st.button("Voir les Résultats", type="secondary", use_container_width=True):
             st.switch_page("pages/resultat.py")
+    
+    with col4:
+        st.markdown("""
+        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #6f42c1; text-align: center;">
+            <i class="fas fa-robot" style="font-size: 2.5rem; color: #6f42c1; margin-bottom: 1rem;"></i>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Classification LLM</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Résultats de classification automatique</p>
+        </div>
+        """, unsafe_allow_html=True)
+        if st.button("Voir Classification LLM", type="secondary", use_container_width=True):
+            st.switch_page("pages/classification_llm.py")
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">

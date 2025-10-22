@@ -1,661 +1,387 @@
 """
 Page de Classification LLM - FreeMobilaChat
-===========================================
+==========================================
 
-Interface Streamlit pour la classification intelligente des tweets Free
-avec le nouveau moteur LLM multi-label.
-
-Fonctionnalités:
-    - Upload de fichiers CSV de tweets
-    - Classification automatique multi-label
-    - Visualisation des résultats par dimension
-    - Export des résultats annotés
-    - Statistiques et métriques en temps réel
-
-Auteur: Archimed Anderson
-Date: Octobre 2024
+Page dédiée à l'affichage et à l'analyse des résultats de classification LLM.
 """
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from pathlib import Path
-import sys
+from plotly.subplots import make_subplots
 import json
-import logging
-from typing import List, Dict
+from pathlib import Path
 from datetime import datetime
+import sys
+import os
 
-# Ajouter le chemin backend au sys.path
-backend_path = Path(__file__).parent.parent.parent / "backend"
-if str(backend_path) not in sys.path:
-    sys.path.append(str(backend_path))
-
-try:
-    from app.services.tweet_classifier import TweetClassifier, ClassificationResult
-    CLASSIFIER_AVAILABLE = True
-except ImportError as e:
-    st.error(f"Erreur d'import du classificateur: {e}")
-    CLASSIFIER_AVAILABLE = False
+# Ajout du chemin pour les imports
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app'))
 
 # Configuration de la page
 st.set_page_config(
     page_title="Classification LLM - FreeMobilaChat",
-    page_icon="🤖",
+    page_icon=":brain:",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# Logger
-logger = logging.getLogger(__name__)
-
-
-def load_custom_css():
-    """Charge le CSS personnalisé Free Mobile"""
-    st.markdown("""
-    <style>
-    /* Theme Free Mobile - Rouge et Noir */
-    :root {
-        --free-red: #CC0000;
-        --free-dark-red: #8B0000;
-        --free-black: #1a1a1a;
-        --free-light-gray: #f8f9fa;
-        --free-border: #e0e0e0;
-    }
-    
-    /* Header */
+# CSS personnalisé
+st.markdown("""
+<style>
     .main-header {
-        background: linear-gradient(135deg, var(--free-red) 0%, var(--free-dark-red) 100%);
+        background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%);
         padding: 2rem;
-        border-radius: 15px;
+        border-radius: 10px;
         color: white;
         text-align: center;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 15px rgba(204, 0, 0, 0.2);
     }
     
-    .main-header h1 {
-        font-size: 2.5rem;
-        font-weight: 800;
-        margin-bottom: 0.5rem;
-    }
-    
-    .main-header p {
-        font-size: 1.1rem;
-        opacity: 0.95;
-    }
-    
-    /* Cards */
     .metric-card {
         background: white;
         padding: 1.5rem;
         border-radius: 10px;
-        border-left: 4px solid var(--free-red);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-left: 4px solid #CC0000;
         margin-bottom: 1rem;
     }
     
-    .metric-card h3 {
-        color: var(--free-black);
-        font-size: 1.8rem;
-        font-weight: 700;
-        margin: 0;
-    }
-    
-    .metric-card p {
-        color: #666;
-        font-size: 0.9rem;
-        margin: 0.5rem 0 0 0;
-    }
-    
-    /* Upload Zone */
-    .upload-container {
-        background: var(--free-light-gray);
-        border: 2px dashed var(--free-red);
-        border-radius: 15px;
-        padding: 3rem;
-        text-align: center;
-        margin: 2rem 0;
-    }
-    
-    /* Progress Bar */
-    .stProgress > div > div > div {
-        background-color: var(--free-red);
-    }
-    
-    /* Buttons */
-    .stButton > button {
-        background: var(--free-red);
-        color: white;
-        font-weight: 600;
+    .classification-example {
+        background: #f8f9fa;
+        padding: 1rem;
         border-radius: 8px;
-        padding: 0.75rem 2rem;
-        border: none;
-        transition: all 0.3s ease;
+        border-left: 3px solid #CC0000;
+        margin: 0.5rem 0;
     }
     
-    .stButton > button:hover {
-        background: var(--free-dark-red);
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(204, 0, 0, 0.3);
+    .reclamation-high {
+        border-left-color: #dc3545 !important;
     }
     
-    /* Tables */
-    .dataframe {
-        font-size: 0.9rem;
+    .reclamation-medium {
+        border-left-color: #ffc107 !important;
     }
     
-    .dataframe th {
-        background-color: var(--free-red) !important;
-        color: white !important;
-        font-weight: 600;
+    .reclamation-low {
+        border-left-color: #28a745 !important;
     }
-    
-    /* Info/Success/Warning boxes */
-    .stAlert {
-        border-radius: 10px;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+</style>
+""", unsafe_allow_html=True)
 
-
-def render_header():
-    """Affiche le header de la page"""
-    st.markdown("""
-    <div class="main-header">
-        <h1>🤖 Classification Intelligente LLM</h1>
-        <p>Analyse multi-label automatisée des tweets Free avec intelligence artificielle</p>
-    </div>
-    """, unsafe_allow_html=True)
-
-
-def render_sidebar():
-    """Affiche la sidebar avec configuration"""
-    with st.sidebar:
-        st.header("⚙️ Configuration")
-        
-        # Sélection du modèle LLM
-        model_options = ["gpt-4", "gpt-3.5-turbo", "claude-3-opus", "claude-3-sonnet", "fallback (sans LLM)"]
-        selected_model = st.selectbox(
-            "Modèle LLM",
-            options=model_options,
-            index=4,  # Par défaut fallback
-            help="Sélectionnez le modèle LLM à utiliser pour la classification"
-        )
-        
-        # API Key (si nécessaire)
-        api_key = None
-        if "fallback" not in selected_model:
-            api_key = st.text_input(
-                "Clé API",
-                type="password",
-                help="Entrez votre clé API OpenAI ou Anthropic"
-            )
-        
-        # Options avancées
-        with st.expander("🔧 Options Avancées"):
-            temperature = st.slider(
-                "Température",
-                min_value=0.0,
-                max_value=1.0,
-                value=0.1,
-                step=0.1,
-                help="0 = déterministe, 1 = créatif"
-            )
-            
-            max_tokens = st.number_input(
-                "Max Tokens",
-                min_value=100,
-                max_value=500,
-                value=300,
-                help="Nombre maximum de tokens dans la réponse"
-            )
-            
-            show_confidence = st.checkbox(
-                "Afficher scores de confiance",
-                value=True
-            )
-            
-            filter_low_confidence = st.checkbox(
-                "Filtrer faible confiance (< 0.7)",
-                value=False
-            )
-        
-        # Instructions
-        st.markdown("---")
-        st.markdown("### 📖 Instructions")
-        st.markdown("""
-        1. **Uploadez** un fichier CSV contenant une colonne `text` avec les tweets
-        2. **Configurez** le modèle LLM (ou utilisez le fallback)
-        3. **Lancez** la classification
-        4. **Analysez** les résultats et exportez
-        """)
-        
-        # Taxonomie
-        with st.expander("📊 Taxonomie de Classification"):
-            st.markdown("""
-            **is_reclamation**: OUI | NON
-            
-            **theme**: FIBRE | MOBILE | TV | FACTURE | SAV | RESEAU | AUTRE
-            
-            **sentiment**: NEGATIF | NEUTRE | POSITIF
-            
-            **urgence**: FAIBLE | MOYENNE | ELEVEE | CRITIQUE
-            
-            **type_incident**: PANNE | LENTEUR | FACTURATION | PROCESSUS_SAV | INFO | AUTRE
-            """)
-        
-        # Retourner la configuration
-        return {
-            "model": selected_model,
-            "api_key": api_key,
-            "temperature": temperature,
-            "max_tokens": max_tokens,
-            "show_confidence": show_confidence,
-            "filter_low_confidence": filter_low_confidence
-        }
-
-
-def load_and_validate_csv(uploaded_file) -> pd.DataFrame:
-    """
-    Charge et valide le fichier CSV.
-    
-    Args:
-        uploaded_file: Fichier uploadé depuis Streamlit
-        
-    Returns:
-        DataFrame validé
-    """
+def load_classification_results():
+    """Charge les résultats de classification depuis le fichier CSV"""
     try:
-        df = pd.read_csv(uploaded_file)
-        
-        # Vérifier la présence de la colonne 'text'
-        if 'text' not in df.columns:
-            st.error("❌ Le fichier doit contenir une colonne 'text' avec les tweets")
+        csv_path = Path("backend/data/intelligent_training/dataset_classified_enriched.csv")
+        if csv_path.exists():
+            df = pd.read_csv(csv_path)
+            return df
+        else:
+            st.error(f"Fichier de résultats non trouvé: {csv_path}")
             return None
-        
-        # Nettoyer les valeurs nulles
-        df = df.dropna(subset=['text'])
-        df = df[df['text'].str.strip() != '']
-        
-        st.success(f"✅ Fichier chargé: {len(df)} tweets")
-        
-        return df
-        
     except Exception as e:
-        st.error(f"❌ Erreur de chargement: {e}")
+        st.error(f"Erreur lors du chargement: {e}")
         return None
 
+def load_analysis_report():
+    """Charge le rapport d'analyse"""
+    try:
+        report_path = Path("backend/data/intelligent_training/rapport_analyse_intelligente.md")
+        if report_path.exists():
+            with open(report_path, 'r', encoding='utf-8') as f:
+                return f.read()
+        else:
+            return None
+    except Exception as e:
+        st.error(f"Erreur lors du chargement du rapport: {e}")
+        return None
 
-def classify_tweets(
-    df: pd.DataFrame,
-    classifier: TweetClassifier,
-    config: Dict
-) -> pd.DataFrame:
-    """
-    Classifie les tweets du DataFrame.
+def create_classification_metrics(df):
+    """Crée les métriques de classification"""
+    total_tweets = len(df)
+    reclamations = len(df[df['is_reclamation'] == 'OUI'])
+    reclamation_rate = (reclamations / total_tweets * 100) if total_tweets > 0 else 0
     
-    Args:
-        df: DataFrame avec colonne 'text'
-        classifier: Instance du classificateur
-        config: Configuration utilisateur
-        
-    Returns:
-        DataFrame avec classifications
-    """
-    tweets = df['text'].tolist()
-    tweet_ids = df['tweet_id'].tolist() if 'tweet_id' in df.columns else None
+    # Distribution des thèmes
+    theme_dist = df['theme'].value_counts()
     
-    # Progress bar
-    progress_bar = st.progress(0)
-    status_text = st.empty()
+    # Distribution des sentiments
+    sentiment_dist = df['sentiment'].value_counts()
     
-    results = []
-    total = len(tweets)
+    # Distribution des urgences
+    urgence_dist = df['urgence'].value_counts()
     
-    for i, (tweet, tweet_id) in enumerate(zip(tweets, tweet_ids or [None] * total)):
-        try:
-            # Classifier le tweet
-            result = classifier.classify(tweet, tweet_id)
-            results.append(result.dict())
-            
-            # Mettre à jour la progression
-            progress = (i + 1) / total
-            progress_bar.progress(progress)
-            status_text.text(f"Classification: {i + 1}/{total} tweets ({progress:.1%})")
-            
-        except Exception as e:
-            logger.error(f"Erreur tweet {i}: {e}")
-            # Ajouter un résultat vide
-            results.append({
-                "is_reclamation": "NON",
-                "theme": "AUTRE",
-                "sentiment": "NEUTRE",
-                "urgence": "FAIBLE",
-                "type_incident": "AUTRE",
-                "confidence": 0.0,
-                "justification": f"Erreur: {str(e)}",
-                "tweet_id": tweet_id
-            })
+    # Confiance moyenne
+    avg_confidence = df['confidence'].mean()
     
-    progress_bar.empty()
-    status_text.empty()
-    
-    # Créer le DataFrame de résultats
-    results_df = pd.DataFrame(results)
-    
-    # Fusionner avec le DataFrame original
-    df_classified = pd.concat([df.reset_index(drop=True), results_df], axis=1)
-    
-    # Filtrer par confiance si demandé
-    if config.get('filter_low_confidence', False):
-        df_classified = df_classified[df_classified['confidence'] >= 0.7]
-        st.info(f"Filtrage appliqué: {len(df_classified)} tweets avec confiance ≥ 0.7")
-    
-    return df_classified
+    return {
+        'total_tweets': total_tweets,
+        'reclamations': reclamations,
+        'reclamation_rate': reclamation_rate,
+        'theme_dist': theme_dist,
+        'sentiment_dist': sentiment_dist,
+        'urgence_dist': urgence_dist,
+        'avg_confidence': avg_confidence
+    }
 
-
-def display_classification_metrics(df: pd.DataFrame):
-    """
-    Affiche les métriques de classification.
+def render_classification_dashboard(df, metrics):
+    """Affiche le tableau de bord de classification"""
     
-    Args:
-        df: DataFrame avec classifications
-    """
-    st.markdown("### 📊 Métriques de Classification")
+    # En-tête principal
+    st.markdown("""
+    <div class="main-header">
+        <h1>🧠 Classification LLM - FreeMobilaChat</h1>
+        <p>Analyse intelligente des tweets Free Mobile avec Intelligence Artificielle</p>
+    </div>
+    """, unsafe_allow_html=True)
     
+    # Métriques principales
     col1, col2, col3, col4 = st.columns(4)
     
     with col1:
-        total_reclamations = (df['is_reclamation'] == 'OUI').sum()
-        pct_reclamations = (total_reclamations / len(df)) * 100
-        st.markdown(f"""
-        <div class="metric-card">
-            <h3>{total_reclamations}</h3>
-            <p>Réclamations ({pct_reclamations:.1f}%)</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="Total Tweets",
+            value=f"{metrics['total_tweets']:,}",
+            delta=None
+        )
     
     with col2:
-        avg_confidence = df['confidence'].mean()
-        st.markdown(f"""
-        <div class="metric-card">
-            <h3>{avg_confidence:.2f}</h3>
-            <p>Confiance Moyenne</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="Réclamations",
+            value=f"{metrics['reclamations']:,}",
+            delta=f"{metrics['reclamation_rate']:.1f}%"
+        )
     
     with col3:
-        negative_sentiment = (df['sentiment'] == 'NEGATIF').sum()
-        pct_negative = (negative_sentiment / len(df)) * 100
-        st.markdown(f"""
-        <div class="metric-card">
-            <h3>{negative_sentiment}</h3>
-            <p>Sentiment Négatif ({pct_negative:.1f}%)</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.metric(
+            label="Confiance Moyenne",
+            value=f"{metrics['avg_confidence']:.2f}",
+            delta=None
+        )
     
     with col4:
-        critical_urgency = (df['urgence'] == 'CRITIQUE').sum()
-        high_urgency = (df['urgence'] == 'ELEVEE').sum()
-        urgent_total = critical_urgency + high_urgency
-        st.markdown(f"""
-        <div class="metric-card">
-            <h3>{urgent_total}</h3>
-            <p>Urgent/Critique</p>
-        </div>
-        """, unsafe_allow_html=True)
-
-
-def display_visualizations(df: pd.DataFrame):
-    """
-    Affiche les visualisations des résultats.
+        st.metric(
+            label="Mode Classification",
+            value="Fallback",
+            delta="Règles automatiques"
+        )
     
-    Args:
-        df: DataFrame avec classifications
-    """
-    st.markdown("### 📈 Visualisations")
+    st.markdown("---")
     
+    # Graphiques de distribution
     col1, col2 = st.columns(2)
     
     with col1:
-        # Distribution des thèmes
-        theme_counts = df['theme'].value_counts()
-        fig_theme = px.bar(
-            x=theme_counts.index,
-            y=theme_counts.values,
-            labels={'x': 'Thème', 'y': 'Nombre de tweets'},
-            title="Distribution des Thèmes",
-            color=theme_counts.values,
-            color_continuous_scale=['#CC0000', '#8B0000']
+        st.subheader("📊 Distribution des Thèmes")
+        fig_theme = px.pie(
+            values=metrics['theme_dist'].values,
+            names=metrics['theme_dist'].index,
+            color_discrete_sequence=px.colors.qualitative.Set3
         )
-        fig_theme.update_layout(showlegend=False)
+        fig_theme.update_traces(textposition='inside', textinfo='percent+label')
         st.plotly_chart(fig_theme, use_container_width=True)
-        
-        # Distribution des types d'incidents
-        incident_counts = df['type_incident'].value_counts()
-        fig_incident = px.pie(
-            values=incident_counts.values,
-            names=incident_counts.index,
-            title="Types d'Incidents",
-            color_discrete_sequence=px.colors.sequential.Reds_r
-        )
-        st.plotly_chart(fig_incident, use_container_width=True)
     
     with col2:
-        # Distribution sentiment
-        sentiment_counts = df['sentiment'].value_counts()
-        colors = {'NEGATIF': '#CC0000', 'NEUTRE': '#666666', 'POSITIF': '#28a745'}
+        st.subheader("😊 Distribution des Sentiments")
         fig_sentiment = px.bar(
-            x=sentiment_counts.index,
-            y=sentiment_counts.values,
-            labels={'x': 'Sentiment', 'y': 'Nombre de tweets'},
-            title="Distribution des Sentiments",
-            color=sentiment_counts.index,
-            color_discrete_map=colors
+            x=metrics['sentiment_dist'].index,
+            y=metrics['sentiment_dist'].values,
+            color=metrics['sentiment_dist'].index,
+            color_discrete_map={
+                'POSITIF': '#28a745',
+                'NEUTRE': '#6c757d',
+                'NEGATIF': '#dc3545'
+            }
         )
+        fig_sentiment.update_layout(showlegend=False, xaxis_title="Sentiment", yaxis_title="Nombre")
         st.plotly_chart(fig_sentiment, use_container_width=True)
-        
-        # Distribution urgence
-        urgence_counts = df['urgence'].value_counts()
-        fig_urgence = px.funnel(
-            y=urgence_counts.index,
-            x=urgence_counts.values,
-            title="Niveaux d'Urgence",
-            color=urgence_counts.index,
-            color_discrete_sequence=px.colors.sequential.Reds
+    
+    # Graphique des urgences
+    st.subheader("⚠️ Distribution des Niveaux d'Urgence")
+    col1, col2 = st.columns([2, 1])
+    
+    with col1:
+        fig_urgence = px.bar(
+            x=metrics['urgence_dist'].index,
+            y=metrics['urgence_dist'].values,
+            color=metrics['urgence_dist'].index,
+            color_discrete_map={
+                'CRITIQUE': '#dc3545',
+                'ELEVEE': '#fd7e14',
+                'MOYENNE': '#ffc107',
+                'FAIBLE': '#28a745'
+            }
         )
+        fig_urgence.update_layout(showlegend=False, xaxis_title="Niveau d'Urgence", yaxis_title="Nombre")
         st.plotly_chart(fig_urgence, use_container_width=True)
     
-    # Distribution de confiance
-    st.markdown("#### Distribution des Scores de Confiance")
-    fig_conf = px.histogram(
-        df,
-        x='confidence',
-        nbins=20,
-        title="Distribution des Scores de Confiance",
-        labels={'confidence': 'Score de Confiance', 'count': 'Fréquence'},
-        color_discrete_sequence=['#CC0000']
-    )
-    fig_conf.add_vline(
-        x=df['confidence'].mean(),
-        line_dash="dash",
-        line_color="black",
-        annotation_text=f"Moyenne: {df['confidence'].mean():.2f}"
-    )
-    st.plotly_chart(fig_conf, use_container_width=True)
+    with col2:
+        st.markdown("""
+        <div class="metric-card">
+            <h4>📈 Statistiques Clés</h4>
+            <p><strong>Réclamations:</strong> {:.1f}%</p>
+            <p><strong>Sentiment Négatif:</strong> {} tweets</p>
+            <p><strong>Urgence Élevée:</strong> {} tweets</p>
+            <p><strong>Confiance Moyenne:</strong> {:.2f}</p>
+        </div>
+        """.format(
+            metrics['reclamation_rate'],
+            metrics['sentiment_dist'].get('NEGATIF', 0),
+            metrics['urgence_dist'].get('ELEVEE', 0) + metrics['urgence_dist'].get('CRITIQUE', 0),
+            metrics['avg_confidence']
+        ), unsafe_allow_html=True)
 
-
-def display_sample_classifications(df: pd.DataFrame, n_samples: int = 10):
-    """
-    Affiche un échantillon de classifications.
+def render_classification_examples(df):
+    """Affiche des exemples de classification"""
+    st.subheader("🔍 Exemples de Classification")
     
-    Args:
-        df: DataFrame avec classifications
-        n_samples: Nombre d'échantillons à afficher
-    """
-    st.markdown("### 🔍 Échantillon de Classifications")
-    
-    # Filtrer les colonnes à afficher
-    display_cols = [
-        'text',
-        'is_reclamation',
-        'theme',
-        'sentiment',
-        'urgence',
-        'type_incident',
-        'confidence',
-        'justification'
-    ]
-    
-    # Prendre un échantillon aléatoire
-    sample_df = df[display_cols].sample(min(n_samples, len(df)))
-    
-    # Styler le DataFrame
-    def color_confidence(val):
-        if val >= 0.8:
-            color = '#28a745'  # Vert
-        elif val >= 0.6:
-            color = '#ffc107'  # Jaune
-        else:
-            color = '#CC0000'  # Rouge
-        return f'background-color: {color}; color: white'
-    
-    styled_df = sample_df.style.applymap(
-        color_confidence,
-        subset=['confidence']
-    )
-    
-    st.dataframe(styled_df, use_container_width=True, height=400)
-
-
-def export_results(df: pd.DataFrame):
-    """
-    Permet l'export des résultats.
-    
-    Args:
-        df: DataFrame avec classifications
-    """
-    st.markdown("### 💾 Export des Résultats")
-    
+    # Filtres
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        # Export CSV
-        csv_data = df.to_csv(index=False).encode('utf-8')
-        st.download_button(
-            label="📥 Télécharger CSV",
-            data=csv_data,
-            file_name=f"classifications_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
-            mime="text/csv"
+        selected_theme = st.selectbox(
+            "Filtrer par thème:",
+            ["Tous"] + list(df['theme'].unique())
         )
     
     with col2:
-        # Export JSON
-        json_data = df.to_json(orient='records', force_ascii=False, indent=2)
-        st.download_button(
-            label="📥 Télécharger JSON",
-            data=json_data,
-            file_name=f"classifications_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json",
-            mime="application/json"
+        selected_sentiment = st.selectbox(
+            "Filtrer par sentiment:",
+            ["Tous"] + list(df['sentiment'].unique())
         )
     
     with col3:
-        # Export Excel
-        from io import BytesIO
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='Classifications')
-        excel_data = output.getvalue()
-        st.download_button(
-            label="📥 Télécharger Excel",
-            data=excel_data,
-            file_name=f"classifications_{datetime.now().strftime('%Y%m%d_%H%M%S')}.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+        selected_reclamation = st.selectbox(
+            "Type de tweet:",
+            ["Tous", "Réclamations", "Informatifs"]
         )
+    
+    # Application des filtres
+    filtered_df = df.copy()
+    
+    if selected_theme != "Tous":
+        filtered_df = filtered_df[filtered_df['theme'] == selected_theme]
+    
+    if selected_sentiment != "Tous":
+        filtered_df = filtered_df[filtered_df['sentiment'] == selected_sentiment]
+    
+    if selected_reclamation == "Réclamations":
+        filtered_df = filtered_df[filtered_df['is_reclamation'] == 'OUI']
+    elif selected_reclamation == "Informatifs":
+        filtered_df = filtered_df[filtered_df['is_reclamation'] == 'NON']
+    
+    # Affichage des exemples
+    st.write(f"**{len(filtered_df)} tweets trouvés**")
+    
+    for idx, row in filtered_df.head(10).iterrows():
+        # Déterminer la classe CSS selon l'urgence
+        urgency_class = ""
+        if row['urgence'] == 'CRITIQUE':
+            urgency_class = "reclamation-high"
+        elif row['urgence'] == 'ELEVEE':
+            urgency_class = "reclamation-medium"
+        else:
+            urgency_class = "reclamation-low"
+        
+        st.markdown(f"""
+        <div class="classification-example {urgency_class}">
+            <h5>📝 Tweet #{row['tweet_id']}</h5>
+            <p><strong>Texte:</strong> {row['text_clean'][:200]}{'...' if len(row['text_clean']) > 200 else ''}</p>
+            <div style="display: flex; gap: 1rem; margin-top: 0.5rem;">
+                <span><strong>Réclamation:</strong> {row['is_reclamation']}</span>
+                <span><strong>Thème:</strong> {row['theme']}</span>
+                <span><strong>Sentiment:</strong> {row['sentiment']}</span>
+                <span><strong>Urgence:</strong> {row['urgence']}</span>
+                <span><strong>Confiance:</strong> {row['confidence']:.2f}</span>
+            </div>
+            <p style="margin-top: 0.5rem; font-style: italic;"><strong>Justification:</strong> {row['justification']}</p>
+        </div>
+        """, unsafe_allow_html=True)
 
+def render_data_table(df):
+    """Affiche le tableau de données complet"""
+    st.subheader("📋 Tableau de Données Complet")
+    
+    # Options d'affichage
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        show_columns = st.multiselect(
+            "Colonnes à afficher:",
+            options=df.columns.tolist(),
+            default=['tweet_id', 'text_clean', 'is_reclamation', 'theme', 'sentiment', 'urgence', 'confidence']
+        )
+    
+    with col2:
+        max_rows = st.slider("Nombre de lignes à afficher:", 10, len(df), 50)
+    
+    # Affichage du tableau
+    display_df = df[show_columns].head(max_rows)
+    st.dataframe(display_df, use_container_width=True)
+    
+    # Bouton de téléchargement
+    csv_data = df.to_csv(index=False, encoding='utf-8')
+    st.download_button(
+        label="📥 Télécharger le dataset complet",
+        data=csv_data,
+        file_name=f"free_tweets_classified_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
+        mime="text/csv"
+    )
 
 def main():
     """Fonction principale"""
     
-    # Charger le CSS
-    load_custom_css()
+    # Chargement des données
+    df = load_classification_results()
     
-    # Afficher le header
-    render_header()
-    
-    # Vérifier que le classificateur est disponible
-    if not CLASSIFIER_AVAILABLE:
-        st.error("❌ Le module de classification n'est pas disponible. Vérifiez l'installation.")
+    if df is None:
+        st.error("Impossible de charger les résultats de classification.")
+        st.info("Exécutez d'abord le script d'entraînement: `python backend/train_simple_classifier.py`")
         return
     
-    # Sidebar avec configuration
-    config = render_sidebar()
+    # Calcul des métriques
+    metrics = create_classification_metrics(df)
     
-    # Zone d'upload
-    st.markdown('<div class="upload-container">', unsafe_allow_html=True)
-    st.markdown("### 📤 Upload de Fichier CSV")
-    st.markdown("Uploadez un fichier CSV contenant une colonne **`text`** avec les tweets à classifier")
+    # Interface utilisateur
+    tab1, tab2, tab3, tab4 = st.tabs(["📊 Dashboard", "🔍 Exemples", "📋 Données", "📄 Rapport"])
     
-    uploaded_file = st.file_uploader(
-        "Choisir un fichier CSV",
-        type=['csv'],
-        help="Le fichier doit contenir au minimum une colonne 'text' avec les tweets"
-    )
-    st.markdown('</div>', unsafe_allow_html=True)
+    with tab1:
+        render_classification_dashboard(df, metrics)
     
-    if uploaded_file is not None:
-        # Charger et valider le CSV
-        df = load_and_validate_csv(uploaded_file)
+    with tab2:
+        render_classification_examples(df)
+    
+    with tab3:
+        render_data_table(df)
+    
+    with tab4:
+        st.subheader("📄 Rapport d'Analyse Complet")
+        report_content = load_analysis_report()
+        if report_content:
+            st.markdown(report_content)
+        else:
+            st.error("Rapport d'analyse non trouvé.")
+    
+    # Sidebar avec informations
+    with st.sidebar:
+        st.header("ℹ️ Informations")
+        st.info(f"""
+        **Dataset analysé:** {len(df)} tweets
         
-        if df is not None:
-            # Afficher un aperçu
-            with st.expander("👀 Aperçu des Données", expanded=False):
-                st.dataframe(df.head(10), use_container_width=True)
-            
-            # Bouton de lancement de classification
-            if st.button("🚀 Lancer la Classification", type="primary"):
-                with st.spinner("⏳ Classification en cours..."):
-                    try:
-                        # Initialiser le classificateur
-                        classifier = TweetClassifier(
-                            model_name=config['model'],
-                            api_key=config.get('api_key'),
-                            temperature=config['temperature'],
-                            max_tokens=config['max_tokens']
-                        )
-                        
-                        # Classifier les tweets
-                        df_classified = classify_tweets(df, classifier, config)
-                        
-                        # Sauvegarder dans session state
-                        st.session_state['df_classified'] = df_classified
-                        
-                        st.success(f"✅ Classification terminée: {len(df_classified)} tweets classifiés")
-                        
-                    except Exception as e:
-                        st.error(f"❌ Erreur lors de la classification: {e}")
-                        logger.error(f"Erreur classification: {e}", exc_info=True)
-            
-            # Afficher les résultats si disponibles
-            if 'df_classified' in st.session_state:
-                df_classified = st.session_state['df_classified']
-                
-                # Métriques
-                display_classification_metrics(df_classified)
-                
-                # Visualisations
-                display_visualizations(df_classified)
-                
-                # Échantillon
-                display_sample_classifications(df_classified)
-                
-                # Export
-                export_results(df_classified)
-
+        **Réclamations détectées:** {metrics['reclamations']} ({metrics['reclamation_rate']:.1f}%)
+        
+        **Confiance moyenne:** {metrics['avg_confidence']:.2f}
+        
+        **Mode de classification:** Fallback (Règles automatiques)
+        """)
+        
+        st.header("🔧 Actions")
+        if st.button("🔄 Recharger les données"):
+            st.rerun()
+        
+        if st.button("📊 Nouvelle analyse"):
+            st.info("Utilisez le script d'entraînement pour une nouvelle analyse")
 
 if __name__ == "__main__":
     main()
-
