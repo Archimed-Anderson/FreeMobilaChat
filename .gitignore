@@ -215,7 +215,7 @@ yarn-debug.log*
 *.zip
 *.rar
 
-# Large data files
+# Large data files - NEVER commit these
 *.csv
 *.xlsx
 *.json
@@ -223,6 +223,18 @@ yarn-debug.log*
 !*_sample.*
 !requirements*.txt
 !package*.json
+!dataset_statistics.json
+
+# Data directories - NEVER commit
+data/raw/**
+data/processed/**
+data/training/**
+data/fast_graphrag/**
+data/fast_graphrag_test/**
+backend/data/raw/**
+backend/data/processed/**
+backend/data/training/**
+backend/data/results/**
 
 # Model files
 *.pkl
