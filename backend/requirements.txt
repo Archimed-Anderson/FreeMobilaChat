@@ -16,6 +16,7 @@ psycopg2-binary==2.9.9  # PostgreSQL adapter (optional)
 # Data Processing
 pandas>=2.2.0  # Updated for compatibility with numpy 2.x
 numpy>=2.0.0,<3.0.0  # Updated for Fast-GraphRAG and scikit-learn compatibility
+openpyxl>=3.1.0  # Pour support Excel (.xlsx)
 
 # LLM Integration
 openai>=1.60.0
@@ -86,6 +87,11 @@ seaborn>=0.13.0  # Updated for compatibility
 
 # Embeddings & NLP
 sentence-transformers>=2.2.0
+textblob>=0.18.0  # Pour analyse de sentiment
+nltk>=3.9  # Natural Language Toolkit
+langchain>=0.3.0  # LLM framework
+langchain-community>=0.3.0  # Community integrations
+faiss-cpu>=1.9.0  # Vector similarity search
 
 # Fast-GraphRAG Dependencies
 fast-graphrag>=0.0.5  # Main Fast-GraphRAG package
