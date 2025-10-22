@@ -1,60 +1,58 @@
-# Tweet Dataset Documentation
+# Répertoire de Données - FreeMobilaChat
 
-## Data Source and Extraction
-- **Original file**: `data/raw/free tweet export.xlsx`
-- **Sheet name**: "Tweets nettoyés uniques - LLM"
-- **Extraction date**: 2025-10-11 21:07:59
-- **Processing script**: `data_preparation.py`
+## Important
 
-## Dataset Statistics
-- **Total tweets (original)**: 3,764
-- **Total tweets (after cleaning)**: 3,764
-- **Unique authors**: 2,660
-- **Date range**: 2020-12-28 to 2025-06-17
+Ce répertoire contient les données d'entraînement et de test pour le projet FreeMobilaChat. Les fichiers de données ne sont **pas** versionnés dans Git pour des raisons de taille et de confidentialité.
 
-## Data Cleaning Operations Applied
-1. **Empty text removal**: 0 tweets removed
-2. **Duplicate removal**: 0 duplicate tweets removed
-3. **Text truncation**: 13 tweets truncated (>500 chars)
-4. **Date standardization**: 0 invalid dates fixed
-5. **Author extraction**: Usernames extracted from Twitter URLs
-6. **Sequential ID assignment**: 6-digit zero-padded tweet IDs assigned
+## Structure des Données
 
-## Column Descriptions
+```
+data/
+├── raw/                    # Données brutes (CSV, Excel)
+│   └── [Ajoutez vos fichiers CSV/Excel ici]
+│
+├── processed/              # Données nettoyées
+│
+├── training/               # Jeux de données d'entraînement
+│   ├── train_dataset.csv
+│   ├── validation_dataset.csv
+│   └── test_dataset.csv
+│
+├── samples/                # Échantillons de données pour tests
+│   └── sample_tweets.csv
+│
+└── fast_graphrag/          # Cache GraphRAG
+```
 
-| Column | Data Type | Description | Example |
-|--------|-----------|-------------|---------|
-| `tweet_id` | string | Sequential 6-digit identifier | "000001" |
-| `author` | string | Twitter username (extracted from URL) | "Freebox" |
-| `text` | string | Tweet content (cleaned, max 500 chars) | "RT : retrouvez désormais..." |
-| `date` | datetime | Tweet creation timestamp (UTC) | "2021-05-14 10:56:22+00:00" |
-| `url` | string | Original Twitter URL | "https://twitter.com/Freebox/status/..." |
+## Fichiers Requis pour l'Entraînement
 
-## Text Statistics
-- **Minimum length**: 1 characters
-- **Maximum length**: 503 characters
-- **Average length**: 152.9 characters
-- **Median length**: 152.0 characters
+Pour entraîner les modèles, vous devez avoir dans `data/training/` :
 
-## Data Quality Notes
-- All tweets contain non-empty text content
-- No duplicate tweets based on text content
-- All URLs are valid Twitter/X.com links
-- Dates are standardized to UTC timezone
-- Text content has been cleaned of control characters and excessive punctuation
+1. **train_dataset.csv** - Ensemble d'entraînement (70% des données)
+2. **validation_dataset.csv** - Ensemble de validation (15% des données)
+3. **test_dataset.csv** - Ensemble de test (15% des données)
 
-## Files Generated
-- **Main dataset**: `data/raw/free_tweet_export.csv` - Complete cleaned dataset
-- **Sample dataset**: `data/samples/sample_tweets.csv` - Random sample of 100 tweets for testing
+### Format des Fichiers CSV
 
-## Usage Recommendations
-- Use the main dataset for full analysis
-- Use the sample dataset for testing and development
-- Consider the date range when analyzing temporal patterns
-- Author field may contain "unknown" for URLs that couldn't be parsed
+Colonnes requises :
+- `tweet_id` : Identifiant unique du tweet
+- `author` : Auteur du tweet
+- `text` : Contenu du tweet
+- `date` : Date de publication
+- `sentiment` : Sentiment (positif, neutre, negatif)
+- `category` : Catégorie (sav, technique, commercial, autre)
+- `priority` : Priorité (haute, moyenne, basse)
 
-## Data Format
-- **Encoding**: UTF-8
-- **Delimiter**: Comma (,)
-- **Quote character**: Double quote (")
-- **Header**: First row contains column names
+## Note pour Streamlit Cloud
+
+Les fichiers de données locaux ne sont **pas nécessaires** pour le déploiement sur Streamlit Cloud. L'application peut fonctionner sans ces fichiers et permettra aux utilisateurs de télécharger leurs propres données.
+
+## Ajout de Nouvelles Données
+
+1. Placez vos fichiers CSV/Excel dans `data/raw/`
+2. Les fichiers seront automatiquement ignorés par Git (`.gitignore`)
+3. Utilisez l'interface Streamlit pour analyser les données
+
+---
+
+**Note** : Ne jamais commiter de fichiers `.csv`, `.xlsx`, `.db`, `.pkl` dans le repository Git.
