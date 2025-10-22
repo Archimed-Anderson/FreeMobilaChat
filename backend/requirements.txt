@@ -84,6 +84,7 @@ scipy>=1.14.1  # Required by Fast-GraphRAG
 kiwisolver>=1.4.5  # Force newer version to avoid build errors
 matplotlib>=3.9.0  # Updated for better dependency resolution
 seaborn>=0.13.0  # Updated for compatibility
+ydata-profiling>=4.10.0  # Pour analyse automatique de données
 
 # Embeddings & NLP
 sentence-transformers>=2.2.0
