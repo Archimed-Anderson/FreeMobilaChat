@@ -22,6 +22,7 @@ from .services.csv_processor import CSVProcessor
 from .services.llm_analyzer import LLMAnalyzer
 from .services.kpi_calculator import KPICalculator
 from .services.chatbot_service import ChatbotService
+from .services.tweet_classifier import TweetClassifier, ClassificationResult
 
 # Import new modernized components
 from .config import config  # Import from backend/app/config.py (not config_pkg)
@@ -1030,6 +1031,209 @@ async def initialize_chatbot():
             status_code=500,
             detail=f"Erreur lors de l'initialisation: {str(e)}"
         )
+
+# CLASSIFICATION ENDPOINTS - Tweet Classification with LLM
+
+class ClassifyTweetRequest(BaseModel):
+    """Request model for single tweet classification"""
+    text: str = Field(min_length=1, max_length=500, description="Tweet text to classify")
+    model_name: str = Field(default="gpt-4", description="LLM model to use")
+    llm_provider: str = Field(default="openai", description="LLM provider")
+    tweet_id: Optional[str] = Field(None, description="Optional tweet ID")
+
+class ClassifyBatchRequest(BaseModel):
+    """Request model for batch classification"""
+    tweets: List[str] = Field(description="List of tweets to classify")
+    model_name: str = Field(default="gpt-4", description="LLM model to use")
+    llm_provider: str = Field(default="openai", description="LLM provider")
+
+@app.post("/api/classify/single")
+async def classify_single_tweet(request: ClassifyTweetRequest):
+    """
+    Classify a single tweet using LLM
+    
+    Args:
+        request: Classification request with tweet text and model configuration
+        
+    Returns:
+        Classification result with theme, sentiment, urgency, and justification
+    """
+    try:
+        logger.info(f"🔍 Classifying single tweet with {request.llm_provider}/{request.model_name}")
+        
+        # Get API key from environment
+        api_key = None
+        if request.llm_provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+        elif request.llm_provider == "mistral":
+            api_key = os.getenv("MISTRAL_API_KEY")
+        elif request.llm_provider == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+        elif request.llm_provider == "ollama":
+            api_key = os.getenv("OLLAMA_API_KEY")  # Optional for Ollama
+        
+        # Initialize classifier
+        classifier = TweetClassifier(
+            model_name=request.model_name,
+            api_key=api_key
+        )
+        
+        # Classify the tweet
+        result = classifier.classify(
+            tweet=request.text,
+            tweet_id=request.tweet_id
+        )
+        
+        logger.info(f"✅ Classification complete: {result.theme} / {result.sentiment}")
+        
+        return {
+            "success": True,
+            "classification": result.dict(),
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Classification error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Classification failed: {str(e)}"
+        )
+
+@app.post("/api/classify/batch")
+async def classify_batch_tweets(
+    file: UploadFile = File(...),
+    model_name: str = Form(default="gpt-4"),
+    llm_provider: str = Form(default="openai"),
+    max_tweets: int = Form(default=100)
+):
+    """
+    Classify multiple tweets from CSV file
+    
+    Args:
+        file: CSV file with tweets (must have 'text' column)
+        model_name: LLM model to use
+        llm_provider: LLM provider (openai, mistral, anthropic, ollama)
+        max_tweets: Maximum number of tweets to classify
+        
+    Returns:
+        Batch classification results
+    """
+    try:
+        logger.info(f"📋 Starting batch classification with {llm_provider}/{model_name}")
+        
+        # Validate file
+        if not file.filename.endswith('.csv'):
+            raise ValidationError("Only CSV files are supported")
+        
+        # Read CSV file
+        content = await file.read()
+        import io
+        import pandas as pd
+        
+        df = pd.read_csv(io.BytesIO(content))
+        
+        # Check for text column
+        if 'text' not in df.columns:
+            raise ValidationError("CSV must contain 'text' column")
+        
+        # Limit tweets
+        tweets = df['text'].dropna().head(max_tweets).tolist()
+        tweet_ids_list: Optional[List[Optional[str]]] = None
+        if 'tweet_id' in df.columns:
+            tweet_ids_list = [str(tid) if tid is not None else None for tid in df['tweet_id'].head(max_tweets).tolist()]
+        
+        logger.info(f"📊 Processing {len(tweets)} tweets")
+        
+        # Get API key
+        api_key = None
+        if llm_provider == "openai":
+            api_key = os.getenv("OPENAI_API_KEY")
+        elif llm_provider == "mistral":
+            api_key = os.getenv("MISTRAL_API_KEY")
+        elif llm_provider == "anthropic":
+            api_key = os.getenv("ANTHROPIC_API_KEY")
+        elif llm_provider == "ollama":
+            api_key = os.getenv("OLLAMA_API_KEY")
+        
+        # Initialize classifier
+        classifier = TweetClassifier(
+            model_name=model_name,
+            api_key=api_key
+        )
+        
+        # Classify batch
+        results = classifier.batch_classify(
+            tweets=tweets,
+            tweet_ids=tweet_ids_list
+        )
+        
+        # Convert to dict
+        results_dict = [result.dict() for result in results]
+        
+        logger.info(f"✅ Batch classification complete: {len(results)} tweets classified")
+        
+        return {
+            "success": True,
+            "total_tweets": len(tweets),
+            "classified_tweets": len(results),
+            "results": results_dict,
+            "timestamp": datetime.now(UTC).isoformat()
+        }
+        
+    except Exception as e:
+        logger.error(f"❌ Batch classification error: {e}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Batch classification failed: {str(e)}"
+        )
+
+@app.get("/api/classify/models")
+async def list_classification_models():
+    """
+    List available classification models and providers
+    
+    Returns:
+        Available models and their configurations
+    """
+    return {
+        "providers": {
+            "openai": {
+                "models": ["gpt-4", "gpt-4o-mini", "gpt-3.5-turbo"],
+                "default": "gpt-4",
+                "configured": os.getenv("OPENAI_API_KEY") is not None
+            },
+            "mistral": {
+                "models": ["mistral-small-latest", "mistral-medium-latest", "mistral-large-latest"],
+                "default": "mistral-small-latest",
+                "configured": os.getenv("MISTRAL_API_KEY") is not None
+            },
+            "anthropic": {
+                "models": ["claude-3-opus-20240229", "claude-3-sonnet-20240229", "claude-3-haiku-20240307"],
+                "default": "claude-3-haiku-20240307",
+                "configured": os.getenv("ANTHROPIC_API_KEY") is not None
+            },
+            "ollama": {
+                "models": ["llama3.1:8b", "llama2", "mistral"],
+                "default": "llama3.1:8b",
+                "configured": True,  # Ollama doesn't require API key
+                "base_url": os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+            },
+            "fallback": {
+                "models": ["rule-based"],
+                "default": "rule-based",
+                "configured": True,
+                "description": "Rule-based classification fallback (no LLM required)"
+            }
+        },
+        "classification_taxonomy": {
+            "is_reclamation": ["OUI", "NON"],
+            "theme": ["FIBRE", "MOBILE", "TV", "FACTURE", "SAV", "RESEAU", "AUTRE"],
+            "sentiment": ["NEGATIF", "NEUTRE", "POSITIF"],
+            "urgence": ["FAIBLE", "MOYENNE", "ELEVEE", "CRITIQUE"],
+            "type_incident": ["PANNE", "LENTEUR", "FACTURATION", "PROCESSUS_SAV", "INFO", "AUTRE"]
+        },
+        "default_provider": os.getenv("DEFAULT_LLM_PROVIDER", "openai")
+    }
 
 # Error handlers
 @app.exception_handler(HTTPException)

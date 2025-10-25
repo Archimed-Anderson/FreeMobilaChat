@@ -71,6 +71,9 @@ langchain-community>=0.0.10
 openai>=1.0.0
 anthropic>=0.3.0
 
+# Data Profiling and Analysis
+ydata-profiling>=4.10.0
+
 # Optional: Local LLM
 # ollama>=0.1.0
 

@@ -21,6 +21,19 @@ import re
 import warnings
 warnings.filterwarnings('ignore')
 
+# Imports des nouveaux services
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services'))
+
+try:
+    from services.tweet_classifier import TweetClassifier, ClassificationResult
+    from services.llm_analysis_engine import LLMAnalysisEngine, DatasetProfile
+    CLASSIFIER_AVAILABLE = True
+except ImportError as e:
+    print(f"Erreur import classificateur: {e}")
+    CLASSIFIER_AVAILABLE = False
+
 # Imports conditionnels pour éviter les erreurs
 try:
     from textblob import TextBlob
@@ -366,6 +379,8 @@ def _render_sidebar_config():
         st.markdown("### Statut des Bibliothèques")
         
         libraries = [
+            ("Classificateur IA", CLASSIFIER_AVAILABLE),
+            ("Moteur LLM", CLASSIFIER_AVAILABLE),
             ("TextBlob", TEXTBLOB_AVAILABLE),
             ("NLTK", NLTK_AVAILABLE),
             ("Scikit-learn", SKLEARN_AVAILABLE),
@@ -376,7 +391,7 @@ def _render_sidebar_config():
         ]
         
         for lib_name, available in libraries:
-            status = "" if available else ""
+            status = "✅" if available else "❌"
             st.markdown(f"{status} {lib_name}")
 
 def _render_multiple_upload_zone():
@@ -438,7 +453,52 @@ def _handle_multiple_file_analysis(uploaded_files):
         _render_global_summary(all_results)
 
 def analyze_csv(uploaded_file, df: pd.DataFrame) -> Dict[str, Any]:
-    """Analyse un fichier CSV et retourne les résultats"""
+    """Analyse un fichier CSV avec le moteur LLM intelligent"""
+    
+    filename = uploaded_file.name
+    file_size = uploaded_file.size
+    
+    # Initialisation du moteur d'analyse LLM
+    if CLASSIFIER_AVAILABLE:
+        try:
+            # Configuration du LLM depuis la session
+            llm_provider = st.session_state.llm_config.get('provider', 'fallback')
+            model = st.session_state.llm_config.get('model', 'llama2')
+            
+            # Création du moteur d'analyse
+            analysis_engine = LLMAnalysisEngine(llm_provider=llm_provider, model=model)
+            
+            # Analyse complète avec le moteur LLM
+            analysis_result = analysis_engine.analyze_dataset(df, filename)
+            
+            # Classification des tweets si c'est un dataset de tweets
+            if analysis_result['profile']['data_type'] == 'SOCIAL_MEDIA':
+                classifier = TweetClassifier(llm_provider=llm_provider)
+                text_column = 'text' if 'text' in df.columns else 'text_clean'
+                if text_column in df.columns:
+                    # Classification d'un échantillon pour les performances
+                    sample_size = min(100, len(df))
+                    sample_df = df.sample(n=sample_size, random_state=42)
+                    classifications = classifier.batch_classify(sample_df[text_column].tolist())
+                    
+                    # Ajout des classifications à l'analyse
+                    analysis_result['tweet_classifications'] = {
+                        'sample_size': sample_size,
+                        'classifications': [c.to_dict() for c in classifications]
+                    }
+            
+            return analysis_result
+            
+        except Exception as e:
+            logger.error(f"Erreur moteur LLM: {e}")
+            # Fallback vers l'ancienne méthode
+            return _analyze_csv_fallback(uploaded_file, df)
+    else:
+        # Fallback vers l'ancienne méthode
+        return _analyze_csv_fallback(uploaded_file, df)
+
+def _analyze_csv_fallback(uploaded_file, df: pd.DataFrame) -> Dict[str, Any]:
+    """Méthode de fallback pour l'analyse CSV"""
     
     filename = uploaded_file.name
     file_size = uploaded_file.size
@@ -756,9 +816,110 @@ def detect_anomalies(df: pd.DataFrame) -> Dict[str, Any]:
     return anomalies
 
 def _render_file_analysis_result(result: Dict[str, Any], df: pd.DataFrame, filename: str):
-    """Affiche les résultats d'analyse pour un fichier"""
+    """Affiche les résultats d'analyse pour un fichier avec le nouveau moteur LLM"""
     
     st.markdown(f"### <i class='fas fa-file-csv'></i> {filename}", unsafe_allow_html=True)
+    
+    # Vérification du format de résultat (nouveau vs ancien)
+    if 'profile' in result:
+        # Nouveau format avec moteur LLM
+        _render_llm_analysis_result(result, df, filename)
+    else:
+        # Ancien format (fallback)
+        _render_fallback_analysis_result(result, df, filename)
+
+def _render_llm_analysis_result(result: Dict[str, Any], df: pd.DataFrame, filename: str):
+    """Affiche les résultats du moteur LLM"""
+    
+    profile = result['profile']
+    kpis = result['kpis']
+    
+    # Métriques principales
+    col1, col2, col3, col4, col5 = st.columns(5)
+    
+    with col1:
+        st.metric("Lignes", f"{kpis['basic']['row_count']:,}")
+    
+    with col2:
+        st.metric("Colonnes", kpis['basic']['column_count'])
+    
+    with col3:
+        st.metric("Type", profile['data_type'])
+    
+    with col4:
+        st.metric("Qualité", f"{profile['quality_score']:.2f}")
+    
+    with col5:
+        st.metric("Taille", f"{result.get('file_size', 0) / 1024:.1f} KB")
+    
+    # Profil du dataset
+    st.markdown("#### <i class='fas fa-info-circle'></i> Profil du Dataset", unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="result-card">
+            <h4>Caractéristiques</h4>
+            <p><strong>Type:</strong> {profile['data_type']}</p>
+            <p><strong>Taille:</strong> {profile['size_category']}</p>
+            <p><strong>Score qualité:</strong> {profile['quality_score']:.2f}/1.0</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        column_types = profile['column_types']
+        st.markdown(f"""
+        <div class="result-card">
+            <h4>Types de Colonnes</h4>
+            <p><strong>Numériques:</strong> {len(column_types['numeric'])}</p>
+            <p><strong>Textuelles:</strong> {len(column_types['textual'])}</p>
+            <p><strong>Catégorielles:</strong> {len(column_types['categorical'])}</p>
+            <p><strong>Temporelles:</strong> {len(column_types['temporal'])}</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    # Insights narratifs
+    st.markdown("#### <i class='fas fa-brain'></i> Insights Narratifs", unsafe_allow_html=True)
+    st.markdown(f"""
+    <div class="insight-card">
+        <div class="insight-description">
+            {result['insights']}
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Recommandations
+    if 'recommendations' in result and result['recommendations']:
+        st.markdown("#### <i class='fas fa-lightbulb'></i> Recommandations", unsafe_allow_html=True)
+        
+        for i, rec in enumerate(result['recommendations'][:5], 1):
+            st.markdown(f"""
+            <div class="insight-card">
+                <div class="insight-title">{i}. {rec}</div>
+            </div>
+            """, unsafe_allow_html=True)
+    
+    # Classification des tweets si disponible
+    if 'tweet_classifications' in result:
+        _render_tweet_classifications(result['tweet_classifications'])
+    
+    # Anomalies
+    if 'anomalies' in result and result['anomalies']:
+        _render_anomalies_llm(result['anomalies'])
+    
+    # Synthèse
+    if 'synthesis' in result:
+        st.markdown("#### <i class='fas fa-file-alt'></i> Synthèse Structurée", unsafe_allow_html=True)
+        st.markdown(result['synthesis'])
+    
+    # Visualisations
+    _render_visualizations(df, filename)
+    
+    st.markdown("---")
+
+def _render_fallback_analysis_result(result: Dict[str, Any], df: pd.DataFrame, filename: str):
+    """Affiche les résultats de fallback (ancien format)"""
     
     # Métriques de base
     kpis = result['kpis']
@@ -818,6 +979,63 @@ def _render_file_analysis_result(result: Dict[str, Any], df: pd.DataFrame, filen
     _render_visualizations(df, filename)
     
     st.markdown("---")
+
+def _render_tweet_classifications(tweet_classifications: Dict[str, Any]):
+    """Affiche les classifications de tweets"""
+    
+    st.markdown("#### <i class='fas fa-twitter'></i> Classification des Tweets", unsafe_allow_html=True)
+    
+    classifications = tweet_classifications['classifications']
+    sample_size = tweet_classifications['sample_size']
+    
+    # Statistiques de classification
+    reclamations = sum(1 for c in classifications if c['is_reclamation'] == 'OUI')
+    reclamation_rate = (reclamations / len(classifications)) * 100 if classifications else 0
+    
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.metric("Échantillon", f"{sample_size:,}")
+    
+    with col2:
+        st.metric("Réclamations", f"{reclamations} ({reclamation_rate:.1f}%)")
+    
+    with col3:
+        avg_confidence = np.mean([c['confidence'] for c in classifications]) if classifications else 0
+        st.metric("Confiance Moy.", f"{avg_confidence:.2f}")
+    
+    with col4:
+        themes = [c['theme'] for c in classifications]
+        unique_themes = len(set(themes))
+        st.metric("Thèmes", unique_themes)
+    
+    # Distribution des thèmes
+    theme_counts = {}
+    for c in classifications:
+        theme = c['theme']
+        theme_counts[theme] = theme_counts.get(theme, 0) + 1
+    
+    if theme_counts:
+        st.markdown("**Distribution des Thèmes:**")
+        for theme, count in sorted(theme_counts.items(), key=lambda x: x[1], reverse=True):
+            percentage = (count / len(classifications)) * 100
+            st.markdown(f"- **{theme}:** {count} tweets ({percentage:.1f}%)")
+
+def _render_anomalies_llm(anomalies: Dict[str, Any]):
+    """Affiche les anomalies détectées par le moteur LLM"""
+    
+    st.markdown("#### <i class='fas fa-exclamation-triangle'></i> Anomalies Détectées", unsafe_allow_html=True)
+    
+    if anomalies.get('outliers'):
+        st.warning(f"**Outliers détectés:** {len(anomalies['outliers'])} colonnes affectées")
+    
+    if anomalies.get('missing_patterns'):
+        missing = anomalies['missing_patterns']
+        st.warning(f"**Valeurs manquantes:** {missing.get('columns_affected', 0)} colonnes affectées")
+    
+    if anomalies.get('data_inconsistencies'):
+        inconsistencies = anomalies['data_inconsistencies']
+        st.warning(f"**Incohérences:** {len(inconsistencies)} problèmes détectés")
 
 def _render_visualizations(df: pd.DataFrame, filename: str):
     """Génère des visualisations pour le dataset"""

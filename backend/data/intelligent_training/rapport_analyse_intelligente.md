@@ -1,81 +1,78 @@
 # Rapport d'Analyse Intelligente - FreeMobilaChat
 
-**Date**: 2025-10-22 23:15:41
-**Fichier**: free_tweet_export
-**Mode**: Fallback (Classification par règles)
+**Date**: 2025-10-23 07:04:15
+**Fichier**: sample_tweets
 
 ---
 
 ## 1. Vue d'Ensemble
 
+- **Domaine identifié**: social_media_tweets
 - **Nombre de lignes**: 100
-- **Nombre de colonnes**: 6
-- **Score de qualité global**: 50/100
+- **Nombre de colonnes**: 5
+- **Score de qualité global**: 100.0/100
 
-## 2. Résumé Exécutif
+## 2. Résumé Exécutif (Généré par IA)
 
-Analyse automatique des tweets Free Mobile avec classification par règles.
-Dataset traité avec succès en mode fallback.
+Dataset de 100 entrées dans le domaine social_media_tweets
 
-## 3. Résultats de Classification
+## 3. Structure des Données
+
+### Types de Colonnes
+
+- **Textual**: author
+- **Identifier**: tweet_id, text, date, url
+
+## 4. KPI Dynamiques
+
+### KPI Globaux
+
+- **Taille mémoire**: 0.07 MB
+- **Valeurs manquantes**: 0.00%
+
+## 5. Résultats de Classification
 
 - **Tweets classifiés**: 100
-- **Réclamations détectées**: 24 (24.0%)
+- **Réclamations détectées**: 0 (0.0%)
 - **Confiance moyenne**: 0.60
 
 ### Distribution des Thèmes
 
-- AUTRE: 50
-- FIBRE: 41
-- MOBILE: 3
-- RESEAU: 2
-- TV: 2
-- FACTURE: 1
+- AUTRE: 82
+- FIBRE: 16
+- TV: 1
 - SAV: 1
 
 ### Distribution des Sentiments
 
-- NEUTRE: 75
-- NEGATIF: 13
-- POSITIF: 12
+- NEUTRE: 100
 
-## 4. Exemples de Classification
+## 6. Insights Clés (Générés par IA)
 
-### Exemples de Réclamations
-- **Tweet**: bonsoir, j'ai toujours des gros problèmes avec les services télé sur ma freebox. la panne se poursui...
-  - Thème: FIBRE, Sentiment: NEGATIF, Urgence: MOYENNE
-  - Justification: Classification automatique par règles (fallback)
+1. Qualité globale des données: 100.0/100
+2. Taux de complétude: 100.0%
+3. Présence d'anomalies: Non
 
-- **Tweet**: depuis que je suis chez j’ai tellement de bug putain les coupures de tv et internet c’est hallucinan...
-  - Thème: FIBRE, Sentiment: NEGATIF, Urgence: MOYENNE
-  - Justification: Classification automatique par règles (fallback)
+## 7. Recommandations
 
-- **Tweet**: étant donné qu'après presque 2 mois sans internet toujours rien n'est fait je me demandais qui est c...
-  - Thème: FIBRE, Sentiment: POSITIF, Urgence: MOYENNE
-  - Justification: Classification automatique par règles (fallback)
+1. Nettoyer les valeurs manquantes
+2. Vérifier les anomalies détectées
 
-### Exemples de Tweets Informatifs
-- **Tweet**: salut , 10 coupures de fibre depuis le début de l'année, dont 2 en 3 jours ! c'est inacceptable. j'a...
-  - Thème: FIBRE, Sentiment: NEUTRE
+## 8. Qualité des Données
 
-- **Tweet**: on fait comment pour vous joindre qd on est plus client?? le code barre de retour colis n est pas ac...
-  - Thème: AUTRE, Sentiment: NEUTRE
+- **Complétude**: 100.0/100
+- **Unicité**: 100.0/100
+- **Consistance**: 100.0/100
+- **Score global**: 100.0/100
 
+## 10. Statistiques du Dataset Final
 
-## 5. Statistiques Finales
-
-- **Total de tweets**: 100
-- **Réclamations**: 24 (24.0%)
-- **Sentiment Négatif**: 13
-- **Sentiment Neutre**: 75
-- **Sentiment Positif**: 12
-
-## 6. Recommandations
-
-1. Le mode fallback fonctionne correctement
-2. Pour une meilleure précision, configurez une clé API OpenAI/Anthropic
-3. Les résultats sont cohérents avec les règles définies
+- **Total de tweets**: 20
+- **Réclamations**: 6 (30.0%)
+- **Sentiment Négatif**: 3
+- **Sentiment Neutre**: 16
+- **Sentiment Positif**: 1
 
 ---
 
-*Rapport généré automatiquement par le pipeline d'analyse intelligente simplifié*
+*Rapport généré automatiquement par le pipeline d'analyse intelligente*

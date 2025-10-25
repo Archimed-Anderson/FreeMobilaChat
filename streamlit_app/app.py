@@ -1,20 +1,20 @@
 """
-FreeMobilaChat - Application d'Analyse de Données Twitter
-Interface utilisateur moderne pour l'analyse de sentiment et de classification
-Développé dans le cadre d'un mémoire de master en Data Science
+FreeMobilaChat - Twitter Data Analysis Application
+Modern user interface for sentiment analysis and classification
+Developed as part of a Master's thesis in Data Science
 """
 
 import streamlit as st
 
 # Configuration
 st.set_page_config(
-    page_title="FreeMobilaChat - Analyse IA",
-    page_icon=":chart_with_upwards_trend:",
+    page_title="FreeMobilaChat - AI Analysis",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
 
-# Chargement des styles CSS personnalisés
+# Custom CSS styles loading
 def load_css():
     st.markdown("""
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,7 +34,7 @@ def load_css():
     """, unsafe_allow_html=True)
 
 def render_header():
-    """Affichage de l'en-tête principal avec navigation"""
+    """Main header display with navigation"""
     st.markdown("""
     <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
         <div style="display: flex; align-items: center; gap: 1rem;">
@@ -56,23 +56,23 @@ def render_header():
     """, unsafe_allow_html=True)
 
 def render_hero():
-    """Section principale avec présentation de l'application"""
+    """Main section with application presentation"""
     st.markdown("""
     <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 3rem 2rem; text-align: center; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
-        <h1 style="color: white; font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); letter-spacing: -1px;">Analysez vos Tweets avec l'IA</h1>
-        <p style="color: white; font-size: 1.1rem; opacity: 0.98; max-width: 700px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transformez vos donnees Twitter en insights actionnables grace a l'intelligence artificielle.<br>Analyse de sentiment, categorisation automatique et KPIs en temps reel.</p>
+        <h1 style="color: white; font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); letter-spacing: -1px;">Analyze Your Tweets with AI</h1>
+        <p style="color: white; font-size: 1.1rem; opacity: 0.98; max-width: 700px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transform your Twitter data into actionable insights with artificial intelligence.<br>Sentiment analysis, automatic categorization and real-time KPIs.</p>
     </div>
     """, unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
-        if st.button("Commencer Maintenant", type="primary", use_container_width=True):
+        if st.button("Start Now", type="primary", use_container_width=True):
             st.switch_page("pages/analyse_intelligente.py")
     
-    # Indicateur de scroll
+    # Scroll indicator
     st.markdown("""
     <div style="text-align: center; margin-top: 2rem;">
-        <div style="color: white; font-size: 1rem; margin-bottom: 1rem; opacity: 0.8;">Découvrez nos fonctionnalités</div>
+        <div style="color: white; font-size: 1rem; margin-bottom: 1rem; opacity: 0.8;">Discover our features</div>
         <div style="color: white; font-size: 2rem; animation: bounce 2s infinite;">↓</div>
     </div>
     <style>
@@ -86,7 +86,7 @@ def render_hero():
     
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
     
-    # 3 Cartes avec icônes Font Awesome
+    # 3 Cards with Font Awesome icons
     col_a, col_b, col_c = st.columns(3)
     
     with col_a:
@@ -107,13 +107,13 @@ def render_hero():
                        margin-bottom: 1rem;
                        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                        letter-spacing: -0.5px;">
-                Rapide
+                Fast
             </h3>
             <p style="color: #555; 
                       font-size: 1.1rem; 
                       line-height: 1.6;
                       font-weight: 400;">
-                Resultats en moins de 3 secondes
+                Results in less than 3 seconds
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -135,13 +135,13 @@ def render_hero():
                        margin-bottom: 1rem;
                        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                        letter-spacing: -0.5px;">
-                Precis
+                Accurate
             </h3>
             <p style="color: #555; 
                       font-size: 1.1rem; 
                       line-height: 1.6;
                       font-weight: 400;">
-                IA avec 98,5% de precision
+                AI with 98.5% accuracy
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -163,13 +163,13 @@ def render_hero():
                        margin-bottom: 1rem;
                        text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                        letter-spacing: -0.5px;">
-                Complet
+                Complete
             </h3>
             <p style="color: #555; 
                       font-size: 1.1rem; 
                       line-height: 1.6;
                       font-weight: 400;">
-                Tableau de bord interactif
+                Interactive dashboard
             </p>
         </div>
         """, unsafe_allow_html=True)
@@ -177,7 +177,7 @@ def render_hero():
     st.markdown("<div style='height: 5rem;'></div>", unsafe_allow_html=True)
 
 def render_pricing():
-    """Section tarification"""
+    """Pricing section"""
     st.markdown("""
     <div id="offres" style="padding: 5rem 3rem; background: white;">
         <h2 style="text-align: center; 
@@ -187,7 +187,7 @@ def render_pricing():
                    margin-bottom: 1rem;
                    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                    letter-spacing: -0.5px;">
-            Nos Offres Tarifaires
+            Our Pricing Plans
         </h2>
         <div style="width: 100px; height: 4px; background: linear-gradient(90deg, #CC0000 0%, #8B0000 100%); 
                     margin: 0 auto 1rem; border-radius: 2px;"></div>
@@ -196,7 +196,7 @@ def render_pricing():
                   color: #666; 
                   margin-bottom: 4rem;
                   font-weight: 400;">
-            Choisissez le plan qui correspond le mieux a vos besoins
+            Choose the plan that best fits your needs
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -223,14 +223,14 @@ def render_pricing():
                       font-size: 1rem; 
                       margin-bottom: 2rem;
                       font-weight: 400;">
-                Parfait pour debuter
+                Perfect for beginners
             </p>
             <div style="margin-bottom: 2rem;">
                 <span style="font-size: 3.5rem; 
                              font-weight: 900; 
                              color: #333;
                              text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-                    Gratuit
+                    Free
                 </span>
             </div>
             <ul style="list-style: none; 
@@ -238,16 +238,16 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> 1 000 tweets/mois
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> 1,000 tweets/month
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Analyse de sentiment
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Sentiment analysis
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
                     <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> 3 categories
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Rapports mensuels
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Monthly reports
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
                     <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Support email
@@ -255,8 +255,8 @@ def render_pricing():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Choisir Starter", key="starter", use_container_width=True):
-            st.success("Plan Starter selectionne !")
+        if st.button("Choose Starter", key="starter", use_container_width=True):
+            st.success("Starter plan selected!")
     
     with col2:
         st.markdown("""
@@ -278,7 +278,7 @@ def render_pricing():
                         font-weight: 700; 
                         font-size: 0.9rem;
                         text-shadow: none;">
-                POPULAIRE
+                POPULAR
             </div>
             <h3 style="color: white; 
                        font-size: 2rem; 
@@ -292,19 +292,19 @@ def render_pricing():
                       margin-bottom: 2rem;
                       font-weight: 400;
                       text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">
-                Pour les pros
+                For professionals
             </p>
             <div style="margin-bottom: 2rem;">
                 <span style="font-size: 3.5rem; 
                              font-weight: 900; 
                              color: white;
                              text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-                    49€
+                    €49
                 </span>
                 <span style="font-size: 1.2rem; 
                              color: rgba(255,255,255,0.9);
                              text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">
-                    /mois
+                    /month
                 </span>
             </div>
             <ul style="list-style: none; 
@@ -312,16 +312,16 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> 100 000 tweets/mois
+                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> 100,000 tweets/month
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Analyse IA avancee
+                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Advanced AI analysis
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Categories illimitees
+                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Unlimited categories
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Rapports temps reel
+                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Real-time reports
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
                     <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Support 24/7
@@ -332,8 +332,8 @@ def render_pricing():
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Choisir Professional", key="pro", use_container_width=True):
-            st.success("Plan Professional selectionne !")
+        if st.button("Choose Professional", key="pro", use_container_width=True):
+            st.success("Professional plan selected!")
     
     with col3:
         st.markdown("""
@@ -355,14 +355,14 @@ def render_pricing():
                       font-size: 1rem; 
                       margin-bottom: 2rem;
                       font-weight: 400;">
-                Solution sur mesure
+                Custom solution
             </p>
             <div style="margin-bottom: 2rem;">
                 <span style="font-size: 2.5rem; 
                              font-weight: 900; 
                              color: #333;
                              text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">
-                    Sur Devis
+                    On Quote
                 </span>
             </div>
             <ul style="list-style: none; 
@@ -370,86 +370,86 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Volume illimite
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Unlimited volume
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Modeles IA dedies
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Dedicated AI models
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Dashboards custom
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Custom dashboards
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
                     <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Integration complete
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Gestionnaire dedie
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Dedicated manager
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> SLA garanti
+                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Guaranteed SLA
                 </li>
             </ul>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Nous Contacter", key="enterprise", use_container_width=True):
-            st.info("Notre equipe vous contactera sous 24h")
+        if st.button("Contact Us", key="enterprise", use_container_width=True):
+            st.info("Our team will contact you within 24h")
     
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
 def render_features():
-    """Section fonctionnalités avec icônes Font Awesome"""
-    # Section de navigation rapide vers les pages d'analyse
+    """Features section with Font Awesome icons"""
+    # Quick navigation section to analysis pages
     st.markdown("""
     <div style="background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); padding: 3rem; text-align: center; margin: 3rem 0; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
-        <h2 style="color: #CC0000; font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Accès Rapide aux Analyses</h2>
-        <p style="color: #666; font-size: 1.2rem; margin-bottom: 3rem; font-weight: 400; line-height: 1.6;">Choisissez votre type d'analyse et commencez immédiatement</p>
+        <h2 style="color: #CC0000; font-size: 2.5rem; font-weight: 800; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.1);">Quick Access to Analysis</h2>
+        <p style="color: #666; font-size: 1.2rem; margin-bottom: 3rem; font-weight: 400; line-height: 1.6;">Choose your analysis type and start immediately</p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Cartes de navigation avec composants Streamlit natifs
+    # Navigation cards with native Streamlit components
     col1, col2, col3, col4 = st.columns(4, gap="medium")
     
     with col1:
         st.markdown("""
         <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #CC0000; text-align: center;">
             <i class="fas fa-brain" style="font-size: 2.5rem; color: #CC0000; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Intelligente</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">IA avancée avec LLM pour des insights uniques</p>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Intelligent Analysis</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Advanced AI with LLM for unique insights</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Commencer l'Analyse Intelligente", type="primary", use_container_width=True):
+        if st.button("Start Intelligent Analysis", type="primary", use_container_width=True):
             st.switch_page("pages/analyse_intelligente.py")
     
     with col2:
         st.markdown("""
         <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #28a745; text-align: center;">
             <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Analyse Classique</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Analyse traditionnelle avec visualisations</p>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Classic Analysis</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Traditional analysis with visualizations</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Commencer l'Analyse Classique", type="secondary", use_container_width=True):
+        if st.button("Start Classic Analysis", type="secondary", use_container_width=True):
             st.switch_page("pages/analyse_old.py")
     
     with col3:
         st.markdown("""
         <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8; text-align: center;">
             <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Résultats</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Visualisez et explorez vos résultats</p>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Results</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">View and explore your results</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Voir les Résultats", type="secondary", use_container_width=True):
+        if st.button("View Results", type="secondary", use_container_width=True):
             st.switch_page("pages/resultat.py")
     
     with col4:
         st.markdown("""
         <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #6f42c1; text-align: center;">
             <i class="fas fa-robot" style="font-size: 2.5rem; color: #6f42c1; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Classification LLM</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Résultats de classification automatique</p>
+            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">LLM Classification</h3>
+            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Automatic classification results</p>
         </div>
         """, unsafe_allow_html=True)
-        if st.button("Voir Classification LLM", type="secondary", use_container_width=True):
+        if st.button("View LLM Classification", type="secondary", use_container_width=True):
             st.switch_page("pages/classification_llm.py")
     
     st.markdown("""
@@ -461,7 +461,7 @@ def render_features():
                    margin-bottom: 1rem;
                    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                    letter-spacing: -0.5px;">
-            Fonctionnalites Principales
+            Main Features
         </h2>
         <div style="width: 100px; height: 4px; background: linear-gradient(90deg, #CC0000 0%, #8B0000 100%); 
                     margin: 0 auto 1rem; border-radius: 2px;"></div>
@@ -470,18 +470,18 @@ def render_features():
                   color: #666; 
                   margin-bottom: 4rem;
                   font-weight: 400;">
-            Tout ce dont vous avez besoin pour analyser vos tweets
+            Everything you need to analyze your tweets
         </p>
     </div>
     """, unsafe_allow_html=True)
     
     features = [
-        ("fas fa-robot", "Analyse IA Avancee", "Utilisation de modeles de langage de pointe pour une analyse precise"),
-        ("fas fa-chart-bar", "Dashboards Interactifs", "Visualisations dynamiques et personnalisables"),
-        ("fas fa-clock", "Temps Reel", "Traitement et analyse des tweets en temps reel"),
-        ("fas fa-tags", "Categorisation Auto", "Classification automatique des tweets"),
-        ("fas fa-file-export", "Rapports Detailles", "Generation automatique de rapports exportables"),
-        ("fas fa-shield-alt", "Securite Maximale", "Chiffrement des donnees et conformite RGPD")
+        ("fas fa-robot", "Advanced AI Analysis", "Using state-of-the-art language models for precise analysis"),
+        ("fas fa-chart-bar", "Interactive Dashboards", "Dynamic and customizable visualizations"),
+        ("fas fa-clock", "Real Time", "Real-time tweet processing and analysis"),
+        ("fas fa-tags", "Auto Categorization", "Automatic tweet classification"),
+        ("fas fa-file-export", "Detailed Reports", "Automatic generation of exportable reports"),
+        ("fas fa-shield-alt", "Maximum Security", "Data encryption and GDPR compliance")
     ]
     
     for i in range(0, len(features), 3):
@@ -522,7 +522,7 @@ def render_features():
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
 def render_partners():
-    """Section partenaires"""
+    """Partners section"""
     st.markdown("""
     <div id="partenaires" style="padding: 5rem 3rem; background: white;">
         <h2 style="text-align: center; 
@@ -532,7 +532,7 @@ def render_partners():
                    margin-bottom: 1rem;
                    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                    letter-spacing: -0.5px;">
-            Nos Partenaires Technologiques
+            Our Technology Partners
         </h2>
         <div style="width: 100px; height: 4px; background: linear-gradient(90deg, #CC0000 0%, #8B0000 100%); 
                     margin: 0 auto 1rem; border-radius: 2px;"></div>
@@ -541,7 +541,7 @@ def render_partners():
                   color: #666; 
                   margin-bottom: 4rem;
                   font-weight: 400;">
-            Nous collaborons avec les leaders de l'IA
+            We collaborate with AI leaders
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -578,7 +578,7 @@ def render_partners():
     st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
 
 def render_footer():
-    """Footer 4 colonnes avec texte noir sur fond clair"""
+    """Footer 4 columns with black text on light background"""
     st.markdown("""
     <div id="contact" style="background: #f8f9fa; padding: 4rem 3rem 2rem;">
         <h2 style="text-align: center; 
@@ -588,7 +588,7 @@ def render_footer():
                    margin-bottom: 1rem;
                    text-shadow: 1px 1px 2px rgba(0,0,0,0.1);
                    letter-spacing: -0.5px;">
-            Contactez-nous
+            Contact Us
         </h2>
         <div style="width: 100px; height: 4px; background: linear-gradient(90deg, #CC0000 0%, #8B0000 100%); 
                     margin: 0 auto 3rem; border-radius: 2px;"></div>
@@ -607,7 +607,7 @@ def render_footer():
                        border-bottom: 3px solid #CC0000; 
                        padding-bottom: 0.5rem;
                        text-shadow: none;">
-                Chat Mobile Gratuit
+                Free Mobile Chat
             </h3>
             <p style="color: #333; 
                       line-height: 1.8; 
@@ -615,8 +615,8 @@ def render_footer():
                       margin-bottom: 2rem;
                       font-weight: 400;
                       text-shadow: none;">
-                Solution d'analyse de tweets par intelligence artificielle.
-                Transformez vos donnees en insights actionnables.
+                Twitter analysis solution powered by artificial intelligence.
+                Transform your data into actionable insights.
             </p>
             <div style="display: flex; gap: 1rem;">
                 <a href="#" style="width: 50px; height: 50px; background: #CC0000; 
@@ -657,7 +657,7 @@ def render_footer():
                        border-bottom: 3px solid #CC0000; 
                        padding-bottom: 0.5rem;
                        text-shadow: none;">
-                Liens Rapides
+                Quick Links
             </h3>
             <ul style="list-style: none; padding: 0;">
                 <li style="margin-bottom: 1rem;">
@@ -667,7 +667,7 @@ def render_footer():
                                             font-weight: 500;
                                             text-shadow: none;
                                             transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Nos Offres
+                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Our Offers
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -677,7 +677,7 @@ def render_footer():
                                                        font-weight: 500;
                                                        text-shadow: none;
                                                        transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Fonctionnalites
+                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Features
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -687,7 +687,7 @@ def render_footer():
                                                   font-weight: 500;
                                                   text-shadow: none;
                                                   transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Partenaires
+                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Partners
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -697,7 +697,7 @@ def render_footer():
                                                           font-weight: 500;
                                                           text-shadow: none;
                                                           transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Commencer
+                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Get Started
                     </a>
                 </li>
             </ul>
@@ -714,7 +714,7 @@ def render_footer():
                        border-bottom: 3px solid #CC0000; 
                        padding-bottom: 0.5rem;
                        text-shadow: none;">
-                Coordonnees
+                Contact Information
             </h3>
             <div style="margin-bottom: 1.5rem; padding: 1.2rem; background: #f8f9fa; border-radius: 10px; border: 1px solid #e0e0e0;">
                 <div style="color: #CC0000; font-size: 1.5rem; margin-bottom: 0.8rem;">
@@ -747,7 +747,7 @@ def render_footer():
                            text-shadow: none;
                            text-transform: uppercase;
                            letter-spacing: 0.5px;">
-                    Telephone
+                    Phone
                 </div>
                 <div style="font-size: 1.1rem; 
                            color: #222; 
@@ -773,23 +773,22 @@ def render_footer():
                        border-bottom: 3px solid #CC0000; 
                        padding-bottom: 0.5rem;
                        text-shadow: none;">
-                Formulaire Contact
+                Contact Form
             </h3>
         """, unsafe_allow_html=True)
         
         with st.form(key="contact_form"):
-            nom = st.text_input("Nom", placeholder="Jean Dupont", label_visibility="collapsed")
-            email = st.text_input("Email", placeholder="jean@email.com", label_visibility="collapsed")
-            message = st.text_area("Message", placeholder="Votre message...", height=100, label_visibility="collapsed")
+            nom = st.text_input("Name", placeholder="John Doe", label_visibility="collapsed")
+            email = st.text_input("Email", placeholder="john@email.com", label_visibility="collapsed")
+            message = st.text_area("Message", placeholder="Your message...", height=100, label_visibility="collapsed")
             
-            submit = st.form_submit_button("Envoyer", use_container_width=True, type="primary")
+            submit = st.form_submit_button("Send", use_container_width=True, type="primary")
             
             if submit:
                 if nom and email and message:
-                    st.success("Message envoye !")
-                    st.balloons()
+                    st.success("Message sent!")
                 else:
-                    st.error("Tous les champs requis")
+                    st.error("All fields required")
         
         st.markdown("</div>", unsafe_allow_html=True)
     
@@ -805,16 +804,16 @@ def render_footer():
                   margin: 0;
                   font-weight: 500;
                   text-shadow: none;">
-            &copy; 2025 FreeMobilaChat. Tous droits reserves. | 
-            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">Politique</a> | 
-            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">CGU</a> | 
-            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">Mentions</a>
+            &copy; 2025 FreeMobilaChat. All rights reserved. | 
+            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">Policy</a> | 
+            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">Terms</a> | 
+            <a href="#" style="color: #CC0000; text-decoration: none; font-weight: 600;">Legal</a>
         </p>
     </div>
     """, unsafe_allow_html=True)
 
 def main():
-    """Fonction principale"""
+    """Main function"""
     load_css()
     render_header()
     render_hero()
