@@ -67,7 +67,7 @@ def render_hero():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Start Now", type="primary", use_container_width=True):
-            st.switch_page("pages/analyse_intelligente.py")
+            st.switch_page("pages/1_Analyse_Intelligente.py")
     
     # Scroll indicator
     st.markdown("""
@@ -417,7 +417,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Start Intelligent Analysis", type="primary", use_container_width=True):
-            st.switch_page("pages/analyse_intelligente.py")
+            st.switch_page("pages/1_Analyse_Intelligente.py")
     
     with col2:
         st.markdown("""
@@ -428,7 +428,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("Start Classic Analysis", type="secondary", use_container_width=True):
-            st.switch_page("pages/analyse_old.py")
+            st.switch_page("pages/4_Analyse_Classique.py")
     
     with col3:
         st.markdown("""
@@ -439,7 +439,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("View Results", type="secondary", use_container_width=True):
-            st.switch_page("pages/resultat.py")
+            st.switch_page("pages/3_Resultats.py")
     
     with col4:
         st.markdown("""
@@ -450,7 +450,7 @@ def render_features():
         </div>
         """, unsafe_allow_html=True)
         if st.button("View LLM Classification", type="secondary", use_container_width=True):
-            st.switch_page("pages/classification_llm.py")
+            st.switch_page("pages/2_Classification_LLM.py")
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
@@ -691,7 +691,7 @@ def render_footer():
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
-                    <a href="/pages/analyse_intelligente.py" style="color: #333; 
+                    <a href="#" style="color: #333; 
                                                           text-decoration: none; 
                                                           font-size: 1.1rem;
                                                           font-weight: 500;

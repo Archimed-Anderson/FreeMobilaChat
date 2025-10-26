@@ -87,7 +87,7 @@ except ImportError:
 # Configuration
 st.set_page_config(
     page_title="Analyse Intelligente - FreeMobilaChat",
-    page_icon=":brain:",
+    page_icon="🧠",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -227,8 +227,8 @@ def _load_modern_css():
         margin-bottom: 1rem !important;
     }
     
-    /* Métriques */
-    .metric-card {
+    /* Métriques - KPI Cards */
+    .stat-card {
         background: #ffffff !important;
         padding: 1.5rem !important;
         border-radius: 12px !important;
@@ -236,6 +236,12 @@ def _load_modern_css():
         text-align: center !important;
         border-left: 4px solid #CC0000 !important;
         margin-bottom: 1rem !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15) !important;
     }
     
     .metric-value {
@@ -247,9 +253,24 @@ def _load_modern_css():
     
     .metric-label {
         font-size: 0.9rem !important;
-        color: #333333 !important;
+        color: #666 !important;
         text-transform: uppercase !important;
         letter-spacing: 0.5px !important;
+    }
+    
+    /* Section Preprocessing */
+    .preprocessing-section {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+        padding: 1.5rem !important;
+        border-radius: 10px !important;
+        margin: 1.5rem 0 !important;
+        color: white !important;
+    }
+    
+    .preprocessing-section h2 {
+        color: white !important;
+        margin: 0 !important;
+        font-size: 1.8rem !important;
     }
     
     /* Insights */
@@ -391,8 +412,10 @@ def _render_sidebar_config():
         ]
         
         for lib_name, available in libraries:
-            status = "✅" if available else "❌"
-            st.markdown(f"{status} {lib_name}")
+            if available:
+                st.markdown(f"<span style='color: #38a169;'>&#10003;</span> {lib_name}", unsafe_allow_html=True)
+            else:
+                st.markdown(f"<span style='color: #e53e3e;'>&#10007;</span> {lib_name}", unsafe_allow_html=True)
 
 def _render_multiple_upload_zone():
     """Affiche la zone d'upload multiple"""
@@ -433,12 +456,22 @@ def _handle_multiple_file_analysis(uploaded_files):
             # Lecture du fichier
             df = pd.read_csv(uploaded_file)
             
-            # Analyse du fichier
-            result = analyze_csv(uploaded_file, df)
+            # Affichage du nom du fichier
+            st.markdown(f"### <i class='fas fa-file-csv'></i> {uploaded_file.name}", unsafe_allow_html=True)
+            
+            # SECTION PREPROCESSING - Core Feature
+            df_clean, preproc_stats = _display_preprocessing_section(df, uploaded_file.name)
+            
+            # Analyse du fichier (avec données nettoyées)
+            result = analyze_csv(uploaded_file, df_clean)
+            result['preprocessing_stats'] = preproc_stats  # Ajouter stats preprocessing
             all_results.append(result)
             
             # Affichage des résultats pour ce fichier
-            _render_file_analysis_result(result, df, uploaded_file.name)
+            _render_file_analysis_result(result, df_clean, uploaded_file.name)
+            
+            # VISUALISATIONS DYNAMIQUES
+            _render_enhanced_visualizations(df_clean, uploaded_file.name)
             
         except Exception as e:
             st.error(f"Erreur lors de l'analyse de {uploaded_file.name}: {str(e)}")
@@ -451,6 +484,267 @@ def _handle_multiple_file_analysis(uploaded_files):
     # Résumé global
     if all_results:
         _render_global_summary(all_results)
+
+def _preprocess_dataframe(df: pd.DataFrame):
+    """Nettoie et prépare le DataFrame avec statistiques détaillées"""
+    
+    df_clean = df.copy()
+    
+    # Statistiques initiales
+    initial_rows = len(df)
+    initial_nulls = df.isnull().sum().sum()
+    initial_duplicates = df.duplicated().sum()
+    
+    # Nettoyage colonnes numériques (médiane pour les nulls)
+    numeric_cols = df_clean.select_dtypes(include=['number']).columns
+    for col in numeric_cols:
+        if df_clean[col].isnull().any():
+            df_clean[col].fillna(df_clean[col].median(), inplace=True)
+    
+    # Nettoyage colonnes catégorielles (mode pour les nulls)
+    categorical_cols = df_clean.select_dtypes(include=['object']).columns
+    for col in categorical_cols:
+        if df_clean[col].isnull().any():
+            mode_val = df_clean[col].mode()[0] if not df_clean[col].mode().empty else ''
+            df_clean[col].fillna(mode_val, inplace=True)
+    
+    # Suppression des doublons
+    df_clean.drop_duplicates(inplace=True)
+    
+    # Calcul de la qualité globale
+    final_rows = len(df_clean)
+    final_nulls = df_clean.isnull().sum().sum()
+    total_cells = final_rows * len(df_clean.columns) if final_rows > 0 else 1
+    quality_score = 1.0 - (final_nulls / total_cells)
+    
+    stats = {
+        'clean_rows': int(final_rows),
+        'removed_rows': int(initial_rows - final_rows),
+        'null_filled': int(initial_nulls - final_nulls),
+        'duplicates_removed': int(initial_duplicates),
+        'quality_score': float(quality_score)
+    }
+    
+    return df_clean, stats
+
+def _display_preprocessing_section(df: pd.DataFrame, filename: str):
+    """Affiche la section preprocessing avec KPIs visuels et professionnels"""
+    
+    st.markdown("""
+    <div class="preprocessing-section">
+        <h2><i class="fas fa-broom" style="margin-right: 0.5rem;"></i> PREPROCESSING DES DONNÉES</h2>
+        <p style="margin: 0.5rem 0 0 0; font-size: 1rem; opacity: 0.9;">
+            Nettoyage et normalisation automatiques avant analyse
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Prétraitement automatique
+    df_clean, stats = _preprocess_dataframe(df)
+    
+    # 4 KPI Cards - Preprocessing
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-check-circle" style="color: #38a169; font-size: 2rem;"></i>
+            <div class="metric-value">{stats['clean_rows']:,}</div>
+            <div class="metric-label">Lignes Valides</div>
+            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">-{stats['removed_rows']} supprimées</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-fill-drip" style="color: #4299e1; font-size: 2rem;"></i>
+            <div class="metric-value">{stats['null_filled']}</div>
+            <div class="metric-label">Nulls Remplis</div>
+            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">Médiane/Mode</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-percentage" style="color: #48bb78; font-size: 2rem;"></i>
+            <div class="metric-value">{stats['quality_score']:.0%}</div>
+            <div class="metric-label">Qualité Globale</div>
+            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">Score de complétude</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-copy" style="color: #ed8936; font-size: 2rem;"></i>
+            <div class="metric-value">{stats['duplicates_removed']}</div>
+            <div class="metric-label">Doublons Retirés</div>
+            <div style="font-size: 0.75rem; color: #999; margin-top: 0.25rem;">Lignes identiques</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    return df_clean, stats
+
+def _render_enhanced_visualizations(df: pd.DataFrame, filename: str):
+    """Visualisations Plotly professionnelles et entièrement dynamiques"""
+    
+    st.markdown("---")
+    st.markdown("### <i class='fas fa-chart-line'></i> Visualisations Dynamiques", unsafe_allow_html=True)
+    
+    numeric_cols = df.select_dtypes(include=['number']).columns
+    categorical_cols = df.select_dtypes(include=['object']).columns
+    
+    # Heatmap de corrélations (si au moins 2 colonnes numériques)
+    if len(numeric_cols) >= 2:
+        st.markdown("#### Matrice de Corrélations")
+        corr_matrix = df[numeric_cols].corr()
+        
+        fig = px.imshow(
+            corr_matrix,
+            labels=dict(color="Corrélation"),
+            color_continuous_scale='Reds',
+            aspect="auto",
+            title="<b>Corrélations entre Variables Numériques</b>",
+            text_auto='.2f'
+        )
+        fig.update_layout(
+            title_font_size=16,
+            height=500,
+            template="plotly_white"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Distribution des colonnes numériques
+    if len(numeric_cols) > 0:
+        st.markdown("#### Distributions des Variables Numériques")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            selected_col = st.selectbox(
+                "Colonne à visualiser",
+                numeric_cols,
+                key=f"viz_col_{filename}"
+            )
+        
+        with col2:
+            chart_type = st.selectbox(
+                "Type de graphique",
+                ["Histogramme", "Box Plot", "Violin Plot"],
+                key=f"chart_type_{filename}"
+            )
+        
+        if chart_type == "Histogramme":
+            fig = px.histogram(
+                df,
+                x=selected_col,
+                nbins=30,
+                title=f"<b>Distribution: {selected_col}</b>",
+                color_discrete_sequence=['#CC0000'],
+                marginal="box"
+            )
+        elif chart_type == "Box Plot":
+            fig = px.box(
+                df,
+                y=selected_col,
+                title=f"<b>Box Plot: {selected_col}</b>",
+                color_discrete_sequence=['#CC0000']
+            )
+        else:  # Violin Plot
+            fig = px.violin(
+                df,
+                y=selected_col,
+                title=f"<b>Violin Plot: {selected_col}</b>",
+                color_discrete_sequence=['#CC0000'],
+                box=True
+            )
+        
+        fig.update_layout(
+            title_font_size=16,
+            height=400,
+            template="plotly_white"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Analyse des colonnes catégorielles (top categories)
+    if len(categorical_cols) > 0:
+        st.markdown("#### Distribution des Variables Catégorielles")
+        
+        selected_cat = st.selectbox(
+            "Colonne catégorielle",
+            categorical_cols,
+            key=f"cat_col_{filename}"
+        )
+        
+        # Top 10 catégories
+        value_counts = df[selected_cat].value_counts().head(10)
+        
+        fig = px.bar(
+            x=value_counts.index,
+            y=value_counts.values,
+            title=f"<b>Top 10 Catégories: {selected_cat}</b>",
+            labels={'x': selected_cat, 'y': 'Nombre'},
+            color=value_counts.values,
+            color_continuous_scale='Reds'
+        )
+        fig.update_layout(
+            title_font_size=16,
+            height=400,
+            template="plotly_white",
+            showlegend=False
+        )
+        st.plotly_chart(fig, use_container_width=True)
+    
+    # Scatter plot pour analyse bivariée (si au moins 2 colonnes numériques)
+    if len(numeric_cols) >= 2:
+        st.markdown("#### Analyse Bivariée")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            x_col = st.selectbox(
+                "Axe X",
+                numeric_cols,
+                key=f"scatter_x_{filename}"
+            )
+        
+        with col2:
+            y_col = st.selectbox(
+                "Axe Y",
+                [c for c in numeric_cols if c != x_col],
+                key=f"scatter_y_{filename}"
+            )
+        
+        # Optionnel: colonne de couleur si catégorielle disponible
+        color_col = None
+        if len(categorical_cols) > 0:
+            color_col = st.selectbox(
+                "Colorer par (optionnel)",
+                ['Aucune'] + list(categorical_cols),
+                key=f"color_col_{filename}"
+            )
+            if color_col == 'Aucune':
+                color_col = None
+        
+        fig = px.scatter(
+            df,
+            x=x_col,
+            y=y_col,
+            color=color_col,
+            title=f"<b>Relation: {x_col} vs {y_col}</b>",
+            color_discrete_sequence=px.colors.sequential.Reds if color_col is None else None,
+            trendline="ols" if color_col is None else None
+        )
+        fig.update_layout(
+            title_font_size=16,
+            height=500,
+            template="plotly_white"
+        )
+        st.plotly_chart(fig, use_container_width=True)
 
 def analyze_csv(uploaded_file, df: pd.DataFrame) -> Dict[str, Any]:
     """Analyse un fichier CSV avec le moteur LLM intelligent"""

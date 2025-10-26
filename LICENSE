@@ -1,6 +1,6 @@
 MIT License
 
-Copyright (c) 2024-2025 Archimed Anderson
+Copyright (c) 2025 FreeMobilaChat
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -19,16 +19,3 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
----
-
-ACADEMIC DISCLAIMER
-
-This project was developed as part of a Master's thesis in Data Science.
-While the code is released under the MIT License, any academic use of this
-work should provide proper attribution:
-
-Anderson, A. (2024-2025). FreeMobilaChat: Système d'Analyse de Sentiment 
-et Classification de Données Twitter. Mémoire de Master en Data Science.
-[Your University].
-
