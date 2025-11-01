@@ -19,9 +19,15 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 try:
     from services.tweet_classifier import TweetClassifier
+    from services.role_manager import initialize_role_system, get_current_role
+    from services.dynamic_classifier import DynamicClassificationEngine
     CLASSIFIER_AVAILABLE = True
+    ROLE_SYSTEM_AVAILABLE = True
+    DYNAMIC_CLASSIFIER_AVAILABLE = True
 except:
     CLASSIFIER_AVAILABLE = False
+    ROLE_SYSTEM_AVAILABLE = False
+    DYNAMIC_CLASSIFIER_AVAILABLE = False
 
 st.set_page_config(
     page_title="Analyse Classique - FreeMobilaChat",
@@ -46,7 +52,15 @@ FEW_SHOT_EXAMPLES = [
 
 def main():
     _load_css()
-    _render_header()
+    
+    # Initialisation du système de rôles
+    if ROLE_SYSTEM_AVAILABLE:
+        role_manager, role_ui_manager = initialize_role_system()
+        current_role = role_ui_manager.render_role_selector()
+        role_ui_manager.render_role_specific_header(current_role, "Analyse Classique")
+    else:
+        _render_header()
+    
     _render_sidebar()
     
     uploaded_file = _render_upload()

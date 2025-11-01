@@ -29,10 +29,16 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'services'))
 try:
     from services.tweet_classifier import TweetClassifier, ClassificationResult
     from services.llm_analysis_engine import LLMAnalysisEngine, DatasetProfile
+    from services.role_manager import initialize_role_system, get_current_role, check_permission
+    from services.dynamic_classifier import DynamicClassificationEngine
     CLASSIFIER_AVAILABLE = True
+    ROLE_SYSTEM_AVAILABLE = True
+    DYNAMIC_CLASSIFIER_AVAILABLE = True
 except ImportError as e:
     print(f"Erreur import classificateur: {e}")
     CLASSIFIER_AVAILABLE = False
+    ROLE_SYSTEM_AVAILABLE = False
+    DYNAMIC_CLASSIFIER_AVAILABLE = False
 
 # Imports conditionnels pour éviter les erreurs
 try:
@@ -101,8 +107,14 @@ def main():
     # CSS personnalisé moderne
     _load_modern_css()
     
-    # Header moderne
-    _render_modern_header()
+    # Initialisation du système de rôles
+    if ROLE_SYSTEM_AVAILABLE:
+        role_manager, role_ui_manager = initialize_role_system()
+        current_role = role_ui_manager.render_role_selector()
+        role_ui_manager.render_role_specific_header(current_role, "Analyse Intelligente")
+    else:
+        # Header moderne par défaut
+        _render_modern_header()
     
     # Sidebar avec configuration
     _render_sidebar_config()
@@ -462,9 +474,19 @@ def _handle_multiple_file_analysis(uploaded_files):
             # SECTION PREPROCESSING - Core Feature
             df_clean, preproc_stats = _display_preprocessing_section(df, uploaded_file.name)
             
-            # Analyse du fichier (avec données nettoyées)
-            result = analyze_csv(uploaded_file, df_clean)
+            # SECTION CLASSIFICATION DYNAMIQUE - New Feature
+            if DYNAMIC_CLASSIFIER_AVAILABLE:
+                current_role = get_current_role() if ROLE_SYSTEM_AVAILABLE else None
+                df_classified, class_summary = _perform_dynamic_classification(df_clean, uploaded_file.name, current_role)
+            else:
+                df_classified = df_clean
+                class_summary = None
+            
+            # Analyse du fichier (avec données nettoyées et classifiées)
+            result = analyze_csv(uploaded_file, df_classified)
             result['preprocessing_stats'] = preproc_stats  # Ajouter stats preprocessing
+            if class_summary:
+                result['classification_summary'] = class_summary  # Ajouter stats classification
             all_results.append(result)
             
             # Affichage des résultats pour ce fichier
@@ -526,6 +548,274 @@ def _preprocess_dataframe(df: pd.DataFrame):
     }
     
     return df_clean, stats
+
+def _perform_dynamic_classification(df: pd.DataFrame, filename: str, current_role: Optional[str] = None):
+    """Effectue une classification dynamique et relationnelle du dataset"""
+    
+    st.markdown("---")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #805ad5 0%, #6b46c1 100%); padding: 1.5rem; border-radius: 10px; margin: 1.5rem 0;">
+        <h2 style="color: white; margin: 0; font-size: 1.8rem;">
+            <i class="fas fa-brain" style="margin-right: 0.5rem;"></i>
+            CLASSIFICATION DYNAMIQUE & RELATIONNELLE
+        </h2>
+        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1rem;">
+            Classification adaptée au contenu : Intention, Thème, Sentiment, Urgence
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Détection de la colonne de texte
+    text_columns = [col for col in df.columns if df[col].dtype == 'object']
+    
+    if not text_columns:
+        st.warning("⚠️ Aucune colonne de texte détectée pour la classification")
+        return df, None
+    
+    # Sélection de la colonne de texte
+    if len(text_columns) == 1:
+        text_column = text_columns[0]
+        st.info(f"📝 Colonne de texte détectée automatiquement : **{text_column}**")
+    else:
+        text_column = st.selectbox(
+            "🔍 Sélectionnez la colonne contenant le texte à classifier :",
+            text_columns,
+            key=f"text_col_select_{filename}"
+        )
+    
+    # Initialisation du moteur de classification
+    classifier = DynamicClassificationEngine()
+    
+    # Barre de progression
+    with st.spinner("🤖 Classification en cours..."):
+        df_classified = classifier.classify_dataframe(df, text_column)
+        summary = classifier.get_classification_summary(df_classified)
+    
+    # Affichage des résultats - adapté selon le rôle
+    _display_dynamic_classification_results(df_classified, summary, current_role)
+    
+    return df_classified, summary
+
+def _display_dynamic_classification_results(df: pd.DataFrame, summary: Dict[str, Any], role: Optional[str] = None):
+    """Affiche les résultats de classification selon le rôle utilisateur"""
+    
+    st.markdown("### 📊 Résultats de Classification")
+    
+    # KPI Cards - 4 indicateurs principaux
+    col1, col2, col3, col4 = st.columns(4)
+    
+    with col1:
+        reclamations = summary.get('intention_distribution', {}).get('reclamation', 0)
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-exclamation-triangle" style="color: #e53e3e; font-size: 2rem;"></i>
+            <div class="metric-value">{reclamations}</div>
+            <div class="metric-label">Réclamations</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col2:
+        avg_conf = summary.get('avg_confidence', 0)
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-check-circle" style="color: #38a169; font-size: 2rem;"></i>
+            <div class="metric-value">{avg_conf:.0%}</div>
+            <div class="metric-label">Confiance Moyenne</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col3:
+        neg_sentiment = summary.get('sentiment_distribution', {}).get('negatif', 0)
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-frown" style="color: #dd6b20; font-size: 2rem;"></i>
+            <div class="metric-value">{neg_sentiment}</div>
+            <div class="metric-label">Sentiments Négatifs</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with col4:
+        urgents = summary.get('urgency_distribution', {}).get('critique', 0) + summary.get('urgency_distribution', {}).get('haute', 0)
+        st.markdown(f"""
+        <div class="stat-card">
+            <i class="fas fa-bolt" style="color: #3182ce; font-size: 2rem;"></i>
+            <div class="metric-value">{urgents}</div>
+            <div class="metric-label">Cas Urgents</div>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Visualisations adaptées au rôle
+    if role == 'agent_sav':
+        _display_agent_sav_view(df, summary)
+    elif role == 'manager':
+        _display_manager_view(df, summary)
+    elif role == 'data_analyst':
+        _display_analyst_view(df, summary)
+    else:
+        _display_default_classification_view(df, summary)
+
+def _display_agent_sav_view(df: pd.DataFrame, summary: Dict[str, Any]):
+    """Vue Agent SAV : Priorisation opérationnelle"""
+    st.markdown("#### 👥 Vue Agent SAV - Traitement Prioritaire")
+    
+    # Filtrer les cas urgents et réclamations
+    urgent_df = df[(df['urgency'].isin(['critique', 'haute'])) | (df['intention'] == 'reclamation')]
+    
+    st.warning(f"⚡ **{len(urgent_df)} cas nécessitant une attention immédiate**")
+    
+    if len(urgent_df) > 0:
+        st.dataframe(
+            urgent_df[['intention', 'theme', 'sentiment', 'urgency', 'confidence']].head(20),
+            use_container_width=True,
+            height=300
+        )
+
+def _display_manager_view(df: pd.DataFrame, summary: Dict[str, Any]):
+    """Vue Manager : Supervision et KPIs"""
+    st.markdown("#### 📊 Vue Manager - Indicateurs de Performance")
+    
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Distribution des intentions
+        intent_dist = pd.Series(summary.get('intention_distribution', {}))
+        fig = px.pie(values=intent_dist.values, names=intent_dist.index, 
+                     title="Répartition des Intentions",
+                     color_discrete_sequence=px.colors.sequential.Purples)
+        st.plotly_chart(fig, use_container_width=True)
+    
+    with col2:
+        # Distribution de l'urgence
+        urg_dist = pd.Series(summary.get('urgency_distribution', {}))
+        fig = px.bar(x=urg_dist.index, y=urg_dist.values,
+                     title="Niveaux d'Urgence",
+                     color=urg_dist.values,
+                     color_continuous_scale='Reds')
+        st.plotly_chart(fig, use_container_width=True)
+
+def _display_analyst_view(df: pd.DataFrame, summary: Dict[str, Any]):
+    """Vue Data Analyst : Analyses approfondies"""
+    st.markdown("#### 🔬 Vue Data Analyst - Analyses Avancées")
+    
+    try:
+        # Matrice de corrélation intention-sentiment-urgence
+        st.markdown("**Corrélations entre dimensions de classification :**")
+        
+        # Vérifier que les colonnes existent
+        if 'intention' in df.columns and 'sentiment' in df.columns:
+            # Création d'une matrice de co-occurrence
+            cooccur = pd.crosstab(df['intention'], df['sentiment'])
+            
+            fig = px.imshow(cooccur, 
+                            labels=dict(color="Fréquence"),
+                            title="Matrice Intention vs Sentiment",
+                            color_continuous_scale='Purples')
+            st.plotly_chart(fig, use_container_width=True)
+        else:
+            st.warning("⚠️ Colonnes de classification non disponibles pour l'analyse de corrélation")
+        
+    except Exception as e:
+        st.error(f"❌ Erreur lors de la création de la matrice de corrélation: {str(e)}")
+        logger.error(f"Error in analyst view correlation matrix: {e}", exc_info=True)
+    
+    # Export des données
+    st.markdown("**📥 Export des données classifiées :**")
+    
+    try:
+        # Créer une copie du DataFrame pour l'export
+        df_export = df.copy()
+        
+        # Convertir toutes les colonnes qui pourraient contenir des listes en chaînes
+        for col in df_export.columns:
+            if df_export[col].dtype == 'object':
+                # Vérifier si la colonne contient des listes
+                first_valid = df_export[col].dropna().iloc[0] if len(df_export[col].dropna()) > 0 else None
+                if isinstance(first_valid, list):
+                    df_export[col] = df_export[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+        
+        csv = df_export.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="Télécharger CSV classifié",
+            data=csv,
+            file_name="donnees_classifiees.csv",
+            mime="text/csv"
+        )
+    except Exception as e:
+        st.error(f"❌ Erreur lors de la préparation de l'export: {str(e)}")
+        logger.error(f"Error in analyst view export: {e}", exc_info=True)
+
+def _display_default_classification_view(df: pd.DataFrame, summary: Dict[str, Any]):
+    """Vue par défaut : Aperçu général"""
+    
+    tab1, tab2, tab3 = st.tabs(["Distribution", "Détails", "Export"])
+    
+    with tab1:
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            # Distribution des intentions
+            intent_dist = pd.Series(summary.get('intention_distribution', {}))
+            if not intent_dist.empty:
+                fig = px.bar(x=intent_dist.index, y=intent_dist.values,
+                            title="Distribution des Intentions",
+                            color=intent_dist.values,
+                            color_continuous_scale='Purples')
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("📄 Aucune donnée de distribution d'intention disponible")
+        
+        with col2:
+            # Distribution des thèmes
+            theme_dist = pd.Series(summary.get('theme_distribution', {}))
+            if not theme_dist.empty:
+                fig = px.pie(values=theme_dist.values, names=theme_dist.index,
+                            title="Répartition des Thèmes",
+                            color_discrete_sequence=px.colors.sequential.Purples)
+                st.plotly_chart(fig, use_container_width=True)
+            else:
+                st.info("📄 Aucune donnée de distribution de thème disponible")
+    
+    with tab2:
+        try:
+            # Créer une copie pour l'affichage
+            df_display = df.copy()
+            
+            # Convertir les colonnes avec des listes en chaînes pour l'affichage
+            for col in df_display.columns:
+                if df_display[col].dtype == 'object':
+                    first_valid = df_display[col].dropna().iloc[0] if len(df_display[col].dropna()) > 0 else None
+                    if isinstance(first_valid, list):
+                        df_display[col] = df_display[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+            
+            st.dataframe(df_display.head(50), use_container_width=True, height=400)
+        except Exception as e:
+            st.error(f"❌ Erreur lors de l'affichage des données: {str(e)}")
+            logger.error(f"Error displaying dataframe: {e}", exc_info=True)
+    
+    with tab3:
+        try:
+            # Créer une copie pour l'export
+            df_export = df.copy()
+            
+            # Convertir les colonnes avec des listes en chaînes pour l'export
+            for col in df_export.columns:
+                if df_export[col].dtype == 'object':
+                    first_valid = df_export[col].dropna().iloc[0] if len(df_export[col].dropna()) > 0 else None
+                    if isinstance(first_valid, list):
+                        df_export[col] = df_export[col].apply(lambda x: ', '.join(x) if isinstance(x, list) else str(x))
+            
+            csv = df_export.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "Télécharger les résultats",
+                csv,
+                "resultats_classification.csv",
+                "text/csv"
+            )
+        except Exception as e:
+            st.error(f"❌ Erreur lors de la préparation de l'export: {str(e)}")
+            logger.error(f"Error preparing export: {e}", exc_info=True)
 
 def _display_preprocessing_section(df: pd.DataFrame, filename: str):
     """Affiche la section preprocessing avec KPIs visuels et professionnels"""

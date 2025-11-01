@@ -32,10 +32,16 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 try:
     from services.tweet_classifier import TweetClassifier, ClassificationResult
     from services.llm_analysis_engine import LLMAnalysisEngine
+    from services.role_manager import initialize_role_system, get_current_role, check_permission
+    from services.dynamic_classifier import DynamicClassificationEngine
     CLASSIFICATION_AVAILABLE = True
+    ROLE_SYSTEM_AVAILABLE = True
+    DYNAMIC_CLASSIFIER_AVAILABLE = True
 except ImportError as e:
     logger.warning(f"Services de classification non disponibles: {e}")
     CLASSIFICATION_AVAILABLE = False
+    ROLE_SYSTEM_AVAILABLE = False
+    DYNAMIC_CLASSIFIER_AVAILABLE = False
 
 # ==============================================================================
 # CONFIGURATION DE LA PAGE
@@ -131,8 +137,14 @@ def main():
     # Chargement des styles CSS professionnels
     _load_professional_css()
     
-    # En-tête professionnel avec logo et titre
-    _render_professional_header()
+    # Initialisation du système de rôles
+    if ROLE_SYSTEM_AVAILABLE:
+        role_manager, role_ui_manager = initialize_role_system()
+        current_role = role_ui_manager.render_role_selector()
+        role_ui_manager.render_role_specific_header(current_role, "Classification LLM")
+    else:
+        # En-tête professionnel avec logo et titre
+        _render_professional_header()
     
     # Configuration dans la sidebar
     _render_sidebar_config()
