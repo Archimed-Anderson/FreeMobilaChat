@@ -1,0 +1,50 @@
+{
+  "date": "2025-11-08T23:10:07.385300",
+  "dataset_size": 3000,
+  "train_size": 2400,
+  "test_size": 600,
+  "config": {
+    "data_file": "data/training/train_dataset.csv",
+    "output_dir": "models/baseline",
+    "test_size": 0.2,
+    "random_state": 42,
+    "max_features": 5000,
+    "ngram_range": [
+      1,
+      2
+    ]
+  },
+  "results": {
+    "sentiment": {
+      "accuracy": 0.8116666666666666,
+      "classes": [
+        "negatif",
+        "neutre",
+        "positif"
+      ]
+    },
+    "categorie": {
+      "accuracy": 0.7316666666666667,
+      "classes": [
+        "réseau",
+        "autre",
+        "fibre",
+        "technique",
+        "service",
+        "internet",
+        "facturation",
+        "mobile",
+        "tv",
+        "résiliation"
+      ]
+    },
+    "priority": {
+      "accuracy": 0.8683333333333333,
+      "classes": [
+        "moyenne",
+        "basse",
+        "haute"
+      ]
+    }
+  }
+}

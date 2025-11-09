@@ -113,7 +113,7 @@ class FastGraphRAGService:
         try:
             with open(self.config.graph_path, 'wb') as f:
                 pickle.dump(self.graph, f)
-            logger.info(f"💾 Graphe sauvegardé dans {self.config.graph_path}")
+            logger.info(f"Graph saved to {self.config.graph_path}")
         except Exception as e:
             logger.error(f" Erreur lors de la sauvegarde du graphe: {e}")
     
@@ -175,7 +175,7 @@ class FastGraphRAGService:
             return []
         
         try:
-            logger.info(f"🔍 Recherche dans le graphe: '{query[:50]}...'")
+            logger.info(f"Searching in graph: '{query[:50]}...'")
             
             # Encoder la requête
             query_embedding = self.embedding_model.encode(query)

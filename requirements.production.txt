@@ -1,0 +1,57 @@
+# FreeMobilaChat - Production Dependencies
+# Version: 4.1 Professional Edition
+# Python 3.8+
+
+# Core Framework
+streamlit==1.28.1
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.4.2
+
+# Data Processing
+pandas==2.1.1
+numpy==1.25.2
+openpyxl==3.1.2
+
+# Machine Learning
+scikit-learn==1.3.1
+transformers==4.34.0
+torch==2.1.0
+sentencepiece==0.1.99
+
+# NLP & Text Processing
+emoji==2.8.0
+nltk==3.8.1
+
+# Visualization
+plotly==5.17.0
+
+# API & HTTP
+requests==2.31.0
+httpx==0.25.0
+
+# Database
+sqlalchemy==2.0.22
+alembic==1.12.1
+
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+
+# Utilities
+python-dotenv==1.0.0
+pyyaml==6.0.1
+python-dateutil==2.8.2
+
+# Logging & Monitoring
+loguru==0.7.2
+
+# Performance
+aiofiles==23.2.1
+orjson==3.9.10
+
+# Testing (optional in production)
+pytest==7.4.3
+pytest-asyncio==0.21.1
+

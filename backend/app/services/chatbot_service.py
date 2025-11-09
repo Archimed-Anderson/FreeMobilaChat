@@ -253,7 +253,7 @@ HISTORIQUE CONVERSATION:
             return None
 
         try:
-            self.logger.info(f"🔍 Recherche Fast-GraphRAG: '{query[:50]}...'")
+            self.logger.info(f"Fast-GraphRAG search: '{query[:50]}...'")
 
             # Recherche avec timeout
             graphrag_results = await asyncio.wait_for(
@@ -315,7 +315,7 @@ HISTORIQUE CONVERSATION:
             Liste de tuples (document, score_similarité)
         """
         try:
-            self.logger.info(f"🔍 Recherche vectorielle classique: '{query[:50]}...'")
+            self.logger.info(f"Classic vector search: '{query[:50]}...'")
 
             # Générer l'embedding de la requête
             query_embedding = self.doc_scraper._generate_embeddings(query)
@@ -503,7 +503,7 @@ HISTORIQUE CONVERSATION:
         start_time = datetime.now(UTC)
         
         try:
-            self.logger.info(f"💬 Traitement du message: '{message[:50]}...'")
+            self.logger.info(f"Processing message: '{message[:50]}...'")
             
             # Rechercher les documents pertinents
             relevant_docs = await self._search_relevant_documents(message, self.max_context_documents)
@@ -541,12 +541,11 @@ HISTORIQUE CONVERSATION:
             user_message_id = None
             assistant_message_id = None
 
-            self.logger.info(f"🔍 Avant stockage - DB Manager: {self.db_manager}")
-
+            self.logger.info(f"Before storage - DB Manager: {self.db_manager}")
             if self.db_manager:
                 try:
-                    self.logger.info(f"🔍 DB Manager disponible: {self.db_manager is not None}")
-                    self.logger.info(f"🔍 DB Type: {self.db_manager.database_type}")
+                    self.logger.info(f"DB Manager available: {self.db_manager is not None}")
+                    self.logger.info(f"DB Type: {self.db_manager.database_type}")
 
                     # Pour l'instant, nous allons créer une conversation avec un UUID personnalisé
                     # en utilisant le conversation_id comme clé primaire

@@ -28,7 +28,11 @@ logger = logging.getLogger(__name__)
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'backend', 'app'))
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Imports des services d'analyse
+# ==============================================================================
+# IMPORTS DES SERVICES D'ANALYSE
+# ==============================================================================
+
+# Import des services de classification
 try:
     from services.tweet_classifier import TweetClassifier, ClassificationResult
     from services.llm_analysis_engine import LLMAnalysisEngine
@@ -43,12 +47,43 @@ except ImportError as e:
     ROLE_SYSTEM_AVAILABLE = False
     DYNAMIC_CLASSIFIER_AVAILABLE = False
 
+# Import des KPIs et visualisations avancées pour dashboard business
+try:
+    from services import enhanced_kpis_vizualizations
+    # Import direct des fonctions necessaires
+    from services.enhanced_kpis_vizualizations import (
+        compute_business_kpis,
+        render_business_kpis,
+        render_complete_dashboard
+    )
+    ENHANCED_KPIS_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Module Enhanced KPIs non disponible: {e}")
+    ENHANCED_KPIS_AVAILABLE = False
+    enhanced_kpis_vizualizations = None
+
+# Import du systeme de selection de roles
+try:
+    from components.role_selector import (
+        render_role_selector,
+        render_role_specific_header,
+        get_current_role,
+        filter_kpis_by_role,
+        filter_dataframe_by_role,
+        get_dashboard_message_by_role,
+        has_permission
+    )
+    ROLE_SELECTOR_AVAILABLE = True
+except ImportError as e:
+    logger.warning(f"Role selector module not available: {e}")
+    ROLE_SELECTOR_AVAILABLE = False
+
 # ==============================================================================
 # CONFIGURATION DE LA PAGE
 # ==============================================================================
 st.set_page_config(
     page_title="Classification LLM - FreeMobilaChat",
-    page_icon="🤖",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -132,18 +167,35 @@ FEW_SHOT_EXAMPLES = [
 # ==============================================================================
 
 def main():
-    """Point d'entrée principal de la page de classification LLM"""
+    """
+    Point d'entree principal de la page de classification LLM
+    
+    Cette page permet de classifier des tweets avec un systeme LLM
+    et affiche des KPIs business adaptes selon le role de l'utilisateur.
+    """
     
     # Chargement des styles CSS professionnels
     _load_professional_css()
     
-    # Initialisation du système de rôles
-    if ROLE_SYSTEM_AVAILABLE:
+    # ==============================================================================
+    # SYSTEME DE SELECTION DE ROLES
+    # ==============================================================================
+    # Affiche le selecteur de roles et obtient le role actuel
+    # Le role determine quels KPIs sont affiches et les permissions
+    if ROLE_SELECTOR_AVAILABLE:
+        # Rendre le selecteur de roles dans la sidebar
+        current_role = render_role_selector()
+        
+        # Afficher un header personnalise selon le role
+        render_role_specific_header(current_role, "Classification LLM")
+    elif ROLE_SYSTEM_AVAILABLE:
+        # Fallback sur l'ancien systeme de roles si disponible
         role_manager, role_ui_manager = initialize_role_system()
         current_role = role_ui_manager.render_role_selector()
         role_ui_manager.render_role_specific_header(current_role, "Classification LLM")
     else:
-        # En-tête professionnel avec logo et titre
+        # Header professionnel par defaut si aucun systeme disponible
+        current_role = "Data Analyst"  # Role par defaut
         _render_professional_header()
     
     # Configuration dans la sidebar
@@ -274,8 +326,8 @@ def _render_sidebar_config():
             
             llm_provider = st.selectbox(
                 "Fournisseur",
-                ["Fallback (Règles)", "Ollama", "OpenAI", "Anthropic"],
-                help="Sélectionnez le fournisseur LLM"
+                ["Fallback (Règles)", "Mistral (Ollama)", "Ollama", "OpenAI", "Anthropic"],
+                help="Sélectionnez le fournisseur LLM - Mistral (Ollama) utilise le nouveau module de classification avancée"
             )
             
             confidence_threshold = st.slider(
@@ -479,10 +531,10 @@ def _display_preprocessing_results(df_original: pd.DataFrame, df_preprocessed: p
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # Comparaison Avant/Après
-    st.markdown("### Comparaison Avant/Après Nettoyage")
+    # Comparaison Avant/Après Nettoyage
+    st.markdown("### Comparaison Avant/Apres Nettoyage")
     
-    tab1, tab2 = st.tabs(["Données Originales", "Données Prétraitées"])
+    tab1, tab2 = st.tabs(["Donnees Originales", "Donnees Pretraitees"])
     
     with tab1:
         st.markdown("**Dataset Original (Brut)**")
@@ -547,17 +599,52 @@ def _display_preprocessing_results(df_original: pd.DataFrame, df_preprocessed: p
             """, unsafe_allow_html=True)
 
 def _handle_dynamic_classification(uploaded_file):
-    """Gère la classification dynamique du fichier uploadé"""
+    """
+    Gère la classification dynamique du fichier uploadé
     
+    Cette fonction garantit que TOUTES les données sont recalculées
+    à chaque nouveau fichier uploadé. Un système de détection de
+    changement de fichier nettoie automatiquement le cache.
+    
+    Args:
+        uploaded_file: Fichier uploadé via st.file_uploader
+    """
     try:
-        # Lecture du fichier
+        # ================================================================
+        # DÉTECTION DE CHANGEMENT DE FICHIER (Garantit le dynamisme)
+        # ================================================================
+        current_file_id = f"{uploaded_file.name}_{uploaded_file.size}"
+        last_file_id = st.session_state.get('last_processed_file_id', None)
+        
+        # Si c'est un nouveau fichier, nettoyer tout le cache
+        if current_file_id != last_file_id:
+            # Nettoyage complet du cache pour garantir recalcul dynamique
+            keys_to_clear = [
+                'preprocessed_dataframe',
+                'preprocessing_stats',
+                'classified_dataframe',
+                'classification_metrics',
+                'text_column',
+                'dataframe'
+            ]
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            
+            # Enregistrer le nouveau fichier
+            st.session_state['last_processed_file_id'] = current_file_id
+            
+            # Message de confirmation du nouveau fichier
+            st.info(f"**Nouveau fichier detecte:** {uploaded_file.name} - Toutes les donnees seront recalculees dynamiquement")
+        
+        # Lecture du fichier (TOUJOURS à partir du fichier uploadé, jamais du cache)
         df = _read_uploaded_file(uploaded_file)
         
         if df is None or df.empty:
             st.error("Impossible de lire le fichier ou fichier vide")
             return
         
-        # Affichage des informations du fichier
+        # Affichage des informations du fichier (dynamiques)
         _display_file_info(uploaded_file, df)
         
         st.markdown("---")
@@ -575,18 +662,22 @@ def _handle_dynamic_classification(uploaded_file):
         </div>
         """, unsafe_allow_html=True)
         
-        # Récupération de la colonne de texte
-        text_column = st.session_state.get('text_column', df.columns[0])
+        # Récupération de la colonne de texte (ou sélection interactive)
+        text_column = st.session_state.get('text_column', None)
+        if text_column is None or text_column not in df.columns:
+            text_column = df.columns[0]  # Défaut à la première colonne
         
-        # Prétraitement automatique du dataset
+        # Prétraitement DYNAMIQUE du dataset (recalculé à chaque fois)
+        # IMPORTANT: Ne pas utiliser de cache ici pour garantir dynamisme
         df_preprocessed, preprocessing_stats = _preprocess_dataset(df, text_column)
         
-        # Affichage des résultats du prétraitement
+        # Affichage des résultats du prétraitement (dynamiques)
         _display_preprocessing_results(df, df_preprocessed, preprocessing_stats, text_column)
         
-        # Sauvegarde du dataset prétraité
+        # Sauvegarde temporaire UNIQUEMENT pour cette session (pas de cache entre fichiers)
         st.session_state['preprocessed_dataframe'] = df_preprocessed
         st.session_state['preprocessing_stats'] = preprocessing_stats
+        st.session_state['current_file_name'] = uploaded_file.name
         
         st.markdown("---")
         
@@ -600,15 +691,19 @@ def _handle_dynamic_classification(uploaded_file):
         </div>
         """, unsafe_allow_html=True)
         
-        if st.button("Lancer la Classification LLM", type="primary", use_container_width=True):
-            # Utilise le dataset prétraité
-            df_to_classify = st.session_state.get('preprocessed_dataframe', df_preprocessed)
+        if st.button("Lancer la Classification LLM", type="primary", use_container_width=True, key='btn_classify_llm'):
+            # ================================================================
+            # CLASSIFICATION 100% DYNAMIQUE
+            # ================================================================
+            # Utilise TOUJOURS le dataset fraîchement prétraité (pas de cache)
+            # Chaque fichier uploadé = nouvelles données = nouveaux résultats
+            df_to_classify = df_preprocessed  # Utiliser les données fraîches, pas le cache
             
-            # Classification dynamique complète
+            # Classification dynamique complète (recalcule TOUT)
             df_classified, metrics = _perform_dynamic_classification(df_to_classify, text_column)
             
             if df_classified is not None and metrics is not None:
-                # Affichage des résultats
+                # Affichage des résultats (100% dynamiques basés sur df_classified et metrics)
                 _display_classification_results(df_classified, metrics)
         
     except Exception as e:
@@ -696,40 +791,59 @@ def _display_file_info(uploaded_file, df):
     st.session_state['dataframe'] = df
 
 def _perform_dynamic_classification(df: pd.DataFrame, text_column: str):
-    """Effectue une classification dynamique complète du dataset (déjà prétraité)"""
+    """
+    Effectue la classification LLM sur exactement les 50 premiers tweets
     
+    Cette fonction limite le traitement aux 50 premiers tweets du dataset
+    pour une analyse rapide. Chaque tweet est classifié selon plusieurs
+    dimensions: réclamation, topics, sentiment, urgence, incident, confidence.
+    
+    Args:
+        df: DataFrame contenant les tweets à classifier
+        text_column: Nom de la colonne contenant le texte
+        
+    Returns:
+        tuple: (df_classified, metrics) ou (None, None) en cas d'erreur
+    """
     # Barre de progression
     progress_bar = st.progress(0)
     status_text = st.empty()
     
     try:
-        # Le dataset est déjà prétraité, on passe directement à la classification
-        status_text.text("Classification en cours...")
+        # ============================================================
+        # LIMITATION À 50 TWEETS - Requirement Principal
+        # ============================================================
+        TWEETS_LIMIT = 50
+        total_in_file = len(df)
+        df_to_classify = df.head(TWEETS_LIMIT).copy()
+        total_tweets = len(df_to_classify)
+        
+        # Information utilisateur
+        if total_in_file > TWEETS_LIMIT:
+            st.info(f"**Analyse limitee:** Traitement des **{TWEETS_LIMIT} premiers tweets** sur {total_in_file:,} disponibles dans le fichier.")
+        else:
+            st.info(f"**Analyse complete:** Traitement des **{total_tweets} tweets** du fichier.")
+        
+        # Classification
+        status_text.text(f"Classification des {total_tweets} tweets en cours...")
         progress_bar.progress(0.2)
         
-        config = st.session_state.get('llm_config', {})
-        batch_size = config.get('batch_size', 50)
-        
         results = []
-        total_tweets = len(df)
-        
-        for i in range(0, total_tweets, batch_size):
-            batch = df[text_column].iloc[i:min(i+batch_size, total_tweets)]
+        for i, text in enumerate(df_to_classify[text_column], 1):
+            result = _classify_single_tweet(str(text))
+            results.append(result)
             
-            for text in batch:
-                result = _classify_single_tweet(str(text))
-                results.append(result)
-            
-            # Mise à jour progression
-            progress = 0.2 + (i / total_tweets) * 0.6
-            progress_bar.progress(min(progress, 0.8))
-            status_text.text(f"Classification: {min(i+batch_size, total_tweets)}/{total_tweets} tweets")
+            # Mise à jour tous les 10 tweets
+            if i % 10 == 0 or i == total_tweets:
+                progress = 0.2 + (i / total_tweets) * 0.6
+                progress_bar.progress(min(progress, 0.8))
+                status_text.text(f"Classification: {i}/{total_tweets} tweets ({i/total_tweets*100:.0f}%)")
         
-        # Étape 2: Enrichissement du dataset
-        status_text.text("Enrichissement des données...")
+        # Enrichissement du dataset
+        status_text.text("Enrichissement des donnees...")
         progress_bar.progress(0.85)
         
-        df_classified = df.copy()
+        df_classified = df_to_classify.copy()
         df_classified['is_claim'] = [r['is_claim'] for r in results]
         df_classified['topics'] = [r['topics'] for r in results]
         df_classified['sentiment'] = [r['sentiment'] for r in results]
@@ -737,8 +851,8 @@ def _perform_dynamic_classification(df: pd.DataFrame, text_column: str):
         df_classified['incident'] = [r['incident'] for r in results]
         df_classified['confidence'] = [r['confidence'] for r in results]
         
-        # Étape 3: Calcul des métriques
-        status_text.text("Calcul des métriques...")
+        # Calcul des métriques
+        status_text.text("Calcul des metriques...")
         progress_bar.progress(0.95)
         
         metrics = _calculate_classification_metrics(df_classified)
@@ -747,6 +861,14 @@ def _perform_dynamic_classification(df: pd.DataFrame, text_column: str):
         progress_bar.progress(1.0)
         status_text.empty()
         progress_bar.empty()
+        
+        # Message de succès
+        st.success(f"""
+        **Classification terminee avec succes!**
+        - **{total_tweets} tweets** classifies
+        - **{metrics['claims']} reclamations** detectees ({metrics['claims_percentage']:.1f}%)
+        - **Confiance moyenne:** {metrics['avg_confidence']:.1%}
+        """)
         
         return df_classified, metrics
         
@@ -839,43 +961,364 @@ def _classify_single_tweet(tweet: str) -> Dict[str, Any]:
         'confidence': round(confidence, 2)
     }
 
+def _prepare_df_for_business_kpis(df: pd.DataFrame) -> pd.DataFrame:
+    """
+    Prépare le DataFrame pour les KPIs business en convertissant les formats
+    
+    Convertit les colonnes du format Classification LLM vers le format attendu
+    par le module enhanced_kpis_vizualizations:
+    - sentiment: 'pos'/'neu'/'neg' → 'positive'/'neutral'/'negative'
+    - urgence: 'haute'/'moyenne'/'basse' → priority: 'haute'/'moyenne'/'basse'
+    - incident → category
+    - topics → conservé tel quel
+    
+    Args:
+        df: DataFrame classifié au format LLM
+        
+    Returns:
+        DataFrame au format compatible avec KPIs business
+    """
+    # Créer une copie pour ne pas modifier l'original
+    df_converted = df.copy()
+    
+    # Conversion du sentiment (pos/neu/neg → positive/neutral/negative)
+    sentiment_mapping = {
+        'pos': 'positive',
+        'neu': 'neutral',
+        'neg': 'negative',
+        'positif': 'positive',
+        'neutre': 'neutral',
+        'negatif': 'negative'
+    }
+    
+    # Appliquer la conversion sur la colonne sentiment
+    if 'sentiment' in df_converted.columns:
+        df_converted['sentiment'] = df_converted['sentiment'].map(
+            lambda x: sentiment_mapping.get(str(x).lower(), str(x))
+        )
+    
+    # Renommer urgence en priority si nécessaire
+    if 'urgence' in df_converted.columns and 'priority' not in df_converted.columns:
+        df_converted['priority'] = df_converted['urgence']
+    
+    # Renommer incident en category si nécessaire
+    if 'incident' in df_converted.columns and 'category' not in df_converted.columns:
+        df_converted['category'] = df_converted['incident']
+    
+    # S'assurer que is_claim est numérique (pour le calcul du taux)
+    if 'is_claim' in df_converted.columns:
+        df_converted['is_claim'] = df_converted['is_claim'].astype(int)
+    
+    # Retourner le DataFrame converti
+    return df_converted
+
+
 def _calculate_classification_metrics(df: pd.DataFrame) -> Dict[str, Any]:
-    """Calcule les métriques de classification"""
+    """
+    Calcule les métriques de classification détaillées pour les 50 tweets
     
+    Cette fonction agrège toutes les statistiques de classification
+    incluant comptages, pourcentages et distributions pour tous les indicateurs.
+    
+    Args:
+        df: DataFrame classifié avec colonnes is_claim, sentiment, urgence, etc.
+        
+    Returns:
+        Dictionnaire contenant toutes les métriques calculées
+    """
+    # Calcul du nombre total de tweets
     total_tweets = len(df)
+    
+    # ==============================================================
+    # 1. RÉCLAMATIONS (is_claim) - Comptage + Pourcentage
+    # ==============================================================
     claims = df['is_claim'].sum()
+    claims_percentage = (claims / total_tweets * 100) if total_tweets > 0 else 0
+    non_claims = total_tweets - claims
+    non_claims_percentage = 100 - claims_percentage
     
-    # Distribution des incidents
-    incident_dist = df['incident'].value_counts()
-    
-    # Distribution des sentiments
-    sentiment_dist = df['sentiment'].value_counts()
-    
-    # Distribution des urgences
-    urgence_dist = df['urgence'].value_counts()
-    
+    # ==============================================================
+    # 2. TOPICS (fibre, mobile, facture) - Comptages détaillés
+    # ==============================================================
     # Topics (flatten list of lists)
     all_topics = [topic for topics in df['topics'] for topic in topics]
     topic_dist = pd.Series(all_topics).value_counts()
     
-    # Confiance moyenne
-    avg_confidence = df['confidence'].mean()
+    # Comptages spécifiques pour les 3 topics principaux
+    topic_fibre = sum(1 for topics in df['topics'] if 'fibre' in topics)
+    topic_mobile = sum(1 for topics in df['topics'] if 'mobile' in topics)
+    topic_facture = sum(1 for topics in df['topics'] if 'facture' in topics)
     
-    # Comptages spécifiques
-    negative_sentiments = len(df[df['sentiment'] == 'neg'])
-    high_urgency = len(df[df['urgence'] == 'haute'])
+    # ==============================================================
+    # 3. SENTIMENT (positif, neutre, négatif) - Comptages
+    # ==============================================================
+    sentiment_dist = df['sentiment'].value_counts()
+    sentiment_positive = len(df[df['sentiment'] == 'pos'])
+    sentiment_neutral = len(df[df['sentiment'] == 'neu'])
+    sentiment_negative = len(df[df['sentiment'] == 'neg'])
+    
+    # ==============================================================
+    # 4. URGENCE (haute, moyenne, basse) - Comptages
+    # ==============================================================
+    urgence_dist = df['urgence'].value_counts()
+    urgence_haute = len(df[df['urgence'] == 'haute'])
+    urgence_moyenne = len(df[df['urgence'] == 'moyenne'])
+    urgence_basse = len(df[df['urgence'] == 'basse'])
+    
+    # ==============================================================
+    # 5. INCIDENT - Distribution
+    # ==============================================================
+    incident_dist = df['incident'].value_counts()
+    
+    # ==============================================================
+    # 6. CONFIDENCE - Statistiques
+    # ==============================================================
+    avg_confidence = df['confidence'].mean()
+    min_confidence = df['confidence'].min()
+    max_confidence = df['confidence'].max()
     
     return {
+        # Métriques générales
         'total_tweets': total_tweets,
+        
+        # 1. Réclamations (AVEC pourcentage)
         'claims': int(claims),
-        'avg_confidence': avg_confidence,
-        'negative_sentiments': negative_sentiments,
-        'high_urgency': high_urgency,
-        'incident_dist': incident_dist,
+        'claims_percentage': claims_percentage,
+        'non_claims': non_claims,
+        'non_claims_percentage': non_claims_percentage,
+        
+        # 2. Topics
+        'topic_fibre': topic_fibre,
+        'topic_mobile': topic_mobile,
+        'topic_facture': topic_facture,
+        'topic_dist': topic_dist,
+        
+        # 3. Sentiments
+        'sentiment_positive': sentiment_positive,
+        'sentiment_neutral': sentiment_neutral,
+        'sentiment_negative': sentiment_negative,
         'sentiment_dist': sentiment_dist,
+        'negative_sentiments': sentiment_negative,  # Pour compatibilité
+        
+        # 4. Urgences
+        'urgence_haute': urgence_haute,
+        'urgence_moyenne': urgence_moyenne,
+        'urgence_basse': urgence_basse,
         'urgence_dist': urgence_dist,
-        'topic_dist': topic_dist
+        'high_urgency': urgence_haute,  # Pour compatibilité
+        
+        # 5. Incidents
+        'incident_dist': incident_dist,
+        
+        # 6. Confidence
+        'avg_confidence': avg_confidence,
+        'min_confidence': min_confidence,
+        'max_confidence': max_confidence
     }
+
+def _display_detailed_visualizations_50_tweets(df: pd.DataFrame, metrics: Dict[str, Any]):
+    """
+    Affiche les visualisations détaillées pour les 50 tweets classifiés
+    
+    Crée 6 visualisations principales dynamiques:
+    1. Détection de réclamations (is_claim) - Donut avec comptage + pourcentage
+    2. Distribution des topics (fibre, mobile, facture) - Bar chart
+    3. Distribution des sentiments (positif, neutre, négatif) - Donut
+    4. Distribution de l'urgence (haute, moyenne, basse) - Bar horizontal
+    5. Distribution des incidents - Pie chart
+    6. Score de confiance - Histogram avec ligne moyenne
+    
+    Args:
+        df: DataFrame classifié
+        metrics: Dictionnaire des métriques
+    """
+    st.markdown("---")
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                padding: 2rem; border-radius: 12px; margin: 1.5rem 0; text-align: center;
+                box-shadow: 0 10px 30px rgba(102, 126, 234, 0.3);">
+        <h2 style="color: white; margin: 0; font-size: 2rem; font-weight: 700;">
+            <i class="fas fa-chart-bar" style="margin-right: 0.75rem;"></i>
+            Analyse Detaillee des Classifications
+        </h2>
+        <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 1.1rem;">
+            Visualisations interactives des {0} tweets analyses
+        </p>
+    </div>
+    """.format(metrics['total_tweets']), unsafe_allow_html=True)
+    
+    # ROW 1: Réclamations + Topics
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.markdown("#### <i class='fas fa-exclamation-circle'></i> Detection de Reclamations", unsafe_allow_html=True)
+        fig_claims = go.Figure(data=[go.Pie(
+            labels=['Réclamations', 'Non-réclamations'],
+            values=[metrics['claims'], metrics['non_claims']],
+            hole=0.4,
+            marker=dict(colors=['#CC0000', '#48bb78']),
+            textinfo='label+percent',
+            hovertemplate='<b>%{label}</b><br>Comptage: %{value}<br>Pourcentage: %{percent}<extra></extra>'
+        )])
+        fig_claims.update_layout(
+            showlegend=True,
+            height=350,
+            margin=dict(t=10, b=10, l=10, r=10),
+            annotations=[dict(
+                text=f'<b>{metrics["claims"]}</b><br><span style="font-size:0.9em">{metrics["claims_percentage"]:.1f}%</span>',
+                x=0.5, y=0.5, font_size=16, showarrow=False
+            )]
+        )
+        st.plotly_chart(fig_claims, use_container_width=True, key='viz_claims_donut')
+        st.caption(f"**Info:** {metrics['claims']} reclamations sur {metrics['total_tweets']} tweets ({metrics['claims_percentage']:.1f}%)")
+    
+    with col2:
+        st.markdown("#### <i class='fas fa-tags'></i> Topics Detectes", unsafe_allow_html=True)
+        topics_df = pd.DataFrame({
+            'Topic': ['Fibre', 'Mobile', 'Facture'],
+            'Comptage': [
+                metrics['topic_fibre'],
+                metrics['topic_mobile'],
+                metrics['topic_facture']
+            ]
+        })
+        fig_topics = px.bar(
+            topics_df,
+            x='Topic',
+            y='Comptage',
+            color='Topic',
+            color_discrete_map={'Fibre': '#667eea', 'Mobile': '#f6ad55', 'Facture': '#48bb78'},
+            text='Comptage'
+        )
+        fig_topics.update_traces(texttemplate='%{text}', textposition='outside')
+        fig_topics.update_layout(
+            showlegend=False,
+            height=350,
+            xaxis_title='',
+            yaxis_title='Nombre de tweets',
+            margin=dict(t=10, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_topics, use_container_width=True, key='viz_topics_bar')
+        total_topics_count = metrics['topic_fibre'] + metrics['topic_mobile'] + metrics['topic_facture']
+        st.caption(f"**Info:** {total_topics_count} topics identifies (un tweet peut avoir plusieurs topics)")
+    
+    # ROW 2: Sentiment + Urgence
+    col3, col4 = st.columns(2)
+    
+    with col3:
+        st.markdown("#### <i class='fas fa-smile'></i> Distribution des Sentiments", unsafe_allow_html=True)
+        sentiment_df = pd.DataFrame({
+            'Sentiment': ['Positif', 'Neutre', 'Négatif'],
+            'Comptage': [
+                metrics['sentiment_positive'],
+                metrics['sentiment_neutral'],
+                metrics['sentiment_negative']
+            ]
+        })
+        fig_sentiment = go.Figure(data=[go.Pie(
+            labels=sentiment_df['Sentiment'],
+            values=sentiment_df['Comptage'],
+            hole=0.5,
+            marker=dict(colors=['#48bb78', '#90cdf4', '#fc8181']),
+            textinfo='label+value',
+            hovertemplate='<b>%{label}</b><br>%{value} tweets<br>%{percent}<extra></extra>'
+        )])
+        fig_sentiment.update_layout(
+            showlegend=True,
+            height=350,
+            margin=dict(t=10, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_sentiment, use_container_width=True, key='viz_sentiment_donut')
+        dominant = sentiment_df.loc[sentiment_df['Comptage'].idxmax(), 'Sentiment']
+        st.caption(f"**Info:** Sentiment dominant: {dominant} ({sentiment_df['Comptage'].max()} tweets)")
+    
+    with col4:
+        st.markdown("#### <i class='fas fa-bolt'></i> Niveaux d'Urgence", unsafe_allow_html=True)
+        urgence_df = pd.DataFrame({
+            'Urgence': ['Haute', 'Moyenne', 'Basse'],
+            'Comptage': [
+                metrics['urgence_haute'],
+                metrics['urgence_moyenne'],
+                metrics['urgence_basse']
+            ]
+        })
+        fig_urgence = px.bar(
+            urgence_df,
+            y='Urgence',
+            x='Comptage',
+            orientation='h',
+            color='Urgence',
+            color_discrete_map={'Haute': '#e53e3e', 'Moyenne': '#dd6b20', 'Basse': '#48bb78'},
+            text='Comptage'
+        )
+        fig_urgence.update_traces(texttemplate='%{text}', textposition='outside')
+        fig_urgence.update_layout(
+            showlegend=False,
+            height=350,
+            xaxis_title='Nombre de tweets',
+            yaxis_title='',
+            margin=dict(t=10, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_urgence, use_container_width=True, key='viz_urgence_bar')
+        urgent_pct = (metrics['urgence_haute'] / metrics['total_tweets'] * 100)
+        st.caption(f"**Info:** Tweets urgents: {metrics['urgence_haute']} ({urgent_pct:.1f}%)")
+    
+    # ROW 3: Incident + Confiance
+    col5, col6 = st.columns(2)
+    
+    with col5:
+        st.markdown("#### <i class='fas fa-tools'></i> Types d'Incidents", unsafe_allow_html=True)
+        if 'incident_dist' in metrics and not metrics['incident_dist'].empty:
+            incident_df = pd.DataFrame({
+                'Type': metrics['incident_dist'].index,
+                'Comptage': metrics['incident_dist'].values
+            })
+            fig_incident = px.pie(
+                incident_df,
+                names='Type',
+                values='Comptage',
+                color_discrete_sequence=px.colors.qualitative.Set3
+            )
+            fig_incident.update_traces(
+                textinfo='label+value',
+                hovertemplate='<b>%{label}</b><br>%{value} tweets<br>%{percent}<extra></extra>'
+            )
+            fig_incident.update_layout(
+                showlegend=True,
+                height=350,
+                margin=dict(t=10, b=10, l=10, r=10)
+            )
+            st.plotly_chart(fig_incident, use_container_width=True, key='viz_incident_pie')
+            top_incident = incident_df.loc[incident_df['Comptage'].idxmax(), 'Type']
+            st.caption(f"**Info:** Incident principal: {top_incident}")
+        else:
+            st.warning("Aucune donnee d'incident disponible")
+    
+    with col6:
+        st.markdown("#### <i class='fas fa-check-circle'></i> Score de Confiance", unsafe_allow_html=True)
+        fig_confidence = px.histogram(
+            df,
+            x='confidence',
+            nbins=20,
+            color_discrete_sequence=['#667eea'],
+            labels={'confidence': 'Score de Confiance', 'count': 'Fréquence'}
+        )
+        fig_confidence.add_vline(
+            x=metrics['avg_confidence'],
+            line_dash="dash",
+            line_color="#CC0000",
+            annotation_text=f"Moyenne: {metrics['avg_confidence']:.2f}",
+            annotation_position="top"
+        )
+        fig_confidence.update_layout(
+            showlegend=False,
+            height=350,
+            xaxis_title='Score de Confiance (0-1)',
+            yaxis_title='Nombre de tweets',
+            margin=dict(t=10, b=10, l=10, r=10)
+        )
+        st.plotly_chart(fig_confidence, use_container_width=True, key='viz_confidence_hist')
+        st.caption(f"**Info:** Confiance: {metrics['avg_confidence']:.2f} (min: {metrics['min_confidence']:.2f}, max: {metrics['max_confidence']:.2f})")
 
 def _display_classification_results(df: pd.DataFrame, metrics: Dict[str, Any]):
     """Affiche les résultats de classification avec visualisations professionnelles"""
@@ -924,8 +1367,128 @@ def _display_classification_results(df: pd.DataFrame, metrics: Dict[str, Any]):
     
     st.markdown("<br>", unsafe_allow_html=True)
     
-    # 3 Tabs de visualisation
-    tab1, tab2, tab3 = st.tabs(["Distribution", "Analyse", "Détails"])
+    # ==================================================================
+    # SECTION: VISUALISATIONS DÉTAILLÉES DES 50 TWEETS
+    # ==================================================================
+    # Affichage des 6 graphiques pour analyser les 50 tweets classifiés
+    # ==================================================================
+    
+    _display_detailed_visualizations_50_tweets(df, metrics)
+    
+    # ==================================================================
+    # SECTION: TABLEAU DE BORD BUSINESS (NOUVEAUX KPIs)
+    # ==================================================================
+    # Cette section affiche les nouveaux KPIs business et visualisations avancées
+    # Elle utilise le module enhanced_kpis_vizualizations.py
+    # ==================================================================
+    
+    if ENHANCED_KPIS_AVAILABLE:
+        # Séparateur visuel avant le dashboard business
+        st.markdown("---")
+        
+        # Header moderne et professionnel du dashboard business
+        # Utilise le gradient rouge Free Mobile pour coherence visuelle avec Page 1
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); 
+                    padding: 2.5rem 2rem; border-radius: 12px; margin: 2rem 0; text-align: center;
+                    box-shadow: 0 10px 30px rgba(204, 0, 0, 0.3);">
+            <h2 style="color: white; margin: 0; font-size: 2.2rem; font-weight: 800; letter-spacing: -0.5px;">
+                <i class="fas fa-chart-line" style="margin-right: 1rem; font-size: 2rem;"></i>
+                TABLEAU DE BORD BUSINESS
+            </h2>
+            <p style="color: rgba(255,255,255,0.95); margin: 1rem 0 0 0; font-size: 1.1rem; font-weight: 400;">
+                Indicateurs cles de performance et analyses avancees
+            </p>
+            <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid rgba(255,255,255,0.2);">
+                <span style="color: rgba(255,255,255,0.85); font-size: 0.9rem;">
+                    Donnees calculees en temps reel sur le dataset actuel
+                </span>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # ================================================================
+        # CALCUL DYNAMIQUE DES KPIs BUSINESS
+        # ================================================================
+        # IMPORTANT: Les KPIs sont TOUJOURS recalcules à partir du DataFrame
+        # actuel (df). Aucun cache n'est utilise. Chaque nouveau fichier
+        # uploadé génère de nouveaux KPIs basés sur ses propres données.
+        # ================================================================
+        
+        # Preparer le DataFrame au format attendu par les KPIs business
+        # Conversion DYNAMIQUE du format LLM (pos/neu/neg) vers format business (positive/neutral/negative)
+        df_for_business = _prepare_df_for_business_kpis(df)
+        
+        # Obtenir le role actuel pour filtrage
+        display_role = get_current_role() if ROLE_SELECTOR_AVAILABLE else "Data Analyst"
+        
+        # Filtrer le DataFrame selon le role (si applicable)
+        if ROLE_SELECTOR_AVAILABLE:
+            # Appliquer le filtre de role sur les donnees
+            df_for_business = filter_dataframe_by_role(df_for_business, display_role)
+            
+            # Afficher un message personnalise selon le role
+            role_message = get_dashboard_message_by_role(display_role)
+            if role_message:
+                st.markdown(role_message, unsafe_allow_html=True)
+        
+        # Calculer les KPIs business DYNAMIQUEMENT sur les donnees actuelles
+        # Cette fonction recalcule TOUT (pas de cache) à partir de df_for_business
+        business_kpis = compute_business_kpis(df_for_business)
+        
+        # Filtrer les KPIs selon le role
+        if ROLE_SELECTOR_AVAILABLE:
+            business_kpis = filter_kpis_by_role(business_kpis, display_role)
+        
+        # Rendre le dashboard avec KPIs filtres selon le role
+        render_business_kpis(business_kpis)
+        
+        # Rendre les visualisations (affichees pour tous les roles)
+        # Appel de la fonction depuis le module importe
+        enhanced_kpis_vizualizations.render_enhanced_visualizations(df_for_business, business_kpis)
+        
+        # Section insights (visible pour tous les roles)
+        st.markdown("---")
+        st.markdown("""
+        <div style="text-align: center; margin: 1.5rem 0 1rem 0;">
+            <h3 style="font-size: 1.5rem; font-weight: 700; color: #1a202c; margin: 0;">
+                <i class="fas fa-lightbulb" style="color: #CC0000; margin-right: 0.75rem;"></i>
+                Synthese Business
+            </h3>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        # Affichage des insights en 3 colonnes
+        insights_col1, insights_col2, insights_col3 = st.columns(3)
+        
+        with insights_col1:
+            st.info(f"**Volume Total**: {len(df_for_business):,} tweets analyses")
+        
+        with insights_col2:
+            if 'satisfaction_index' in business_kpis:
+                satisfaction = business_kpis['satisfaction_index']['value']
+                if satisfaction > 60:
+                    st.success(f"**Satisfaction**: Positive ({satisfaction:.0f}/100)")
+                elif satisfaction > 40:
+                    st.warning(f"**Satisfaction**: Neutre ({satisfaction:.0f}/100)")
+                else:
+                    st.error(f"**Satisfaction**: Negative ({satisfaction:.0f}/100)")
+        
+        with insights_col3:
+            if 'urgency_rate' in business_kpis:
+                urgency = business_kpis['urgency_rate']['urgency_pct']
+                if urgency > 20:
+                    st.error(f"**Urgence**: Elevee ({urgency:.1f}%)")
+                elif urgency > 10:
+                    st.warning(f"**Urgence**: Moderee ({urgency:.1f}%)")
+                else:
+                    st.success(f"**Urgence**: Faible ({urgency:.1f}%)")
+        
+        # Séparateur après le dashboard
+        st.markdown("---")
+    
+    # 3 Tabs de visualisation (anciennes visualisations - retrocompatibilite)
+    tab1, tab2, tab3 = st.tabs(["Distribution", "Analyse", "Details"])
     
     with tab1:
         st.markdown("### Distribution des Classifications")
@@ -933,30 +1496,44 @@ def _display_classification_results(df: pd.DataFrame, metrics: Dict[str, Any]):
         
         with col1:
             # Pie chart - Distribution des incidents
-            if not metrics['incident_dist'].empty:
-                fig_incident = px.pie(
-                    values=metrics['incident_dist'].values,
-                    names=metrics['incident_dist'].index,
-                    title="<b>Répartition par Type d'Incident</b>",
-                    color_discrete_sequence=px.colors.sequential.Reds
-                )
-                fig_incident.update_traces(textposition='inside', textinfo='percent+label')
-                fig_incident.update_layout(title_font_size=16, showlegend=True)
-                st.plotly_chart(fig_incident, use_container_width=True)
+            # Ensure consistent rendering to prevent DOM issues
+            try:
+                if not metrics['incident_dist'].empty:
+                    fig_incident = px.pie(
+                        values=metrics['incident_dist'].values,
+                        names=metrics['incident_dist'].index,
+                        title="<b>Répartition par Type d'Incident</b>",
+                        color_discrete_sequence=px.colors.sequential.Reds
+                    )
+                    fig_incident.update_traces(textposition='inside', textinfo='percent+label')
+                    fig_incident.update_layout(title_font_size=16, showlegend=True)
+                    st.plotly_chart(fig_incident, use_container_width=True)
+                else:
+                    st.info("Aucune donnée d'incident disponible")
+            except Exception as e:
+                st.warning("Impossible d'afficher le graphique des incidents")
+                logger.warning(f"Error rendering incident chart: {e}")
         
         with col2:
             # Bar chart - Fréquence des topics
-            if not metrics['topic_dist'].empty:
-                fig_topics = px.bar(
-                    x=metrics['topic_dist'].index,
-                    y=metrics['topic_dist'].values,
-                    title="<b>Fréquence par Topic</b>",
-                    color=metrics['topic_dist'].values,
-                    color_continuous_scale='Reds',
-                    labels={'x': 'Topic', 'y': 'Nombre'}
-                )
-                fig_topics.update_layout(title_font_size=16, showlegend=False)
-                st.plotly_chart(fig_topics, use_container_width=True)
+            # Ensure consistent rendering to prevent DOM issues
+            try:
+                if not metrics['topic_dist'].empty:
+                    fig_topics = px.bar(
+                        x=metrics['topic_dist'].index,
+                        y=metrics['topic_dist'].values,
+                        title="<b>Fréquence par Topic</b>",
+                        color=metrics['topic_dist'].values,
+                        color_continuous_scale='Reds',
+                        labels={'x': 'Topic', 'y': 'Nombre'}
+                    )
+                    fig_topics.update_layout(title_font_size=16, showlegend=False)
+                    st.plotly_chart(fig_topics, use_container_width=True)
+                else:
+                    st.info("Aucune donnée de topic disponible")
+            except Exception as e:
+                st.warning("Impossible d'afficher le graphique des topics")
+                logger.warning(f"Error rendering topics chart: {e}")
     
     with tab2:
         st.markdown("### Analyse Détaillée")
@@ -964,35 +1541,49 @@ def _display_classification_results(df: pd.DataFrame, metrics: Dict[str, Any]):
         
         with col1:
             # Sentiment avec couleurs sémantiques
-            if not metrics['sentiment_dist'].empty:
-                fig_sentiment = px.bar(
-                    x=metrics['sentiment_dist'].index,
-                    y=metrics['sentiment_dist'].values,
-                    title="<b>Distribution des Sentiments</b>",
-                    color=metrics['sentiment_dist'].index,
-                    color_discrete_map={
-                        'pos': '#38a169',
-                        'neu': '#3182ce',
-                        'neg': '#e53e3e'
-                    },
-                    labels={'x': 'Sentiment', 'y': 'Nombre'}
-                )
-                fig_sentiment.update_layout(title_font_size=16, showlegend=False)
-                st.plotly_chart(fig_sentiment, use_container_width=True)
+            # Ensure consistent rendering to prevent DOM issues
+            try:
+                if not metrics['sentiment_dist'].empty:
+                    fig_sentiment = px.bar(
+                        x=metrics['sentiment_dist'].index,
+                        y=metrics['sentiment_dist'].values,
+                        title="<b>Distribution des Sentiments</b>",
+                        color=metrics['sentiment_dist'].index,
+                        color_discrete_map={
+                            'pos': '#38a169',
+                            'neu': '#3182ce',
+                            'neg': '#e53e3e'
+                        },
+                        labels={'x': 'Sentiment', 'y': 'Nombre'}
+                    )
+                    fig_sentiment.update_layout(title_font_size=16, showlegend=False)
+                    st.plotly_chart(fig_sentiment, use_container_width=True)
+                else:
+                    st.info("Aucune donnée de sentiment disponible")
+            except Exception as e:
+                st.warning("Impossible d'afficher le graphique des sentiments")
+                logger.warning(f"Error rendering sentiment chart: {e}")
         
         with col2:
             # Urgence avec niveaux de priorité
-            if not metrics['urgence_dist'].empty:
-                fig_urgence = px.bar(
-                    x=metrics['urgence_dist'].index,
-                    y=metrics['urgence_dist'].values,
-                    title="<b>Répartition par Urgence</b>",
-                    color=metrics['urgence_dist'].values,
-                    color_continuous_scale='Oranges',
-                    labels={'x': 'Urgence', 'y': 'Nombre'}
-                )
-                fig_urgence.update_layout(title_font_size=16, showlegend=False)
-                st.plotly_chart(fig_urgence, use_container_width=True)
+            # Ensure consistent rendering to prevent DOM issues
+            try:
+                if not metrics['urgence_dist'].empty:
+                    fig_urgence = px.bar(
+                        x=metrics['urgence_dist'].index,
+                        y=metrics['urgence_dist'].values,
+                        title="<b>Répartition par Urgence</b>",
+                        color=metrics['urgence_dist'].values,
+                        color_continuous_scale='Oranges',
+                        labels={'x': 'Urgence', 'y': 'Nombre'}
+                    )
+                    fig_urgence.update_layout(title_font_size=16, showlegend=False)
+                    st.plotly_chart(fig_urgence, use_container_width=True)
+                else:
+                    st.info("Aucune donnée d'urgence disponible")
+            except Exception as e:
+                st.warning("Impossible d'afficher le graphique d'urgence")
+                logger.warning(f"Error rendering urgency chart: {e}")
     
     with tab3:
         st.markdown("### <i class='fas fa-table'></i> Tableau Détaillé Interactif", unsafe_allow_html=True)
@@ -1092,7 +1683,16 @@ def _display_classification_results(df: pd.DataFrame, metrics: Dict[str, Any]):
     with col3:
         # Nouvelle analyse
         if st.button("Nouvelle Analyse", type="primary", use_container_width=True):
-            st.rerun()
+            # Clear session state to start fresh
+            keys_to_clear = ['preprocessed_dataframe', 'preprocessing_stats', 'classified_dataframe', 'classification_metrics']
+            for key in keys_to_clear:
+                if key in st.session_state:
+                    del st.session_state[key]
+            
+            # Instead of rerun, we'll show a message and let the user upload a new file
+            st.info("Veuillez uploader un nouveau fichier pour commencer une nouvelle analyse")
+            # Reset the file uploader by clearing the uploaded file
+            st.session_state.pop('uploaded_file', None)
 
 
 

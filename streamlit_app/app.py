@@ -5,14 +5,19 @@ Developed as part of a Master's thesis in Data Science
 """
 
 import streamlit as st
+from services.auth_service import AuthService
+from components.auth_forms import render_auth_page
 
 # Configuration
 st.set_page_config(
     page_title="FreeMobilaChat - AI Analysis",
-    page_icon="📊",
+    page_icon="chart_with_upwards_trend",
     layout="wide",
     initial_sidebar_state="collapsed"
 )
+
+# Initialize authentication
+AuthService.init_session_state()
 
 # Custom CSS styles loading
 def load_css():
@@ -35,39 +40,80 @@ def load_css():
 
 def render_header():
     """Main header display with navigation"""
-    st.markdown("""
-    <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-            <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
-                <span style="font-size: 2rem; font-weight: 900; color: #CC0000; text-shadow: none; letter-spacing: -1px;">FM</span>
+    # Check if user is authenticated
+    user = AuthService.get_current_user()
+    
+    # Construct header based on authentication status
+    if not user:
+        # Public header with navigation links
+        st.markdown("""
+        <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <span style="font-size: 2rem; font-weight: 900; color: #CC0000; text-shadow: none; letter-spacing: -1px;">FM</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 1.8rem; font-weight: 900; color: white; line-height: 1; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">FreeMobila</span>
+                    <span style="font-size: 1.3rem; font-weight: 700; color: white; line-height: 1; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">CHAT</span>
+                </div>
             </div>
-            <div style="display: flex; flex-direction: column;">
-                <span style="font-size: 1.8rem; font-weight: 900; color: white; line-height: 1; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">FreeMobila</span>
-                <span style="font-size: 1.3rem; font-weight: 700; color: white; line-height: 1; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">CHAT</span>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+                <a href="#offres" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Offres</a>
+                <a href="#fonctionnalites" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Fonctionnalités</a>
+                <a href="#partenaires" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Partenaires</a>
+                <a href="#contact" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Contact</a>
             </div>
         </div>
-        <div style="display: flex; gap: 2rem;">
-            <a href="#offres" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Offres</a>
-            <a href="#fonctionnalites" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Fonctionnalites</a>
-            <a href="#partenaires" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Partenaires</a>
-            <a href="#contact" style="color: white; text-decoration: none; font-weight: 600; font-size: 1.1rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Contact</a>
+        """, unsafe_allow_html=True)
+    else:
+        # Authenticated header with user profile
+        role_icon = AuthService.get_role_icon(user.get("role", ""))
+        role_name = AuthService.get_role_display_name(user.get("role", ""))
+        full_name = user.get('full_name', '')
+        
+        # Use string formatting with proper escaping
+        st.markdown(f"""
+        <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 1.5rem 3rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+            <div style="display: flex; align-items: center; gap: 1rem;">
+                <div style="width: 60px; height: 60px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+                    <span style="font-size: 2rem; font-weight: 900; color: #CC0000; text-shadow: none; letter-spacing: -1px;">FM</span>
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                    <span style="font-size: 1.8rem; font-weight: 900; color: white; line-height: 1; letter-spacing: -1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">FreeMobila</span>
+                    <span style="font-size: 1.3rem; font-weight: 700; color: white; line-height: 1; letter-spacing: 1px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">CHAT</span>
+                </div>
+            </div>
+            <div style="display: flex; gap: 2rem; align-items: center;">
+                <div style="display: flex; align-items: center; gap: 1rem; background: rgba(255,255,255,0.1); padding: 0.5rem 1.5rem; border-radius: 25px;">
+                    <span style="font-size: 1.2rem;">{role_icon}</span>
+                    <div style="display: flex; flex-direction: column;">
+                        <span style="font-size: 0.9rem; font-weight: 600; color: white;">{full_name}</span>
+                        <span style="font-size: 0.75rem; color: rgba(255,255,255,0.8);">{role_name}</span>
+                    </div>
+                </div>
+            </div>
         </div>
-    </div>
-    """, unsafe_allow_html=True)
+        """, unsafe_allow_html=True)
 
 def render_hero():
     """Main section with application presentation"""
     st.markdown("""
-    <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 3rem 2rem; text-align: center; min-height: 60vh; display: flex; flex-direction: column; justify-content: center;">
+    <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); padding: 4rem 2rem 2rem; text-align: center; min-height: 50vh; display: flex; flex-direction: column; justify-content: center;">
         <h1 style="color: white; font-size: 2.8rem; font-weight: 900; margin-bottom: 1rem; text-shadow: 3px 3px 6px rgba(0,0,0,0.3); letter-spacing: -1px;">Analyze Your Tweets with AI</h1>
-        <p style="color: white; font-size: 1.1rem; opacity: 0.98; max-width: 700px; margin: 0 auto 2rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transform your Twitter data into actionable insights with artificial intelligence.<br>Sentiment analysis, automatic categorization and real-time KPIs.</p>
+        <p style="color: white; font-size: 1.1rem; opacity: 0.98; max-width: 700px; margin: 0 auto 3rem; text-shadow: 1px 1px 3px rgba(0,0,0,0.2); font-weight: 400; line-height: 1.6;">Transform your Twitter data into actionable insights with artificial intelligence.<br>Sentiment analysis, automatic categorization and real-time KPIs.</p>
     </div>
     """, unsafe_allow_html=True)
+    
+    # Espacement pour positionner le bouton plus bas
+    st.markdown("<div style='height: 1.5rem;'></div>", unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Start Now", type="primary", use_container_width=True):
-            st.switch_page("pages/1_Analyse_Intelligente.py")
+            st.switch_page("pages/2_Classification_LLM.py")
+    
+    # Espacement après le bouton
+    st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
     
     # Scroll indicator
     st.markdown("""
@@ -96,8 +142,7 @@ def render_hero():
                     background: white; 
                     border-radius: 20px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-                    margin: 0 1rem;
-                    transition: all 0.3s;">
+                    margin: 0 1rem;">
             <div class="icon-box">
                 <i class="fas fa-bolt"></i>
             </div>
@@ -405,52 +450,72 @@ def render_features():
     </div>
     """, unsafe_allow_html=True)
     
-    # Navigation cards with native Streamlit components
-    col1, col2, col3, col4 = st.columns(4, gap="medium")
+    # Navigation cards with native Streamlit components - Streamlined 2 Main Analysis Types
+    col1, col2, col3 = st.columns([1, 2, 1], gap="large")
     
     with col1:
-        st.markdown("""
-        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #CC0000; text-align: center;">
-            <i class="fas fa-brain" style="font-size: 2.5rem; color: #CC0000; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Intelligent Analysis</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Advanced AI with LLM for unique insights</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Start Intelligent Analysis", type="primary", use_container_width=True):
-            st.switch_page("pages/1_Analyse_Intelligente.py")
+        st.empty()  # Spacer for centering
     
     with col2:
-        st.markdown("""
-        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #28a745; text-align: center;">
-            <i class="fas fa-chart-bar" style="font-size: 2.5rem; color: #28a745; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Classic Analysis</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Traditional analysis with visualizations</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("Start Classic Analysis", type="secondary", use_container_width=True):
-            st.switch_page("pages/4_Analyse_Classique.py")
+        # Two main analysis options side by side
+        subcol1, subcol2 = st.columns(2, gap="large")
+        
+        with subcol1:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); 
+                        padding: 2.5rem 2rem; 
+                        border-radius: 20px; 
+                        box-shadow: 0 10px 30px rgba(204, 0, 0, 0.3); 
+                        text-align: center; 
+                        border: 3px solid #CC0000;">
+                <i class="fas fa-robot" style="font-size: 3rem; color: white; margin-bottom: 1rem;"></i>
+                <h3 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">LLM Classification</h3>
+                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Advanced AI analysis with 50-tweet intelligent classification</p>
+                <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Sentiment Detection</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
+                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Topic Categorization</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px;">
+                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Urgency Analysis</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Start LLM Classification", type="primary", use_container_width=True, key="btn_llm"):
+                st.switch_page("pages/2_Classification_LLM.py")
+        
+        with subcol2:
+            st.markdown("""
+            <div style="background: linear-gradient(135deg, #2E86DE 0%, #1E3A5F 100%); 
+                        padding: 2.5rem 2rem; 
+                        border-radius: 20px; 
+                        box-shadow: 0 10px 30px rgba(46, 134, 222, 0.3); 
+                        text-align: center; 
+                        border: 3px solid #2E86DE;
+                        position: relative;
+                        overflow: hidden;">
+                <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.5;"></div>
+                <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%; opacity: 0.5;"></div>
+                <i class="fas fa-brain" style="font-size: 3rem; color: white; margin-bottom: 1rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"></i>
+                <h3 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Mistral AI Classification</h3>
+                <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Advanced multi-model AI with 3 intelligent modes</p>
+                <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> BERT + Mistral + Rules</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> 88-95% Accuracy</p>
+                </div>
+                <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> 10 Business KPIs</p>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            if st.button("Start Mistral Classification", type="primary", use_container_width=True, key="btn_mistral"):
+                st.switch_page("pages/5_Classification_Mistral.py")
     
     with col3:
-        st.markdown("""
-        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #17a2b8; text-align: center;">
-            <i class="fas fa-chart-line" style="font-size: 2.5rem; color: #17a2b8; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">Results</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">View and explore your results</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("View Results", type="secondary", use_container_width=True):
-            st.switch_page("pages/3_Resultats.py")
-    
-    with col4:
-        st.markdown("""
-        <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); border-left: 4px solid #6f42c1; text-align: center;">
-            <i class="fas fa-robot" style="font-size: 2.5rem; color: #6f42c1; margin-bottom: 1rem;"></i>
-            <h3 style="color: #333; font-size: 1.5rem; font-weight: 700; margin-bottom: 1rem;">LLM Classification</h3>
-            <p style="color: #666; font-size: 1rem; margin-bottom: 1.5rem;">Automatic classification results</p>
-        </div>
-        """, unsafe_allow_html=True)
-        if st.button("View LLM Classification", type="secondary", use_container_width=True):
-            st.switch_page("pages/2_Classification_LLM.py")
+        st.empty()  # Spacer for centering
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
@@ -812,15 +877,95 @@ def render_footer():
     </div>
     """, unsafe_allow_html=True)
 
+def render_authenticated_landing():
+    """Landing page for authenticated users with dashboard access"""
+    # Get user information with proper error handling
+    user = AuthService.get_current_user()
+    if user is not None:
+        role = user.get("role", "agent_sav")  # Default to agent_sav if no role
+    else:
+        role = "agent_sav"  # Default role
+    
+    role_name = AuthService.get_role_display_name(role)
+    role_icon = AuthService.get_role_icon(role)
+    
+    st.markdown(f"""
+        <div style="text-align: center; padding: 3rem 2rem;">
+            <h1 style="color: #CC0000; font-size: 3rem; font-weight: 900; margin-bottom: 1rem;">
+                Welcome to FreeMobilaChat
+            </h1>
+            <p style="color: #666; font-size: 1.3rem; margin-bottom: 3rem;">
+                {role_icon} Logged in as <strong>{role_name}</strong>
+            </p>
+        </div>
+    """, unsafe_allow_html=True)
+    
+    # Role-specific dashboard access
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        # Map role to dashboard page
+        dashboard_pages = {
+            "client_sav": "pages/0_Home.py",
+            "agent_sav": "pages/0_Home.py",
+            "data_analyst": "pages/0_Home.py",
+            "manager": "pages/0_Home.py"
+        }
+        
+        if st.button("Go to My Dashboard", type="primary", use_container_width=True):
+            st.switch_page(dashboard_pages.get(role, "pages/0_Home.py"))
+        
+        st.markdown("<div style='height: 1rem;'></div>", unsafe_allow_html=True)
+        
+        if st.button("Logout", use_container_width=True):
+            AuthService.logout()
+            st.rerun()
+    
+    st.markdown("---")
+    
+    # Show available features based on role
+    st.header("Available Features")
+    
+    # All roles can access basic analysis
+    render_features()
+
+
 def main():
     """Main function"""
     load_css()
     render_header()
-    render_hero()
-    render_pricing()
-    render_features()
-    render_partners()
-    render_footer()
+    
+    # Check authentication status
+    if not AuthService.is_authenticated():
+        # Show login/signup page for unauthenticated users
+        render_hero()
+        
+        st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+        st.markdown("""
+            <div style="text-align: center; padding: 2rem; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 20px;">
+                <h2 style="color: #CC0000; font-size: 2.5rem; font-weight: 800; margin-bottom: 1rem;">
+                    Sign In to Get Started
+                </h2>
+                <p style="color: #666; font-size: 1.2rem;">
+                    Access your personalized dashboard and unlock powerful analysis tools
+                </p>
+            </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
+        
+        # Render authentication forms
+        render_auth_page()
+        
+        st.markdown("<div style='height: 3rem;'></div>", unsafe_allow_html=True)
+        
+        # Show public content
+        render_pricing()
+        render_features()
+        render_partners()
+        render_footer()
+    else:
+        # User is authenticated - show landing with dashboard access
+        render_authenticated_landing()
 
 if __name__ == "__main__":
     main()

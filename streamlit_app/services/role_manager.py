@@ -22,6 +22,7 @@ class UserRole(Enum):
     AGENT_SAV = "agent_sav"
     MANAGER = "manager"
     DATA_ANALYST = "data_analyst"
+    DIRECTOR = "director"
 
 
 @dataclass
@@ -56,12 +57,14 @@ class RoleManager:
                 icon="fa-headset",
                 color="#3182ce",
                 permissions=[
+                    "view_tickets",
+                    "view_basic_stats",
+                    "reply_customers",
                     "view_realtime_data",
                     "prioritize_claims",
                     "receive_urgent_alerts",
                     "process_tweets",
-                    "view_classification",
-                    "export_workload"
+                    "view_classification"
                 ],
                 features=[
                     "realtime_stream",
@@ -88,6 +91,11 @@ class RoleManager:
                 icon="fa-chart-line",
                 color="#38a169",
                 permissions=[
+                    "view_tickets",
+                    "view_all_stats",
+                    "export_data",
+                    "manage_team",
+                    "view_performance",
                     "view_global_stats",
                     "monitor_volumes",
                     "track_kpis",
@@ -123,6 +131,10 @@ class RoleManager:
                 icon="fa-microscope",
                 color="#805ad5",
                 permissions=[
+                    "view_tickets",
+                    "view_all_stats",
+                    "export_data",
+                    "create_reports",
                     "access_advanced_analytics",
                     "export_datasets",
                     "create_custom_filters",
@@ -149,6 +161,46 @@ class RoleManager:
                     "anomaly_detection",
                     "predictive_scores",
                     "classification_accuracy"
+                ]
+            ),
+            
+            UserRole.DIRECTOR.value: RoleConfiguration(
+                role_id="director",
+                display_name="Director (Admin)",
+                description="Accès administrateur complet à toutes les fonctionnalités",
+                icon="fa-crown",
+                color="#CC0000",
+                permissions=[
+                    "all",  # Accès total
+                    "view_tickets",
+                    "view_all_stats",
+                    "export_data",
+                    "manage_team",
+                    "view_performance",
+                    "create_reports",
+                    "admin_access",
+                    "system_configuration"
+                ],
+                features=[
+                    "all_features",
+                    "full_dashboard_access",
+                    "team_management",
+                    "performance_monitoring",
+                    "system_settings",
+                    "user_management",
+                    "data_export_all",
+                    "advanced_analytics",
+                    "report_generation"
+                ],
+                dashboard_layout="administrative",
+                priority_metrics=[
+                    "all_metrics",
+                    "system_health",
+                    "team_performance",
+                    "business_kpis",
+                    "user_activity",
+                    "data_quality",
+                    "security_metrics"
                 ]
             )
         }

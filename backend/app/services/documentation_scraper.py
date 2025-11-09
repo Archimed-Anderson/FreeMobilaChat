@@ -291,11 +291,11 @@ class DocumentationScraper:
             Document de connaissances ou None si erreur
         """
         if url in self.scraped_urls or url in self.failed_urls:
-            self.logger.info(f"⏭ URL déjà traitée: {url}")
+            self.logger.info(f"URL already processed: {url}")
             return None
 
         try:
-            self.logger.info(f"🔍 Scraping de l'URL: {url}")
+            self.logger.info(f"Scraping URL: {url}")
 
             async with aiohttp.ClientSession(headers=self.session_headers) as session:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=30)) as response:
@@ -395,13 +395,13 @@ class DocumentationScraper:
                 existing = await self._check_existing_document(document.content_hash)
 
                 if existing:
-                    self.logger.info(f"⏭ Document déjà existant: {document.title[:50]}...")
+                    self.logger.info(f"Document already exists: {document.title[:50]}...")
                     continue
 
                 # Stocker le document
                 await self._store_single_document(document)
                 stored_count += 1
-                self.logger.info(f"💾 Document stocké: {document.title[:50]}...")
+                self.logger.info(f"Document stored: {document.title[:50]}...")
 
             except Exception as e:
                 self.logger.error(f" Erreur lors du stockage de {document.title[:50]}...: {e}")

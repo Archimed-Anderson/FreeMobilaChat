@@ -282,7 +282,7 @@ RÈGLES:
     async def _call_ollama(self, prompt: str) -> Optional[Dict[str, Any]]:
         """Call Ollama API with detailed logging for debugging"""
         logger.info("=" * 80)
-        logger.info("🔍 OLLAMA API CALL - START")
+        logger.info("OLLAMA API CALL - START")
         logger.info("=" * 80)
 
         try:
@@ -301,7 +301,7 @@ RÈGLES:
             temperature = float(os.getenv("OLLAMA_TEMPERATURE", "0.2"))
             max_tokens = int(os.getenv("OLLAMA_MAX_TOKENS", "400"))
 
-            logger.info(f"📋 Configuration:")
+            logger.info(f"Configuration:")
             logger.info(f"   - Model: {model}")
             logger.info(f"   - Temperature: {temperature}")
             logger.info(f"   - Max tokens: {max_tokens}")
@@ -340,7 +340,7 @@ RÈGLES:
             logger.info(f" Status check passed (2xx)")
 
             # Step 5: Parse response
-            logger.info(f"🔍 Parsing response JSON...")
+            logger.info(f"Parsing response JSON...")
             data = response.json()
             logger.info(f"   - Response keys: {list(data.keys())}")
 
@@ -366,7 +366,7 @@ RÈGLES:
                             logger.info(f"   - Cleaned content: {content[:500]}...")
 
                             # Step 7: Parse JSON
-                            logger.info(f"🔍 Parsing JSON content...")
+                            logger.info(f"Parsing JSON content...")
                             try:
                                 parsed_json = json.loads(content)
                                 logger.info(f" JSON parsed successfully")

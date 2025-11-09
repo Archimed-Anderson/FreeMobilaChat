@@ -11,6 +11,7 @@ from pathlib import Path
 import logging
 from contextlib import asynccontextmanager
 import os
+from urllib.parse import quote_plus
 
 try:
     import aiosqlite
@@ -62,7 +63,14 @@ class DatabaseManager:
             db = os.getenv("POSTGRES_DB", "tweets_analysis")
             user = os.getenv("POSTGRES_USER", "postgres")
             password = os.getenv("POSTGRES_PASSWORD", "")
-            return f"postgresql://{user}:{password}@{host}:{port}/{db}"
+            # URL encode the password to handle special characters
+            try:
+                from urllib.parse import quote_plus
+                encoded_password = quote_plus(password)
+                return f"postgresql://{user}:{encoded_password}@{host}:{port}/{db}"
+            except Exception:
+                # Fallback if URL encoding fails
+                return f"postgresql://{user}:{password}@{host}:{port}/{db}"
         else:
             raise ValueError(f"Unsupported database type: {self.database_type}")
     

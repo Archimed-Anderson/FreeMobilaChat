@@ -1,0 +1,14 @@
+{
+  "total_tweets": 3749,
+  "pct_negatif": 14.43051480394772,
+  "pct_neutre": 80.84822619365164,
+  "pct_positif": 4.72125900240064,
+  "pct_urgent": 1.5737530008002134,
+  "top_5_themes": {
+    "autre": 2661,
+    "technique": 432,
+    "reseau": 329,
+    "service_client": 254,
+    "facture": 73
+  }
+}

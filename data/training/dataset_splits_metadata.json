@@ -1,0 +1,42 @@
+{
+  "date": "2025-11-08T23:11:00.487826",
+  "source_file": "data/training/train_dataset.csv",
+  "config": {
+    "source_file": "data/training/train_dataset.csv",
+    "output_dir": "data/training",
+    "train_ratio": 0.7,
+    "val_ratio": 0.15,
+    "test_ratio": 0.15,
+    "random_state": 42,
+    "stratify_on": "sentiment"
+  },
+  "splits": {
+    "train": {
+      "size": 2100,
+      "percentage": 70.0,
+      "sentiment_distribution": {
+        "neutre": 1170,
+        "positif": 697,
+        "negatif": 233
+      }
+    },
+    "validation": {
+      "size": 450,
+      "percentage": 15.0,
+      "sentiment_distribution": {
+        "neutre": 250,
+        "positif": 150,
+        "negatif": 50
+      }
+    },
+    "test": {
+      "size": 450,
+      "percentage": 15.0,
+      "sentiment_distribution": {
+        "neutre": 251,
+        "positif": 149,
+        "negatif": 50
+      }
+    }
+  }
+}

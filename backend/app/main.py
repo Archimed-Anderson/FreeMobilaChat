@@ -31,6 +31,10 @@ from .utils.validation import DataValidator
 from .utils.health_check import health_checker
 from .utils.database import get_database_manager
 
+# Import authentication routes
+from .auth.routes import router as auth_router
+
+
 # Configure logging with proper level from config and rotation
 # Create logs directory if it doesn't exist
 log_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'logs')
@@ -64,7 +68,7 @@ logging.basicConfig(
 )
 
 logger = logging.getLogger(__name__)
-logger.info(f" Logging configured: level={config.log_level}, file={log_file}")
+logger.info(f"Logging configured: level={config.log_level}, file={log_file}")
 
 # Initialize FastAPI app with configuration
 app = FastAPI(
@@ -83,6 +87,11 @@ app.add_middleware(
     allow_methods=config.security.allowed_methods,
     allow_headers=config.security.allowed_headers,
 )
+
+# Include authentication router
+app.include_router(auth_router)
+logger.info("Authentication router included")
+
 
 # Global exception handler
 @app.exception_handler(FreeMobilaChatException)
@@ -122,18 +131,18 @@ db_manager = get_database_manager()
 async def startup_event():
     """Initialize database and application components"""
     try:
-        logger.info(" Initializing FreeMobilaChat Application")
+        logger.info("Initializing FreeMobilaChat Application")
         await db_manager.initialize_database()
-        logger.info(" Database initialized successfully")
+        logger.info("Database initialized successfully")
 
         # Create necessary directories
         config.data_raw_dir.mkdir(parents=True, exist_ok=True)
         config.data_processed_dir.mkdir(parents=True, exist_ok=True)
         config.upload_dir.mkdir(parents=True, exist_ok=True)
 
-        logger.info(" Application startup completed")
+        logger.info("Application startup completed")
     except Exception as e:
-        logger.error(f" Application startup failed: {e}")
+        logger.error(f"Application startup failed: {e}")
         raise
 
 # Health check endpoints
@@ -235,29 +244,29 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
     """
     Test endpoint to analyze a single tweet with detailed debugging
     """
-    # PRINT to console to verify endpoint is called
+    # Verify endpoint is called and log parameters
     print("=" * 80)
-    print(f"🧪 ENDPOINT /test-analyze-single CALLED")
+    print(f"ENDPOINT /test-analyze-single CALLED")
     print(f"   - text parameter: {text[:100] if len(text) > 100 else text}")
     print(f"   - provider parameter: {provider}")
     print(f"   - text length: {len(text)} characters")
     print("=" * 80)
 
-    # LOG 1: Confirm endpoint is called
+    # Confirm endpoint is called
     logger.info("=" * 80)
-    logger.info(f"🧪 ENDPOINT /test-analyze-single CALLED")
+    logger.info(f"ENDPOINT /test-analyze-single CALLED")
     logger.info(f"   - text parameter: {text[:100] if len(text) > 100 else text}")
     logger.info(f"   - provider parameter: {provider}")
     logger.info(f"   - text length: {len(text)} characters")
     logger.info("=" * 80)
 
     try:
-        # LOG 2: Start analysis
-        logger.info(f"🧪 Step 1: Starting single tweet analysis")
+        # Start analysis
+        logger.info(f"Step 1: Starting single tweet analysis")
         logger.info(f"   - Provider requested: {provider}")
 
-        # LOG 3: Create test tweet
-        logger.info(f"🧪 Step 2: Creating test tweet object")
+        # Create test tweet
+        logger.info(f"Step 2: Creating test tweet object")
         test_tweet = TweetRaw(
             tweet_id="test_001",
             author="test_user",
@@ -270,8 +279,8 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
         logger.info(f"   - Author: {test_tweet.author}")
         logger.info(f"   - Text: {test_tweet.text[:100]}...")
 
-        # LOG 4: Initialize analyzer
-        logger.info(f"🧪 Step 3: Initializing LLMAnalyzer")
+        # Initialize analyzer
+        logger.info(f"Step 3: Initializing LLMAnalyzer")
         logger.info(f"   - Provider: {provider}")
         logger.info(f"   - Batch size: 1")
 
@@ -281,13 +290,13 @@ async def test_analyze_single(text: str = "Merci Free pour votre excellent servi
         logger.info(f"   - Analyzer provider: {analyzer.provider}")
         logger.info(f"   - Analyzer provider type: {type(analyzer.provider)}")
 
-        # LOG 5: Call analyze_tweet
-        logger.info(f"🧪 Step 4: Calling analyzer.analyze_tweet()")
+        # Call analyze_tweet
+        logger.info(f"Step 4: Calling analyzer.analyze_tweet()")
         logger.info(f"   - Tweet to analyze: {test_tweet.tweet_id}")
 
         result = await analyzer.analyze_tweet(test_tweet)
 
-        logger.info(f"🧪 Step 5: analyze_tweet() returned")
+        logger.info(f"Step 5: analyze_tweet() returned")
         logger.info(f"   - Result type: {type(result)}")
         logger.info(f"   - Result is None: {result is None}")
 
@@ -471,8 +480,8 @@ async def process_csv_analysis(file_path: str, batch_id: str, llm_provider: str,
     start_time = datetime.now(UTC)
 
     try:
-        logger.info(f" Starting analysis for batch {batch_id}")
-        logger.info(f"📋 Configuration: provider={llm_provider}, max_tweets={max_tweets}, batch_size={batch_size}")
+        logger.info(f"Starting analysis for batch {batch_id}")
+        logger.info(f"Configuration: provider={llm_provider}, max_tweets={max_tweets}, batch_size={batch_size}")
 
         # Load and clean CSV
         tweets_raw = csv_processor.load_and_clean_csv(file_path)
@@ -849,7 +858,7 @@ async def send_message(request: ChatMessageRequest):
         Réponse du chatbot avec sources et métadonnées
     """
     try:
-        logger.info(f"💬 Nouveau message chatbot: '{request.message[:50]}...'")
+        logger.info(f"New chatbot message: '{request.message[:50]}...'")
 
         # Générer un ID de conversation si nécessaire
         conversation_id = request.conversation_id or f"conv_{request.session_id}_{datetime.now(UTC).strftime('%Y%m%d_%H%M%S')}"
@@ -900,7 +909,7 @@ async def get_user_conversations(user_id: str, limit: int = 20):
     """
     try:
         # Récupérer les conversations depuis la base de données
-        logger.info(f"📋 Récupération des conversations pour l'utilisateur: {user_id}")
+        logger.info(f"Retrieving conversations for user: {user_id}")
 
         conversations = await db_manager.get_conversations_by_user(user_id=user_id, limit=20)
 
@@ -1059,7 +1068,7 @@ async def classify_single_tweet(request: ClassifyTweetRequest):
         Classification result with theme, sentiment, urgency, and justification
     """
     try:
-        logger.info(f"🔍 Classifying single tweet with {request.llm_provider}/{request.model_name}")
+        logger.info(f"Classifying single tweet with {request.llm_provider}/{request.model_name}")
         
         # Get API key from environment
         api_key = None
@@ -1084,7 +1093,7 @@ async def classify_single_tweet(request: ClassifyTweetRequest):
             tweet_id=request.tweet_id
         )
         
-        logger.info(f"✅ Classification complete: {result.theme} / {result.sentiment}")
+        logger.info(f"Classification complete: {result.theme} / {result.sentiment}")
         
         return {
             "success": True,
@@ -1093,7 +1102,7 @@ async def classify_single_tweet(request: ClassifyTweetRequest):
         }
         
     except Exception as e:
-        logger.error(f"❌ Classification error: {e}")
+        logger.error(f"Classification error: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Classification failed: {str(e)}"
@@ -1119,7 +1128,7 @@ async def classify_batch_tweets(
         Batch classification results
     """
     try:
-        logger.info(f"📋 Starting batch classification with {llm_provider}/{model_name}")
+        logger.info(f"Starting batch classification with {llm_provider}/{model_name}")
         
         # Validate file
         if not file.filename.endswith('.csv'):
@@ -1142,7 +1151,7 @@ async def classify_batch_tweets(
         if 'tweet_id' in df.columns:
             tweet_ids_list = [str(tid) if tid is not None else None for tid in df['tweet_id'].head(max_tweets).tolist()]
         
-        logger.info(f"📊 Processing {len(tweets)} tweets")
+        logger.info(f"Processing {len(tweets)} tweets")
         
         # Get API key
         api_key = None
@@ -1170,7 +1179,7 @@ async def classify_batch_tweets(
         # Convert to dict
         results_dict = [result.dict() for result in results]
         
-        logger.info(f"✅ Batch classification complete: {len(results)} tweets classified")
+        logger.info(f"Batch classification complete: {len(results)} tweets classified")
         
         return {
             "success": True,
@@ -1181,7 +1190,7 @@ async def classify_batch_tweets(
         }
         
     except Exception as e:
-        logger.error(f"❌ Batch classification error: {e}")
+        logger.error(f"Batch classification error: {e}")
         raise HTTPException(
             status_code=500,
             detail=f"Batch classification failed: {str(e)}"

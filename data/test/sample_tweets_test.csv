@@ -1,0 +1,52 @@
+id,text,date,sentiment,category,urgency,confidence,status,agent,retweet_count,favorite_count
+1,Mon internet ne fonctionne plus depuis ce matin. Besoin d'aide urgente!,2025-01-05 09:30:00,negative,technique,high,0.95,open,agent_1,2,5
+2,Merci pour le service rapide et efficace. Très satisfait!,2025-01-05 10:15:00,positive,service_client,low,0.92,resolved,agent_2,10,25
+3,Je souhaite comprendre ma dernière facture. Pouvez-vous m'aider?,2025-01-05 11:00:00,neutral,facturation,medium,0.88,pending,agent_1,0,2
+4,Problème de connexion WiFi dans toute la maison,2025-01-05 11:30:00,negative,reseau,high,0.91,open,agent_3,5,8
+5,Excellente qualité de service. Je recommande vivement.,2025-01-05 12:00:00,positive,autre,low,0.96,resolved,agent_2,15,40
+6,Ma box redémarre constamment. C'est insupportable.,2025-01-05 13:15:00,negative,technique,high,0.89,open,agent_1,3,7
+7,Comment modifier mon forfait actuel?,2025-01-05 14:00:00,neutral,service_client,medium,0.85,pending,agent_3,0,1
+8,Débit internet très lent depuis hier soir,2025-01-05 14:30:00,negative,reseau,medium,0.90,open,agent_1,1,3
+9,Très bon support client. Problème résolu rapidement.,2025-01-05 15:00:00,positive,service_client,low,0.94,resolved,agent_2,8,20
+10,Facture incompréhensible avec des frais non expliqués,2025-01-05 15:45:00,negative,facturation,high,0.93,open,agent_3,4,10
+11,Service impeccable depuis 2 ans. Rien à redire.,2025-01-05 16:00:00,positive,autre,low,0.97,resolved,agent_2,12,35
+12,Coupure de service pendant 3 heures aujourd'hui,2025-01-05 16:30:00,negative,reseau,high,0.88,open,agent_1,7,15
+13,Quelles sont les nouvelles offres disponibles?,2025-01-05 17:00:00,neutral,service_client,low,0.82,pending,agent_3,0,2
+14,Installation très professionnelle. Équipe au top!,2025-01-05 17:30:00,positive,service_client,low,0.95,resolved,agent_2,9,22
+15,Box qui chauffe énormément. Est-ce normal?,2025-01-05 18:00:00,neutral,technique,medium,0.86,pending,agent_1,1,4
+16,Impossible de se connecter au réseau mobile,2025-01-05 18:30:00,negative,reseau,high,0.92,open,agent_3,3,8
+17,Super offre fibre! Content d'avoir souscrit.,2025-01-05 19:00:00,positive,autre,low,0.93,resolved,agent_2,11,30
+18,Facture doublée ce mois-ci. Erreur de facturation?,2025-01-05 19:30:00,negative,facturation,high,0.91,open,agent_3,6,12
+19,Bon rapport qualité-prix pour les services,2025-01-05 20:00:00,positive,autre,low,0.89,resolved,agent_2,7,18
+20,Signal WiFi très faible à l'étage,2025-01-05 20:30:00,negative,reseau,medium,0.87,open,agent_1,2,5
+21,Conseiller très patient et à l'écoute,2025-01-05 21:00:00,positive,service_client,low,0.96,resolved,agent_2,13,28
+22,Mon compte en ligne ne fonctionne plus,2025-01-05 21:30:00,negative,technique,medium,0.88,pending,agent_1,1,3
+23,Quand sera disponible la 5G dans ma zone?,2025-01-05 22:00:00,neutral,autre,low,0.84,pending,agent_3,0,2
+24,Excellent débit fibre. Très stable.,2025-01-05 22:30:00,positive,reseau,low,0.94,resolved,agent_2,10,25
+25,Problème récurrent de déconnexion,2025-01-05 23:00:00,negative,reseau,high,0.90,open,agent_1,4,9
+26,Service client joignable et efficace,2025-01-05 23:30:00,positive,service_client,low,0.95,resolved,agent_2,8,20
+27,Demande de résiliation de mon abonnement,2025-01-06 00:00:00,neutral,service_client,medium,0.86,pending,agent_3,0,1
+28,Box ne s'allume plus du tout,2025-01-06 00:30:00,negative,technique,high,0.92,open,agent_1,5,11
+29,Très satisfait du nouveau modem,2025-01-06 01:00:00,positive,autre,low,0.91,resolved,agent_2,6,15
+30,Frais de résiliation trop élevés,2025-01-06 01:30:00,negative,facturation,medium,0.89,pending,agent_3,3,7
+31,Installation rapide et soignée,2025-01-06 02:00:00,positive,service_client,low,0.93,resolved,agent_2,9,22
+32,Latence importante sur les jeux en ligne,2025-01-06 02:30:00,negative,reseau,medium,0.87,open,agent_1,2,4
+33,Combien coûte une box supplémentaire?,2025-01-06 03:00:00,neutral,autre,low,0.83,pending,agent_3,0,2
+34,Meilleur opérateur que j'ai eu jusqu'à présent,2025-01-06 03:30:00,positive,autre,low,0.97,resolved,agent_2,14,38
+35,Problème de facturation non résolu depuis 2 mois,2025-01-06 04:00:00,negative,facturation,high,0.94,open,agent_3,8,16
+36,Interface de gestion claire et intuitive,2025-01-06 04:30:00,positive,autre,low,0.90,resolved,agent_2,7,19
+37,Panne de réseau dans mon quartier,2025-01-06 05:00:00,negative,reseau,high,0.91,open,agent_1,6,13
+38,Options de personnalisation intéressantes,2025-01-06 05:30:00,neutral,service_client,low,0.85,pending,agent_3,1,3
+39,Technicien compétent et sympathique,2025-01-06 06:00:00,positive,service_client,low,0.96,resolved,agent_2,11,27
+40,Débit ne correspond pas à l'offre souscrite,2025-01-06 06:30:00,negative,reseau,high,0.92,open,agent_1,5,10
+41,Application mobile très pratique,2025-01-06 07:00:00,positive,autre,low,0.88,resolved,agent_2,8,21
+42,Box obsolète. Demande de changement,2025-01-06 07:30:00,neutral,technique,medium,0.86,pending,agent_1,1,4
+43,Promotion intéressante pour nouveaux clients,2025-01-06 08:00:00,positive,autre,low,0.89,resolved,agent_2,9,23
+44,Service après-vente décevant,2025-01-06 08:30:00,negative,service_client,medium,0.87,open,agent_3,3,6
+45,Offre famille très avantageuse,2025-01-06 09:00:00,positive,autre,low,0.93,resolved,agent_2,12,31
+46,Interruption de service non annoncée,2025-01-06 09:30:00,negative,reseau,high,0.90,open,agent_1,4,8
+47,Personnel accueillant en boutique,2025-01-06 10:00:00,positive,service_client,low,0.94,resolved,agent_2,7,18
+48,Facture erronée. Demande de rectification,2025-01-06 10:30:00,negative,facturation,high,0.93,open,agent_3,6,14
+49,Bonne couverture réseau dans toute la maison,2025-01-06 11:00:00,positive,reseau,low,0.91,resolved,agent_2,10,26
+50,Délai d'intervention trop long,2025-01-06 11:30:00,negative,service_client,medium,0.88,pending,agent_1,2,5
+

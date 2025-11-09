@@ -234,7 +234,7 @@ def format_relative_time(timestamp: str) -> str:
         return "inconnu"
 
 def create_emoji_icon(icon_name: str) -> str:
-    """Retourne un emoji pour un nom d'icône"""
+    """Retourne une icône pour un nom d'icône"""
     icons = {
         'upload': '',
         'analysis': '',
@@ -243,7 +243,7 @@ def create_emoji_icon(icon_name: str) -> str:
         'success': '',
         'error': '',
         'warning': '',
-        'info': 'ℹ',
+        'info': '',
         'loading': '',
         'download': '',
         'export': '',
