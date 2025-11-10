@@ -754,33 +754,129 @@ def _perform_dynamic_classification(df, text_column):
         return None, None
 
 def _classify_single_tweet(tweet: str) -> Dict[str, Any]:
-    """Classifie un tweet"""
+    """Classifie un tweet avec logique améliorée"""
     t = tweet.lower()
     
-    claim_kw = ['panne', 'problème', 'bug', '@free', '@freebox']
+    # Réclamation - mots-clés élargis
+    claim_kw = [
+        'panne', 'problème', 'bug', '@free', '@freebox', 'ne fonctionne', 
+        'impossible', 'bloqué', 'erreur', 'dysfonctionnement', 'coupé', 
+        'déçu', 'mécontent', 'frustré', 'inadmissible', 'scandale'
+    ]
     is_claim = 1 if any(w in t for w in claim_kw) else 0
     
+    # Thème principal - ENRICHI avec priorités et scores
+    theme_scores = {}
+    
+    # FIBRE/INTERNET (priorité haute)
+    fibre_kw = ['fibre', 'ftth', 'internet', 'connexion', 'débit', 'box', 'freebox', 
+                'ligne', 'adsl', 'vdsl', 'wifi', 'réseau wifi', 'routeur']
+    theme_scores['fibre'] = sum(1 for w in fibre_kw if w in t)
+    
+    # MOBILE (priorité haute)
+    mobile_kw = ['mobile', 'forfait', 'téléphone', 'portable', 'smartphone', 
+                 '4g', '5g', 'data', 'sms', 'appel', 'réseau mobile']
+    theme_scores['mobile'] = sum(1 for w in mobile_kw if w in t)
+    
+    # TV (priorité moyenne)
+    tv_kw = ['tv', 'télé', 'télévision', 'chaîne', 'canal', 'programme', 
+             'replay', 'décodeur', 'freebox tv']
+    theme_scores['tv'] = sum(1 for w in tv_kw if w in t)
+    
+    # FACTURE (priorité moyenne)
+    facture_kw = ['facture', 'facturation', 'prix', 'coût', 'tarif', 'abonnement', 
+                  'paiement', 'prélèvement', 'montant', 'euros', '€']
+    theme_scores['facture'] = sum(1 for w in facture_kw if w in t)
+    
+    # SAV (priorité moyenne)
+    sav_kw = ['sav', 'service client', 'support', 'assistance', 'conseiller', 
+              'technicien', 'intervention', 'rendez-vous', 'hotline']
+    theme_scores['sav'] = sum(1 for w in sav_kw if w in t)
+    
+    # RÉSEAU (priorité basse)
+    reseau_kw = ['réseau', 'couverture', 'antenne', 'signal', 'zone blanche', 
+                 'infrastructure', 'déploiement']
+    theme_scores['reseau'] = sum(1 for w in reseau_kw if w in t)
+    
+    # Sélection du thème avec le score maximum
     topics = []
-    if any(w in t for w in ['fibre', 'ftth']): topics.append('fibre')
-    if 'wifi' in t: topics.append('wifi')
-    if any(w in t for w in ['tv', 'télé']): topics.append('tv')
-    if 'mobile' in t: topics.append('mobile')
-    if 'facture' in t: topics.append('facture')
-    if not topics: topics = ['autre']
+    if theme_scores:
+        max_score = max(theme_scores.values())
+        if max_score > 0:
+            # Prendre le(s) thème(s) avec score max
+            top_themes = [theme for theme, score in theme_scores.items() if score == max_score]
+            topics = top_themes[:2]  # Max 2 thèmes
+        else:
+            topics = ['autre']
+    else:
+        topics = ['autre']
     
-    if any(w in t for w in ['merci', 'super', 'bravo']): sentiment = 'pos'
-    elif any(w in t for w in ['panne', 'nul', 'mauvais']): sentiment = 'neg'
-    else: sentiment = 'neu'
+    # Sentiment - logique enrichie
+    positive_kw = ['merci', 'super', 'bravo', 'excellent', 'parfait', 'content', 
+                   'satisfait', 'ravi', 'génial', 'top', 'nickel', 'résolu']
+    negative_kw = ['panne', 'nul', 'mauvais', 'horrible', 'catastrophe', 'dégoûté', 
+                   'énervé', 'frustré', 'déçu', 'insatisfait', 'inadmissible', 
+                   'scandale', 'honte', 'lamentable']
     
-    if any(w in t for w in ['urgent', 'panne', 'critique']): urgence = 'haute'
-    elif is_claim: urgence = 'moyenne'
-    else: urgence = 'basse'
+    pos_score = sum(1 for w in positive_kw if w in t)
+    neg_score = sum(1 for w in negative_kw if w in t)
     
-    if 'facture' in t: incident = 'facturation'
-    elif 'panne' in t: incident = 'incident_reseau'
-    elif 'sav' in t: incident = 'processus_sav'
-    elif is_claim: incident = 'autre'
-    else: incident = 'information'
+    if pos_score > neg_score:
+        sentiment = 'pos'
+    elif neg_score > pos_score:
+        sentiment = 'neg'
+    else:
+        sentiment = 'neu'
+    
+    # Urgence - basée sur mots-clés et contexte
+    urgence_critique_kw = ['urgent', 'critique', 'grave', 'bloqué', 'impossible', 
+                           'catastrophe', 'plus rien', 'totalement coupé']
+    urgence_haute_kw = ['plusieurs heures', 'depuis longtemps', 'toute la journée', 
+                        'depuis ce matin', 'depuis hier']
+    
+    if any(w in t for w in urgence_critique_kw):
+        urgence = 'critique'
+    elif any(w in t for w in urgence_haute_kw) or (is_claim and neg_score >= 2):
+        urgence = 'haute'
+    elif is_claim:
+        urgence = 'moyenne'
+    else:
+        urgence = 'basse'
+    
+    # Type d'incident - logique enrichie avec responsable
+    incident = 'information'  # Default
+    responsable = 'aucun'  # New field
+    
+    if 'facture' in t or 'facturation' in t or 'prix' in t:
+        incident = 'facturation'
+        responsable = 'service_commercial'
+    elif 'panne' in t or 'coupé' in t or 'ne fonctionne' in t:
+        incident = 'panne_technique'
+        responsable = 'service_technique'
+    elif 'lent' in t or 'lenteur' in t or 'ralentissement' in t:
+        incident = 'degradation_service'
+        responsable = 'service_technique'
+    elif any(w in t for w in ['sav', 'service client', 'conseiller']):
+        incident = 'processus_sav'
+        responsable = 'service_client'
+    elif any(w in t for w in ['réseau', 'couverture', 'signal']):
+        incident = 'infrastructure_reseau'
+        responsable = 'service_reseau'
+    elif is_claim:
+        incident = 'autre_reclamation'
+        responsable = 'service_client'
+    
+    # Calcul confiance basé sur nombre de mots-clés détectés
+    total_keywords = max(theme_scores.values()) if theme_scores else 0
+    base_confidence = 0.70
+    if total_keywords >= 3:
+        confidence = 0.90
+    elif total_keywords >= 2:
+        confidence = 0.85
+    elif total_keywords >= 1:
+        confidence = 0.75
+    else:
+        confidence = base_confidence
     
     return {
         'is_claim': is_claim,
@@ -788,7 +884,8 @@ def _classify_single_tweet(tweet: str) -> Dict[str, Any]:
         'sentiment': sentiment,
         'urgence': urgence,
         'incident': incident,
-        'confidence': 0.85 if is_claim else 0.80
+        'responsable': responsable,  # NEW
+        'confidence': confidence
     }
 
 def _calculate_classification_metrics(df: pd.DataFrame) -> Dict[str, Any]:
