@@ -782,17 +782,33 @@ def _handle_upload_robust(uploaded_file):
                         )
                         
                         progress_bar = st.progress(0)
-                        progress_bar.progress(0.3)
+                        time.sleep(0.05)  # DOM stability
+                        
+                        try:
+                            progress_bar.progress(0.3)
+                        except Exception:
+                            pass
                         
                         df_cleaned, stats = cleaner.process_dataframe(df.copy(), selected_column)
                         
-                        progress_bar.progress(1.0)
+                        try:
+                            progress_bar.progress(1.0)
+                        except Exception:
+                            pass
                         
                         st.session_state.df_cleaned = df_cleaned
                         st.session_state.cleaning_stats = stats
                         st.session_state.workflow_step = 'classify'
                         
                         st.success("Nettoyage terminé!", icon="✅")
+                        
+                        # Clear progress bar safely before rerun
+                        time.sleep(0.1)
+                        try:
+                            progress_bar.empty()
+                        except Exception:
+                            pass
+                        
                         time.sleep(1)
                         st.rerun()
                     else:
@@ -890,8 +906,12 @@ def _section_classification():
 
 def _perform_classification(df, text_col, mode, use_optimized):
     """Lance la classification OPTIMISÉE avec batch processing, timeouts et tracking"""
+    import time as t
+    
+    # DOM stability: Initialize containers with small delay
     progress_bar = st.progress(0)
     status = st.empty()
+    t.sleep(0.05)  # Allow DOM to stabilize
     
     # Get enhanced configuration
     config = st.session_state.get('config', {})
@@ -901,8 +921,13 @@ def _perform_classification(df, text_col, mode, use_optimized):
     bert_batch_size = config.get('bert_batch_size', 50)
     
     try:
-        status.info("🔄 Chargement des modules...")
-        progress_bar.progress(0.1)
+        # DOM safe operations with try-catch
+        try:
+            status.info("🔄 Chargement des modules...")
+            t.sleep(0.05)
+            progress_bar.progress(0.1)
+        except Exception:
+            pass  # Ignore DOM errors
         
         modules = _load_classification_modules()
         
@@ -951,8 +976,13 @@ def _perform_classification(df, text_col, mode, use_optimized):
                         rate = (pct * total_tweets) / elapsed if elapsed > 0 else 0
                         eta = ((1 - pct) * total_tweets) / rate if rate > 0 else 0
                         
-                        progress_bar.progress(0.2 + pct * 0.7)
-                        status.info(f"🔄 {msg} | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
+                        # DOM safe progress update
+                        try:
+                            progress_bar.progress(0.2 + pct * 0.7)
+                            t.sleep(0.03)
+                            status.info(f"🔄 {msg} | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
+                        except Exception:
+                            pass  # Ignore DOM errors
                     
                     results, benchmark = classifier.classify_tweets_batch(
                         df,
@@ -1004,8 +1034,12 @@ def _perform_classification(df, text_col, mode, use_optimized):
                     df_classified = _classify_fallback(df, text_col)
         
         # Calcul rapport
-        status.info("📊 Calcul des métriques...")
-        progress_bar.progress(0.95)
+        try:
+            status.info("📊 Calcul des métriques...")
+            t.sleep(0.05)
+            progress_bar.progress(0.95)
+        except Exception:
+            pass
         
         report = _calculate_metrics(df_classified)
         
@@ -1015,7 +1049,10 @@ def _perform_classification(df, text_col, mode, use_optimized):
         st.session_state.classification_mode = mode
         st.session_state.workflow_step = 'results'
         
-        progress_bar.progress(1.0)
+        try:
+            progress_bar.progress(1.0)
+        except Exception:
+            pass
         
         # Display performance summary
         perf = st.session_state.get('performance_metrics', {})
@@ -1026,12 +1063,31 @@ def _perform_classification(df, text_col, mode, use_optimized):
                 f"Mode: {mode.upper()}"
             )
         else:
-            status.success("✅ Classification terminée avec succès!")
+            try:
+                status.success("✅ Classification terminée avec succès!")
+            except Exception:
+                pass
+        
+        # Clear containers safely before rerun
+        t.sleep(0.1)
+        try:
+            status.empty()
+            progress_bar.empty()
+        except Exception:
+            pass
         
         time.sleep(0.5)
         st.rerun()
         
     except Exception as e:
+        # Clear containers safely in exception handler
+        t.sleep(0.1)
+        try:
+            status.empty()
+            progress_bar.empty()
+        except Exception:
+            pass
+        
         st.error(f"🔴 Erreur classification: {str(e)}", icon="🔴")
         logger.error(f"Classification error: {e}", exc_info=True)
         

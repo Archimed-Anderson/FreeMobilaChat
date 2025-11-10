@@ -634,8 +634,12 @@ def _display_file_info(uploaded_file, df):
 
 def _perform_dynamic_classification(df, text_column):
     """Classification optimisée avec mode PRECISE ou BALANCED"""
+    import time as t
+    
+    # DOM stability: Initialize containers with small delay
     progress = st.progress(0)
     status = st.empty()
+    t.sleep(0.05)  # Allow DOM to stabilize
     
     try:
         # Get configuration
@@ -654,8 +658,12 @@ def _perform_dynamic_classification(df, text_column):
         # Initialize classifier based on mode
         if "Precise" in classification_mode:
             # PRECISE MODE: Use LLM with few-shot learning
-            status.text("🧠 Initialisation du modèle LLM...")
-            progress.progress(0.05)
+            try:
+                status.text("🧠 Initialisation du modèle LLM...")
+                t.sleep(0.05)
+                progress.progress(0.05)
+            except Exception:
+                pass
             
             classifier_func = _get_precise_classifier(config)
             if classifier_func is None:
@@ -664,13 +672,21 @@ def _perform_dynamic_classification(df, text_column):
                 classification_mode = "⚡ Balanced (Rapide)"
         else:
             # BALANCED MODE: Use optimized rule-based classifier
-            status.text("⚡ Initialisation des règles avancées...")
-            progress.progress(0.05)
+            try:
+                status.text("⚡ Initialisation des règles avancées...")
+                t.sleep(0.05)
+                progress.progress(0.05)
+            except Exception:
+                pass
             classifier_func = _get_balanced_classifier()
         
         # Process in batches for better performance
-        status.text(f"🔄 Classification en cours... 0/{total}")
-        progress.progress(0.1)
+        try:
+            status.text(f"🔄 Classification en cours... 0/{total}")
+            t.sleep(0.05)
+            progress.progress(0.1)
+        except Exception:
+            pass
         
         results = []
         start_time = time.time()
@@ -696,17 +712,26 @@ def _perform_dynamic_classification(df, text_column):
                     except:
                         results.append(_get_default_result())
             
-            # Update progress
+            # Update progress with DOM safety
             pct = 0.1 + (batch_end / total) * 0.85
-            progress.progress(pct)
             elapsed = time.time() - start_time
             rate = batch_end / elapsed if elapsed > 0 else 0
             eta = (total - batch_end) / rate if rate > 0 else 0
-            status.text(f"🔄 {batch_end}/{total} tweets | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
+            
+            try:
+                progress.progress(pct)
+                t.sleep(0.03)
+                status.text(f"🔄 {batch_end}/{total} tweets | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
+            except Exception:
+                pass  # Ignore DOM errors
         
         # Enrichissement
-        status.text("✨ Enrichissement des données...")
-        progress.progress(0.95)
+        try:
+            status.text("✨ Enrichissement des données...")
+            t.sleep(0.05)
+            progress.progress(0.95)
+        except Exception:
+            pass
         
         df_sample['is_claim'] = [r['is_claim'] for r in results]
         df_sample['topics'] = [r['topics'] for r in results]
@@ -724,10 +749,12 @@ def _perform_dynamic_classification(df, text_column):
         metrics['tweets_per_second'] = total / total_time if total_time > 0 else 0
         metrics['mode'] = classification_mode
         
-        progress.progress(1.0)
+        try:
+            progress.progress(1.0)
+        except Exception:
+            pass
         
         # Clear containers safely with delay (DOM stability)
-        import time as t
         t.sleep(0.1)
         try:
             status.empty()
@@ -741,7 +768,6 @@ def _perform_dynamic_classification(df, text_column):
         
     except Exception as e:
         # Clear containers safely in exception handler
-        import time as t
         t.sleep(0.1)
         try:
             status.empty()
