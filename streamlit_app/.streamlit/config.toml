@@ -13,7 +13,7 @@ serverPort = 8502
 
 [runner]
 magicEnabled = true
-fastReruns = true
+fastReruns = false
 
 [client]
 showErrorDetails = true
