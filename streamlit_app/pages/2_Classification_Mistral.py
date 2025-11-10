@@ -1039,24 +1039,141 @@ def _perform_classification(df, text_col, mode, use_optimized):
             st.code(str(e))
 
 def _classify_fallback(df: pd.DataFrame, text_col: str) -> pd.DataFrame:
-    """Classification fallback par règles simples"""
+    """Classification fallback par règles enrichie - IDENTIQUE à Classification_LLM"""
+    logger.info("→ Fallback: classification par règles avancées (score-based)")
+    
     df_copy = df.copy()
     
     def classify_row(text):
+        """Classifie un tweet avec logique améliorée (score-based)"""
+        if pd.isna(text):
+            return pd.Series({
+                'is_claim': 'non',
+                'sentiment': 'neutre',
+                'urgence': 'faible',
+                'topics': 'autre',
+                'incident': 'information',
+                'responsable': 'aucun',
+                'confidence': 0.50
+            })
+        
         t = str(text).lower()
         
-        # CORRECTION: "réclamation" au lieu de "claim"
-        is_claim = 'oui' if any(w in t for w in ['panne', '@free', 'problème', 'bug']) else 'non'
+        # Réclamation - mots-clés élargis
+        claim_kw = [
+            'panne', 'problème', 'bug', '@free', '@freebox', 'ne fonctionne', 
+            'impossible', 'bloqué', 'erreur', 'dysfonctionnement', 'coupé', 
+            'déçu', 'mécontent', 'frustré', 'inadmissible', 'scandale'
+        ]
+        is_claim = 'oui' if any(w in t for w in claim_kw) else 'non'
         
-        if any(w in t for w in ['merci', 'super', 'bravo', 'excellent']): sentiment = 'positif'
-        elif any(w in t for w in ['panne', 'nul', 'mauvais', 'honte']): sentiment = 'negatif'
-        else: sentiment = 'neutre'
+        # Thème principal - ENRICHI avec priorités et scores
+        theme_scores = {}
         
-        urgence = 'haute' if any(w in t for w in ['panne', 'urgent', 'critique']) else 'moyenne' if is_claim == 'oui' else 'faible'
+        # FIBRE/INTERNET (priorité haute)
+        fibre_kw = ['fibre', 'ftth', 'internet', 'connexion', 'débit', 'box', 'freebox', 
+                    'ligne', 'adsl', 'vdsl', 'wifi', 'réseau wifi', 'routeur']
+        theme_scores['fibre'] = sum(1 for w in fibre_kw if w in t)
         
-        topics = 'fibre' if 'fibre' in t else 'mobile' if 'mobile' in t else 'facture' if 'facture' in t else 'autre'
+        # MOBILE (priorité haute)
+        mobile_kw = ['mobile', 'forfait', 'téléphone', 'portable', 'smartphone', 
+                     '4g', '5g', 'data', 'sms', 'appel', 'réseau mobile']
+        theme_scores['mobile'] = sum(1 for w in mobile_kw if w in t)
         
-        incident = 'incident_reseau' if 'panne' in t else 'facturation' if 'facture' in t else 'autre'
+        # TV (priorité moyenne)
+        tv_kw = ['tv', 'télé', 'télévision', 'chaîne', 'canal', 'programme', 
+                 'replay', 'décodeur', 'freebox tv']
+        theme_scores['tv'] = sum(1 for w in tv_kw if w in t)
+        
+        # FACTURE (priorité moyenne)
+        facture_kw = ['facture', 'facturation', 'prix', 'coût', 'tarif', 'abonnement', 
+                      'paiement', 'prélèvement', 'montant', 'euros', '€']
+        theme_scores['facture'] = sum(1 for w in facture_kw if w in t)
+        
+        # SAV (priorité moyenne)
+        sav_kw = ['sav', 'service client', 'support', 'assistance', 'conseiller', 
+                  'technicien', 'intervention', 'rendez-vous', 'hotline']
+        theme_scores['sav'] = sum(1 for w in sav_kw if w in t)
+        
+        # RÉSEAU (priorité basse)
+        reseau_kw = ['réseau', 'couverture', 'antenne', 'signal', 'zone blanche', 
+                     'infrastructure', 'déploiement']
+        theme_scores['reseau'] = sum(1 for w in reseau_kw if w in t)
+        
+        # Sélection du thème avec le score maximum
+        topics = 'autre'
+        if theme_scores:
+            max_score = max(theme_scores.values())
+            if max_score > 0:
+                # Prendre le thème avec score max
+                topics = max(theme_scores, key=theme_scores.get)
+        
+        # Sentiment - logique enrichie
+        positive_kw = ['merci', 'super', 'bravo', 'excellent', 'parfait', 'content', 
+                       'satisfait', 'ravi', 'génial', 'top', 'nickel', 'résolu']
+        negative_kw = ['panne', 'nul', 'mauvais', 'horrible', 'catastrophe', 'dégoûté', 
+                       'énervé', 'frustré', 'déçu', 'insatisfait', 'inadmissible', 
+                       'scandale', 'honte', 'lamentable']
+        
+        pos_score = sum(1 for w in positive_kw if w in t)
+        neg_score = sum(1 for w in negative_kw if w in t)
+        
+        if pos_score > neg_score:
+            sentiment = 'positif'
+        elif neg_score > pos_score:
+            sentiment = 'negatif'
+        else:
+            sentiment = 'neutre'
+        
+        # Urgence - basée sur mots-clés et contexte
+        urgence_critique_kw = ['urgent', 'critique', 'grave', 'bloqué', 'impossible', 
+                               'catastrophe', 'plus rien', 'totalement coupé']
+        urgence_haute_kw = ['plusieurs heures', 'depuis longtemps', 'toute la journée', 
+                            'depuis ce matin', 'depuis hier']
+        
+        if any(w in t for w in urgence_critique_kw):
+            urgence = 'critique'
+        elif any(w in t for w in urgence_haute_kw) or (is_claim == 'oui' and neg_score >= 2):
+            urgence = 'haute'
+        elif is_claim == 'oui':
+            urgence = 'moyenne'
+        else:
+            urgence = 'faible'
+        
+        # Type d'incident - logique enrichie avec responsable
+        incident = 'information'  # Default
+        responsable = 'aucun'  # New field
+        
+        if 'facture' in t or 'facturation' in t or 'prix' in t:
+            incident = 'facturation'
+            responsable = 'service_commercial'
+        elif 'panne' in t or 'coupé' in t or 'ne fonctionne' in t:
+            incident = 'panne_technique'
+            responsable = 'service_technique'
+        elif 'lent' in t or 'lenteur' in t or 'ralentissement' in t:
+            incident = 'degradation_service'
+            responsable = 'service_technique'
+        elif any(w in t for w in ['sav', 'service client', 'conseiller']):
+            incident = 'processus_sav'
+            responsable = 'service_client'
+        elif any(w in t for w in ['réseau', 'couverture', 'signal']):
+            incident = 'infrastructure_reseau'
+            responsable = 'service_reseau'
+        elif is_claim == 'oui':
+            incident = 'autre_reclamation'
+            responsable = 'service_client'
+        
+        # Calcul confiance basé sur nombre de mots-clés détectés
+        total_keywords = max(theme_scores.values()) if theme_scores else 0
+        base_confidence = 0.70
+        if total_keywords >= 3:
+            confidence = 0.90
+        elif total_keywords >= 2:
+            confidence = 0.85
+        elif total_keywords >= 1:
+            confidence = 0.75
+        else:
+            confidence = base_confidence
         
         return pd.Series({
             'is_claim': is_claim,
@@ -1064,14 +1181,15 @@ def _classify_fallback(df: pd.DataFrame, text_col: str) -> pd.DataFrame:
             'urgence': urgence,
             'topics': topics,
             'incident': incident,
-            'confidence': 0.75
+            'responsable': responsable,  # NEW
+            'confidence': confidence
         })
     
     classifications = df_copy[text_col].apply(classify_row)
     return pd.concat([df_copy, classifications], axis=1)
 
 def _calculate_metrics(df: pd.DataFrame) -> Dict[str, Any]:
-    """Calcule tous les KPIs - RÉCLAMATIONS au lieu de CLAIMS"""
+    """Calcule tous les KPIs - RÉCLAMATIONS au lieu de CLAIMS + RESPONSABLE"""
     return {
         'total_tweets': len(df),
         'reclamations_count': len(df[df['is_claim'] == 'oui']) if 'is_claim' in df.columns else 0,
@@ -1084,7 +1202,8 @@ def _calculate_metrics(df: pd.DataFrame) -> Dict[str, Any]:
         'sentiment_dist': df['sentiment'].value_counts() if 'sentiment' in df.columns else pd.Series(),
         'urgence_dist': df['urgence'].value_counts() if 'urgence' in df.columns else pd.Series(),
         'topics_dist': df['topics'].value_counts() if 'topics' in df.columns else pd.Series(),
-        'incident_dist': df['incident'].value_counts() if 'incident' in df.columns else pd.Series()
+        'incident_dist': df['incident'].value_counts() if 'incident' in df.columns else pd.Series(),
+        'responsable_dist': df['responsable'].value_counts() if 'responsable' in df.columns else pd.Series()  # NEW
     }
 
 # ==============================================================================
@@ -1205,13 +1324,14 @@ def _section_results():
     
     st.markdown("---")
     
-    # TOUS LES ONGLETS DE VISUALISATION (RESTAURÉS)
-    tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+    # TOUS LES ONGLETS DE VISUALISATION (RESTAURÉS + RESPONSABLE)
+    tab1, tab2, tab3, tab4, tab5, tab6, tab7 = st.tabs([
         "Sentiment",
         "Réclamations",
         "Urgence",
         "Topics",
         "Incidents",
+        "Responsable",
         "Données"
     ])
     
@@ -1231,8 +1351,11 @@ def _section_results():
         _render_incidents_chart(df)
     
     with tab6:
+        _render_responsable_chart(df)  # NEW
+    
+    with tab7:
         st.markdown("<h3><i class='fas fa-table'></i> Tableau Détaillé</h3>", unsafe_allow_html=True)
-        display_cols = ['text_cleaned', 'sentiment', 'is_claim', 'urgence', 'topics', 'incident', 'confidence']
+        display_cols = ['text_cleaned', 'sentiment', 'is_claim', 'urgence', 'topics', 'incident', 'responsable', 'confidence']
         available_cols = [col for col in display_cols if col in df.columns]
         
         if available_cols:
@@ -1353,6 +1476,47 @@ def _render_incidents_chart(df):
         st.plotly_chart(fig, use_container_width=True)
         
         st.caption(f"<i class='fas fa-info-circle'></i> {len(df['incident'].unique())} types identifiés", unsafe_allow_html=True)
+
+def _render_responsable_chart(df):
+    """Graphique responsables - NOUVEAU KPI"""
+    st.markdown("<h4><i class='fas fa-user-tie'></i> Responsables de l'Incident</h4>", unsafe_allow_html=True)
+    
+    if 'responsable' in df.columns:
+        counts = df['responsable'].value_counts()
+        
+        # Couleurs adaptées par service
+        color_map = {
+            'service_technique': '#E74C3C',      # Rouge pour technique
+            'service_commercial': '#3498DB',     # Bleu pour commercial
+            'service_client': '#F39C12',         # Orange pour client
+            'service_reseau': '#9B59B6',         # Violet pour réseau
+            'aucun': '#95A5A6'                   # Gris pour aucun
+        }
+        
+        colors = [color_map.get(name, '#95A5A6') for name in counts.index]
+        
+        fig = go.Figure(data=[go.Bar(
+            x=counts.index,
+            y=counts.values,
+            marker_color=colors,
+            text=counts.values,
+            texttemplate='%{text}',
+            textposition='outside'
+        )])
+        
+        fig.update_layout(
+            title="",
+            height=400,
+            showlegend=False,
+            xaxis_title="Service Responsable",
+            yaxis_title="Nombre d'incidents"
+        )
+        st.plotly_chart(fig, use_container_width=True)
+        
+        # Afficher statistiques détaillées
+        non_aucun = len(df[df['responsable'] != 'aucun'])
+        pct = (non_aucun / len(df) * 100) if len(df) > 0 else 0
+        st.caption(f"<i class='fas fa-info-circle'></i> {non_aucun:,} incidents affectés ({pct:.1f}%) | {len(df['responsable'].unique())} services distincts", unsafe_allow_html=True)
 
 def _display_business_dashboard_mistral(df, report):
     """Dashboard Business KPIs COMPLET - RESTAURÉ"""
