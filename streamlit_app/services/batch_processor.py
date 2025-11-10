@@ -121,14 +121,24 @@ class BatchProcessor:
         except Exception as e:
             logger.error(f"Error in batch processing: {e}")
             if show_progress and progress_bar and status_text:
-                progress_bar.empty()
-                status_text.empty()
+                # Add delay for DOM stability
+                time.sleep(0.1)
+                try:
+                    progress_bar.empty()
+                    status_text.empty()
+                except Exception:
+                    pass  # Ignore DOM errors
             raise
             
         finally:
             if show_progress and progress_bar and status_text:
-                progress_bar.empty()
-                status_text.empty()
+                # Add delay for DOM stability
+                time.sleep(0.1)
+                try:
+                    progress_bar.empty()
+                    status_text.empty()
+                except Exception:
+                    pass  # Ignore DOM errors
         
         # Combine results
         result_df = pd.concat(results, ignore_index=True)

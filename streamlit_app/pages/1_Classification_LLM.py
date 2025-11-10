@@ -725,14 +725,30 @@ def _perform_dynamic_classification(df, text_column):
         metrics['mode'] = classification_mode
         
         progress.progress(1.0)
-        status.empty()
-        progress.empty()
+        
+        # Clear containers safely with delay (DOM stability)
+        import time as t
+        t.sleep(0.1)
+        try:
+            status.empty()
+            progress.empty()
+        except Exception:
+            pass  # Ignore DOM errors
         
         st.success(f"✅ {total} tweets classifiés en {total_time:.1f}s | Confiance: {metrics['avg_confidence']:.0%} | Mode: {classification_mode}")
         
         return df_sample, metrics
         
     except Exception as e:
+        # Clear containers safely in exception handler
+        import time as t
+        t.sleep(0.1)
+        try:
+            status.empty()
+            progress.empty()
+        except Exception:
+            pass  # Ignore DOM errors
+        
         st.error(f"❌ Erreur: {str(e)}")
         logger.error(f"Classification error: {e}", exc_info=True)
         return None, None

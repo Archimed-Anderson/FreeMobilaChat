@@ -370,10 +370,14 @@ JSON:"""
             if batch_idx < total_batches - 1:
                 time.sleep(0.5)
         
-        # Nettoyage UI
+        # Nettoyage UI avec delay pour stabilité DOM
         if show_progress:
-            progress_bar.empty()
-            status_text.empty()
+            time.sleep(0.1)
+            try:
+                progress_bar.empty()
+                status_text.empty()
+            except Exception:
+                pass  # Ignore DOM errors
         
         # Enrichissement du DataFrame
         df_classified = df.copy()
