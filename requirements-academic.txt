@@ -46,7 +46,7 @@ psutil==5.9.5               # Métriques CPU/mémoire
 tenacity==8.2.3             # Retry automatique avec backoff
 
 # FILE PROCESSING - Gestion fichiers multiformats
-python-magic==0.4.27        # Détection type MIME
+# python-magic==0.4.27        # Détection type MIME (OPTIONNEL - peut échouer sur Streamlit Cloud)
 reportlab==4.0.7            # Génération PDF pour exports
 
 # TESTING - Dépendances de test (optionnel, voir requirements.dev.txt)

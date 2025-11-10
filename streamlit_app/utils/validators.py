@@ -7,8 +7,15 @@ import os
 import pandas as pd
 from typing import Dict, Any, List, Optional, Tuple
 from pathlib import Path
-import magic
 import logging
+
+# Import magic with fallback for Streamlit Cloud
+try:
+    import magic
+    MAGIC_AVAILABLE = True
+except ImportError:
+    MAGIC_AVAILABLE = False
+    logging.warning("python-magic not available, MIME type validation disabled")
 
 from ..config.settings import get_config
 
@@ -67,25 +74,28 @@ class FileValidator:
                 }
             
             # Vérification du type MIME (si disponible)
-            try:
-                file_content = uploaded_file.read(1024)  # Lire les premiers 1024 bytes
-                uploaded_file.seek(0)  # Reset position
+            if MAGIC_AVAILABLE:
+                try:
+                    file_content = uploaded_file.read(1024)  # Lire les premiers 1024 bytes
+                    uploaded_file.seek(0)  # Reset position
+                    
+                    mime_type = magic.from_buffer(file_content, mime=True)
+                    expected_mimes = {
+                        '.csv': ['text/csv', 'text/plain', 'application/csv'],
+                        '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
+                        '.xls': ['application/vnd.ms-excel'],
+                        '.json': ['application/json', 'text/json'],
+                        '.parquet': ['application/octet-stream']
+                    }
+                    
+                    if file_extension in expected_mimes:
+                        if mime_type not in expected_mimes[file_extension]:
+                            logger.warning(f"MIME type mismatch: expected {expected_mimes[file_extension]}, got {mime_type}")
                 
-                mime_type = magic.from_buffer(file_content, mime=True)
-                expected_mimes = {
-                    '.csv': ['text/csv', 'text/plain', 'application/csv'],
-                    '.xlsx': ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
-                    '.xls': ['application/vnd.ms-excel'],
-                    '.json': ['application/json', 'text/json'],
-                    '.parquet': ['application/octet-stream']
-                }
-                
-                if file_extension in expected_mimes:
-                    if mime_type not in expected_mimes[file_extension]:
-                        logger.warning(f"MIME type mismatch: expected {expected_mimes[file_extension]}, got {mime_type}")
-            
-            except Exception as e:
-                logger.warning(f"Impossible de vérifier le type MIME: {e}")
+                except Exception as e:
+                    logger.warning(f"Impossible de vérifier le type MIME: {e}")
+            else:
+                logger.debug("python-magic not available, skipping MIME type validation")
             
             return {
                 "valid": True,
