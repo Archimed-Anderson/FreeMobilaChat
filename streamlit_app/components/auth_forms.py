@@ -88,6 +88,9 @@ def login_form():
             if success:
                 st.success(message)
                 st.balloons()
+                # DOM stability delay before rerun
+                import time
+                time.sleep(0.3)
                 # Reload page to update authentication state
                 st.rerun()
             else:
@@ -185,6 +188,9 @@ def signup_form():
             if success:
                 st.success(message)
                 st.balloons()
+                # DOM stability delay before rerun
+                import time
+                time.sleep(0.3)
                 # Reload page to update authentication state
                 st.rerun()
             else:

@@ -445,7 +445,7 @@ def render_features():
     col1, col2, col3 = st.columns([1, 2, 1], gap="large")
     
     with col1:
-        st.empty()  # Spacer for centering
+        st.markdown("<div style='height: 1px;'></div>", unsafe_allow_html=True)  # Spacer for centering
     
     with col2:
         # Two main analysis options side by side
@@ -506,7 +506,7 @@ def render_features():
                 st.switch_page("pages/2_Classification_Mistral.py")
     
     with col3:
-        st.empty()  # Spacer for centering
+        st.markdown("<div style='height: 1px;'></div>", unsafe_allow_html=True)  # Spacer for centering
     
     st.markdown("""
     <div id="fonctionnalites" style="padding: 5rem 3rem; background: #f8f9fa;">
@@ -907,6 +907,8 @@ def render_authenticated_landing():
         
         if st.button("Logout", use_container_width=True):
             AuthService.logout()
+            import time
+            time.sleep(0.2)  # DOM stability before rerun
             st.rerun()
     
     st.markdown("---")
