@@ -12,37 +12,38 @@ Fonctionnalités:
 - Format JSON structuré
 """
 
-from typing import List, Dict, Optional, Any
-import pandas as pd
-import json
-import re
-import time
-import logging
-import streamlit as st
+# Imports des bibliothèques tierces pour la manipulation de données
+from typing import List, Dict, Optional, Any  # Typage statique pour la validation
+import pandas as pd  # Manipulation de DataFrame pour le traitement par lot
+import json  # Parsing des réponses JSON du modèle Mistral
+import re  # Expressions régulières pour l'extraction de données structurées
+import time  # Gestion des délais entre les tentatives
+import logging  # Journalisation des opérations et erreurs
+import streamlit as st  # Interface utilisateur et barre de progression
 
+# Configuration du logger pour le suivi des opérations
 logger = logging.getLogger(__name__)
 
-# Configuration (conformes aux specs)
-BATCH_SIZE = 50
-MAX_RETRIES = 3
-RETRY_DELAY = 2  # secondes
+# Configuration des paramètres de traitement par lot (conformes aux spécifications)
+BATCH_SIZE = 50  # Nombre de tweets traités simultanément pour optimiser la performance
+MAX_RETRIES = 3  # Nombre maximal de tentatives en cas d'échec de classification
+RETRY_DELAY = 2  # Délai en secondes entre chaque tentative pour éviter la surcharge
 
-# Import conditionnel d'Ollama
+# Import conditionnel d'Ollama avec gestion d'erreur gracieuse
 try:
-    import ollama
-    OLLAMA_AVAILABLE = True
+    import ollama  # Bibliothèque cliente pour communiquer avec le serveur Ollama local
+    OLLAMA_AVAILABLE = True  # Indicateur de disponibilité du module
 except ImportError:
-    OLLAMA_AVAILABLE = False
+    OLLAMA_AVAILABLE = False  # Désactivation si le module n'est pas installé
     logger.warning("Module ollama non disponible. Installation requise: pip install ollama")
 
 
 class MistralClassifier:
     """
-    Classification de tweets avec Mistral via Ollama
+    Classificateur de tweets utilisant le modèle Mistral via Ollama
     
-    Cette classe implémente la classification par lots selon les
-    spécifications techniques, avec gestion robuste des erreurs et
-    retry logic.
+    Cette classe implémente un système de classification par lots avec gestion
+    robuste des erreurs, mécanisme de retry automatique et système de fallback.
     """
     
     def __init__(self, 
@@ -51,56 +52,66 @@ class MistralClassifier:
                  temperature: float = 0.1,
                  max_retries: int = MAX_RETRIES):
         """
-        Initialise le classificateur Mistral
+        Initialise le classificateur Mistral avec les paramètres de configuration
         
         Args:
-            model_name: Nom du modèle Ollama (mistral, llama2, etc.)
-            batch_size: Nombre de tweets par lot
-            temperature: Température du modèle (0.0-1.0)
-            max_retries: Nombre de tentatives en cas d'échec
+            model_name: Nom du modèle Ollama à utiliser (mistral, llama2, etc.)
+            batch_size: Taille des lots pour le traitement par batch
+            temperature: Paramètre de créativité du modèle (0.0 = déterministe, 1.0 = créatif)
+            max_retries: Nombre maximal de tentatives en cas d'échec de requête
         """
-        self.model_name = model_name
-        self.batch_size = batch_size
-        self.temperature = temperature
-        self.max_retries = max_retries
+        # Stockage des paramètres de configuration dans les attributs d'instance
+        self.model_name = model_name  # Identification du modèle LLM à utiliser
+        self.batch_size = batch_size  # Définition de la taille des lots de traitement
+        self.temperature = temperature  # Contrôle de la variabilité des réponses du modèle
+        self.max_retries = max_retries  # Configuration de la résilience face aux erreurs
         
-        # Options Ollama (conformes aux specs)
+        # Configuration des options Ollama pour le contrôle fin du modèle
         self.ollama_options = {
-            'temperature': temperature,
-            'num_predict': 2000,  # Tokens max pour réponse
-            'top_p': 0.9          # Sampling
+            'temperature': temperature,  # Reproductibilité des résultats avec valeur basse
+            'num_predict': 2000,  # Limitation du nombre de tokens générés pour éviter les réponses trop longues
+            'top_p': 0.9  # Échantillonnage nucléaire pour équilibrer créativité et cohérence
         }
         
-        # Vérifier la disponibilité d'Ollama
+        # Vérification de la disponibilité et de la connexion au serveur Ollama
         self._check_ollama_connection()
         
+        # Journalisation de l'initialisation réussie avec les paramètres
         logger.info(f"MistralClassifier initialisé: model={model_name}, batch_size={batch_size}")
     
     def _check_ollama_connection(self) -> bool:
         """
-        Vérifie la connexion à Ollama
+        Vérifie la disponibilité et l'état de la connexion au serveur Ollama local
+        
+        Cette méthode effectue un test de connectivité pour s'assurer que le serveur
+        Ollama est accessible avant de tenter des opérations de classification.
         
         Returns:
-            True si Ollama est disponible et connecté
+            True si Ollama est installé, démarré et accessible, False sinon
         """
+        # Vérification de la disponibilité du module Python ollama
         if not OLLAMA_AVAILABLE:
             logger.error("Module ollama non installé")
             return False
         
         try:
-            # Tester la connexion
-            ollama.list()
-            logger.info("✅ Connexion Ollama OK")
+            # Tentative de connexion au serveur en listant les modèles disponibles
+            ollama.list()  # Requête HTTP vers le serveur Ollama local (port 11434 par défaut)
+            logger.info("Connexion Ollama OK")  # Confirmation de la connexion réussie
             return True
         except Exception as e:
-            logger.error(f"❌ Erreur connexion Ollama: {e}")
+            # Capture de toute erreur de connexion (serveur non démarré, timeout, etc.)
+            logger.error(f"Erreur connexion Ollama: {e}")
             return False
     
     def build_classification_prompt(self, tweets: List[str]) -> str:
         """
-        Construit le prompt de classification pour Mistral
+        Construit le prompt d'instruction pour le modèle Mistral avec few-shot learning
         
-        Format de sortie attendu (conforme aux specs):
+        Cette méthode génère un prompt structuré qui guide le modèle LLM pour classifier
+        les tweets selon des critères spécifiques à Free Mobile (sentiment, catégorie, confiance).
+        
+        Format de sortie JSON attendu:
         {
             "results": [
                 {
@@ -113,16 +124,17 @@ class MistralClassifier:
         }
         
         Args:
-            tweets: Liste de tweets à classifier
+            tweets: Liste des tweets à classifier (limitée par batch_size)
             
         Returns:
-            Prompt formaté pour Mistral
+            Chaîne de caractères contenant le prompt complet formaté pour Mistral
         """
-        # Construction de la liste des tweets avec indices
-        tweets_text = ""
-        for i, tweet in enumerate(tweets):
-            tweets_text += f"{i}: {tweet}\n"
+        # Construction de la liste numérotée des tweets pour référence dans les résultats
+        tweets_text = ""  # Initialisation de la chaîne vide
+        for i, tweet in enumerate(tweets):  # Itération avec index pour chaque tweet
+            tweets_text += f"{i}: {tweet}\n"  # Formatage index: contenu avec saut de ligne
         
+        # Construction du prompt avec instructions détaillées et taxonomie spécifique
         prompt = f"""Tu es un expert en analyse de tweets pour Free Mobile (opérateur télécoms français).
 
 Ta tâche: Classifier {len(tweets)} tweets selon ces critères:
@@ -155,61 +167,69 @@ Ta tâche: Classifier {len(tweets)} tweets selon ces critères:
 
 JSON:"""
         
-        return prompt
+        return prompt  # Retour du prompt complet prêt pour l'envoi au LLM
     
     def classify_batch(self, tweets: List[str], retry: int = 0) -> List[Dict]:
         """
-        Classifie un lot de tweets avec retry logic
+        Classifie un lot de tweets avec mécanisme de retry automatisé en cas d'échec
         
-        Gère les erreurs avec tentatives multiples (conformes aux specs: 3 tentatives)
+        Cette méthode implémente une stratégie de résilience avec tentatives multiples
+        et fallback vers classification par règles si toutes les tentatives échouent.
         
         Args:
-            tweets: Liste de tweets à classifier
-            retry: Numéro de tentative actuelle
+            tweets: Liste des tweets à classifier (généralement batch_size éléments)
+            retry: Numéro de la tentative actuelle (0 = première tentative)
             
         Returns:
-            Liste de dicts avec classifications
+            Liste de dictionnaires contenant les résultats de classification:
+            [{'index': 0, 'sentiment': 'positif', 'categorie': 'produit', 'score_confiance': 0.9}, ...]
         """
+        # Vérification préalable de la disponibilité d'Ollama
         if not OLLAMA_AVAILABLE:
             logger.warning("Ollama non disponible, utilisation du fallback")
-            return self._classify_batch_fallback(tweets)
+            return self._classify_batch_fallback(tweets)  # Basculement immédiat vers classification par règles
         
         try:
-            # Construire le prompt
+            # Construction du prompt d'instruction pour le modèle LLM
             prompt = self.build_classification_prompt(tweets)
             
-            # Appel à Ollama
+            # Journalisation de la tentative en cours pour traçabilité
             logger.info(f"Appel Ollama pour {len(tweets)} tweets (tentative {retry + 1}/{self.max_retries})")
             
+            # Envoi de la requête au modèle Mistral via l'API Ollama
             response = ollama.generate(
-                model=self.model_name,
-                prompt=prompt,
-                options=self.ollama_options
+                model=self.model_name,  # Sélection du modèle (mistral, llama2, etc.)
+                prompt=prompt,  # Prompt construit avec taxonomie et exemples
+                options=self.ollama_options  # Paramètres de génération (température, tokens, etc.)
             )
             
-            # Extraction de la réponse
+            # Extraction du texte de réponse depuis la structure de données Ollama
             response_text = response.get('response', '')
             
-            # Parsing du JSON
+            # Parsing et validation du JSON retourné par le modèle
             results = self._parse_ollama_response(response_text, len(tweets))
             
+            # Validation de la présence et de la cohérence des résultats
             if results:
-                logger.info(f"✅ Classification réussie de {len(results)} tweets")
+                logger.info(f"Classification réussie de {len(results)} tweets")
                 return results
             else:
+                # Lève une exception pour déclencher le mécanisme de retry
                 raise ValueError("Réponse JSON invalide ou vide")
         
         except Exception as e:
-            logger.error(f"❌ Erreur classification (tentative {retry + 1}): {e}")
+            # Capture de toute erreur (timeout, JSON invalide, erreur serveur, etc.)
+            logger.error(f"Erreur classification (tentative {retry + 1}): {e}")
             
-            # Retry logic
-            if retry < self.max_retries - 1:
+            # Mécanisme de retry avec backoff exponentiel
+            if retry < self.max_retries - 1:  # Vérification qu'il reste des tentatives
                 logger.info(f"Nouvelle tentative dans {RETRY_DELAY}s...")
-                time.sleep(RETRY_DELAY)
-                return self.classify_batch(tweets, retry + 1)
+                time.sleep(RETRY_DELAY)  # Pause avant retry pour éviter la surcharge serveur
+                return self.classify_batch(tweets, retry + 1)  # Appel récursif avec incrémentation du compteur
             else:
+                # Épuisement des tentatives, basculement vers fallback
                 logger.error(f"Échec après {self.max_retries} tentatives, fallback")
-                return self._classify_batch_fallback(tweets)
+                return self._classify_batch_fallback(tweets)  # Classification par règles comme solution de secours
     
     def _parse_ollama_response(self, response_text: str, expected_count: int) -> List[Dict]:
         """

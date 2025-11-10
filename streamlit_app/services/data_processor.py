@@ -1,63 +1,109 @@
 """
-Service de traitement des données
-Nettoyage, validation et préparation des données
+Service de Traitement des Données - FreeMobilaChat
+===================================================
+
+Module de prétraitement et validation de données pour l'analyse de tweets.
+Assure la qualité des données avant classification et calcul des KPIs.
+
+Fonctionnalités:
+- Nettoyage multi-étapes des tweets (URLs, mentions, hashtags, caractères spéciaux)
+- Validation de qualité avec scoring automatique
+- Normalisation Unicode pour compatibilité multilingue
+- Extraction de métadonnées et statistiques descriptives
 """
 
-import pandas as pd
-import numpy as np
-import logging
-from typing import Dict, Any, List, Optional, Tuple
-import re
-from datetime import datetime
-import unicodedata
+# Imports des bibliothèques de traitement de données
+import pandas as pd  # Manipulation de DataFrames pour datasets structurés
+import numpy as np  # Calculs numériques et opérations vectorisées
+import logging  # Journalisation des opérations de nettoyage
+from typing import Dict, Any, List, Optional, Tuple  # Typage statique pour robustesse
+import re  # Expressions régulières pour nettoyage de texte
+from datetime import datetime  # Gestion des timestamps
+import unicodedata  # Normalisation des caractères Unicode (émojis, accents)
 
+# Configuration du logger pour traçabilité des opérations
 logger = logging.getLogger(__name__)
 
 class DataProcessor:
-    """Processeur de données avec nettoyage et validation"""
+    """
+    Processeur de données avec nettoyage, validation et enrichissement
+    
+    Cette classe implémente un pipeline complet de prétraitement des données
+    incluant nettoyage, normalisation, validation de qualité et extraction de métadonnées.
+    """
     
     def __init__(self):
-        self.required_columns = ['text']
+        """
+        Initialise le processeur avec la configuration des colonnes attendues
+        
+        Définit les colonnes requises et optionnelles pour la validation de structure.
+        """
+        # Colonnes obligatoires pour le fonctionnement du système
+        self.required_columns = ['text']  # Seul le texte est strictement nécessaire
+        
+        # Colonnes optionnelles qui enrichissent l'analyse si présentes
         self.optional_columns = ['author', 'date', 'retweet_count', 'favorite_count', 'id']
         
     def clean_data(self, data: pd.DataFrame) -> pd.DataFrame:
-        """Nettoie les données du DataFrame"""
+        """
+        Exécute le pipeline complet de nettoyage des données
         
-        try:
-            # Copie pour éviter les modifications sur l'original
-            cleaned_data = data.copy()
+        Applique séquentiellement toutes les opérations de nettoyage:
+        1. Nettoyage du texte (URLs, mentions, hashtags)
+        2. Normalisation des auteurs
+        3. Conversion et validation des dates
+        4. Normalisation des métriques numériques
+        5. Suppression des lignes vides
+        6. Normalisation des types de données
+        
+        Args:
+            data: DataFrame brut contenant les tweets à nettoyer
             
-            # Nettoyage des colonnes de texte
+        Returns:
+            DataFrame nettoyé et normalisé, prêt pour l'analyse
+            
+        Raises:
+            Exception: En cas d'erreur critique lors du nettoyage
+        """
+        try:
+            # Création d'une copie pour préserver les données originales
+            cleaned_data = data.copy()  # Protection contre les modifications inattendues
+            
+            # Étape 1: Nettoyage du texte principal (le plus critique)
             if 'text' in cleaned_data.columns:
+                # Application de la fonction de nettoyage à chaque tweet
                 cleaned_data['text'] = cleaned_data['text'].apply(self._clean_text)
             
-            # Nettoyage des colonnes d'auteur
+            # Étape 2: Nettoyage des noms d'auteurs (standardisation)
             if 'author' in cleaned_data.columns:
                 cleaned_data['author'] = cleaned_data['author'].apply(self._clean_author)
             
-            # Nettoyage des dates
+            # Étape 3: Conversion et validation des dates
             if 'date' in cleaned_data.columns:
                 cleaned_data['date'] = self._clean_dates(cleaned_data['date'])
             
-            # Nettoyage des colonnes numériques
-            numeric_columns = ['retweet_count', 'favorite_count']
+            # Étape 4: Normalisation des colonnes numériques (métriques d'engagement)
+            numeric_columns = ['retweet_count', 'favorite_count']  # Métriques sociales
             for col in numeric_columns:
                 if col in cleaned_data.columns:
+                    # Conversion en numérique avec gestion des valeurs invalides
                     cleaned_data[col] = self._clean_numeric(cleaned_data[col])
             
-            # Suppression des lignes vides
+            # Étape 5: Suppression des lignes vides ou invalides
             cleaned_data = self._remove_empty_rows(cleaned_data)
             
-            # Normalisation des types
+            # Étape 6: Normalisation finale des types de données
             cleaned_data = self._normalize_types(cleaned_data)
             
+            # Journalisation du résultat du nettoyage
             logger.info(f"Données nettoyées: {len(cleaned_data)} lignes, {len(cleaned_data.columns)} colonnes")
             
             return cleaned_data
             
         except Exception as e:
+            # Capture et journalisation des erreurs critiques
             logger.error(f"Erreur lors du nettoyage des données: {str(e)}")
-            raise
+            raise  # Propagation de l'exception pour gestion en amont
     
     def _clean_text(self, text: str) -> str:
         """Nettoie le texte d'un tweet"""

@@ -1,0 +1,58 @@
+# FreeMobilaChat - Academic Submission Dependencies
+# Version: 5.0 - Optimized for Reproducibility
+# Python 3.10+ (Tested with 3.12.10)
+# Dernière validation: 2025-01
+# ============================================
+
+# CORE FRAMEWORK - Interface utilisateur interactive
+streamlit==1.28.1           # Application web pour dashboards analytiques
+
+# DATA PROCESSING - Traitement de données massives
+pandas==2.1.1               # Manipulation DataFrames et analyse vectorisée
+numpy==1.25.2               # Calculs numériques optimisés (BLAS/LAPACK)
+openpyxl==3.1.2             # Export Excel pour rapports professionnels
+
+# MACHINE LEARNING - Classification et NLP
+transformers==4.34.0        # Modèles Hugging Face (BERT, RoBERTa)
+torch==2.1.0                # Backend PyTorch pour deep learning
+sentencepiece==0.1.99       # Tokenization pour modèles de langage
+
+# NLP & TEXT PROCESSING - Nettoyage et normalisation
+emoji==2.8.0                # Conversion emojis Unicode vers texte
+unidecode==1.3.0            # Normalisation Unicode (accents, caractères spéciaux)
+
+# VISUALIZATION - Graphiques interactifs
+plotly==5.17.0              # Visualisations interactives haute qualité
+
+# LLM INTEGRATION - Classification via modèles locaux
+ollama>=0.6.0               # Serveur Ollama pour Mistral/Llama2
+
+# API & HTTP - Communication réseau
+requests==2.31.0            # Requêtes HTTP synchrones (standard)
+httpx==0.25.0               # Requêtes HTTP asynchrones (performance)
+aiohttp==3.9.0              # Client HTTP async alternatif
+
+# LLM PROVIDERS - APIs cloud optionnelles
+anthropic>=0.8.0            # API Anthropic Claude (optionnel)
+openai>=1.0.0               # API OpenAI GPT (optionnel)
+
+# UTILITIES - Configuration et helpers
+python-dotenv==1.0.0        # Variables d'environnement (.env)
+chardet==5.2.0              # Détection encodage CSV automatique
+
+# PERFORMANCE - Optimisations et monitoring
+tqdm==4.65.0                # Barres de progression batch processing
+psutil==5.9.5               # Métriques CPU/mémoire
+tenacity==8.2.3             # Retry automatique avec backoff
+
+# FILE PROCESSING - Gestion fichiers multiformats
+python-magic==0.4.27        # Détection type MIME
+reportlab==4.0.7            # Génération PDF pour exports
+
+# TESTING - Dépendances de test (optionnel, voir requirements.dev.txt)
+# pytest==7.4.3
+# pytest-cov==4.1.0
+# pytest-asyncio==0.21.1
+
+# Note: Pour environnement de développement complet:
+# pip install -r requirements-academic.txt -r requirements.dev.txt

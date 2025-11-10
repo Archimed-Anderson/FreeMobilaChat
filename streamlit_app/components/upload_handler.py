@@ -11,14 +11,42 @@ import pandas as pd
 import streamlit as st
 from typing import Dict, Any, Optional, Tuple, List
 from pathlib import Path
-import chardet
 import zipfile
 from datetime import datetime
 
-from ..config.settings import get_config, UserRole
-from ..services.data_processor import DataProcessor
-from ..utils.validators import FileValidator
-from ..utils.helpers import format_file_size, get_file_extension
+try:
+    from config import MODEL_CONFIG
+except ImportError:
+    # Fallback configuration if config module not available
+    MODEL_CONFIG = {
+        "max_file_size": 500 * 1024 * 1024,  # 500 MB
+        "supported_formats": ["csv", "xlsx", "xls", "json", "parquet"]
+    }
+
+try:
+    from services.data_processor import DataProcessor
+except ImportError:
+    DataProcessor = None
+
+try:
+    from utils.validators import FileValidator
+except ImportError:
+    FileValidator = None
+
+try:
+    from utils.helpers import format_file_size, get_file_extension
+except ImportError:
+    # Fallback helper functions
+    def format_file_size(size_bytes: int) -> str:
+        size = float(size_bytes)
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size < 1024.0:
+                return f"{size:.1f} {unit}"
+            size /= 1024.0
+        return f"{size:.1f} TB"
+    
+    def get_file_extension(filename: str) -> str:
+        return Path(filename).suffix.lower()
 
 logger = logging.getLogger(__name__)
 
@@ -26,9 +54,23 @@ class UploadHandler:
     """Gestionnaire d'upload avec validation et fallback"""
     
     def __init__(self):
-        self.config = get_config()
-        self.validator = FileValidator()
-        self.data_processor = DataProcessor()
+        # Configuration par défaut
+        self.max_file_size: int = 500 * 1024 * 1024  # 500 MB
+        self.supported_formats: List[str] = ["csv", "xlsx", "xls", "json", "parquet"]
+        
+        # Override from config if available
+        if isinstance(MODEL_CONFIG, dict):
+            max_size = MODEL_CONFIG.get("max_file_size")
+            if isinstance(max_size, int):
+                self.max_file_size = max_size
+            
+            formats = MODEL_CONFIG.get("supported_formats")
+            if isinstance(formats, list):
+                self.supported_formats = formats
+        
+        # Initialisation conditionnelle des services
+        self.validator = FileValidator() if FileValidator else None
+        self.data_processor = DataProcessor() if DataProcessor else None
         
     def render_upload_zone(self) -> Optional[Dict[str, Any]]:
         """Affiche la zone d'upload et retourne les données si upload réussi"""
@@ -95,23 +137,18 @@ class UploadHandler:
         """, unsafe_allow_html=True)
         
         # Zone d'upload
-        st.markdown("""
-        <div class="upload-zone">
-            <div class="upload-icon"></div>
-            <div class="upload-text">Glissez et déposez votre fichier ici</div>
-            <div class="upload-subtext">
-                Formats supportés: CSV, Excel, JSON, Parquet<br>
-                Taille maximale: {max_size}
-            </div>
-        </div>
-        """.format(max_size=format_file_size(self.config.max_file_size)), 
-        unsafe_allow_html=True)
+        st.info(f"""
+        📂 **Glissez et déposez votre fichier ici**
+        
+        Formats supportés: CSV, Excel, JSON, Parquet  
+        Taille maximale: {format_file_size(self.max_file_size)}
+        """)
         
         # File uploader Streamlit
         uploaded_file = st.file_uploader(
             "Choisir un fichier",
-            type=self.config.supported_formats,
-            help=f"Formats supportés: {', '.join(self.config.supported_formats)}",
+            type=self.supported_formats,
+            help=f"Formats supportés: {', '.join(self.supported_formats)}",
             label_visibility="collapsed"
         )
         
@@ -120,50 +157,110 @@ class UploadHandler:
         
         return None
     
+    def _basic_file_validation(self, uploaded_file) -> Dict[str, Any]:
+        """Validation basique de fichier sans module externe"""
+        try:
+            if not uploaded_file.name:
+                return {"valid": False, "error": "Nom de fichier manquant"}
+            
+            if uploaded_file.size > self.max_file_size:
+                return {
+                    "valid": False,
+                    "error": f"Fichier trop volumineux ({format_file_size(uploaded_file.size)})",
+                    "suggestion": f"Taille maximale: {format_file_size(self.max_file_size)}"
+                }
+            
+            file_ext = get_file_extension(uploaded_file.name)
+            if file_ext not in [f".{ext}" for ext in self.supported_formats]:
+                return {
+                    "valid": False,
+                    "error": f"Format non supporté: {file_ext}",
+                    "suggestion": f"Formats acceptés: {', '.join(self.supported_formats)}"
+                }
+            
+            return {"valid": True, "file_size": uploaded_file.size, "file_extension": file_ext}
+        except Exception as e:
+            return {"valid": False, "error": str(e)}
+    
+    def _basic_data_validation(self, data: pd.DataFrame) -> Dict[str, Any]:
+        """Validation basique de données sans module externe"""
+        try:
+            if data.empty:
+                return {"valid": False, "error": "DataFrame vide"}
+            
+            warnings = []
+            if 'text' not in data.columns:
+                warnings.append("Colonne 'text' manquante - classification limitée")
+            
+            return {
+                "valid": True,
+                "warnings": warnings,
+                "row_count": len(data),
+                "column_count": len(data.columns)
+            }
+        except Exception as e:
+            return {"valid": False, "error": str(e)}
+    
+    def _basic_clean_data(self, data: pd.DataFrame) -> pd.DataFrame:
+        """Nettoyage basique sans module externe"""
+        # Supprimer les lignes vides
+        data = data.dropna(how='all')
+        # Supprimer les doublons
+        data = data.drop_duplicates()
+        return data
+    
     def _process_uploaded_file(self, uploaded_file) -> Optional[Dict[str, Any]]:
         """Traite le fichier uploadé avec validation"""
         
         try:
             # Validation de base
-            validation_result = self.validator.validate_file(uploaded_file)
+            if self.validator:
+                validation_result = self.validator.validate_file(uploaded_file)
+            else:
+                # Validation basique sans validator
+                validation_result = self._basic_file_validation(uploaded_file)
             
             if not validation_result["valid"]:
-                st.error(f" **Erreur de validation**: {validation_result['error']}")
+                st.error(f"❌ **Erreur de validation**: {validation_result['error']}")
                 if validation_result.get("suggestion"):
-                    st.info(f" **Suggestion**: {validation_result['suggestion']}")
+                    st.info(f"💡 **Suggestion**: {validation_result['suggestion']}")
                 return None
             
             # Affichage des informations du fichier
             file_info = self._display_file_info(uploaded_file, validation_result)
             
             # Lecture et validation des données
-            with st.spinner(" Lecture et validation des données..."):
+            with st.spinner("🔄 Lecture et validation des données..."):
                 data_result = self._read_file_data(uploaded_file)
             
             if not data_result["success"]:
-                st.error(f" **Erreur de lecture**: {data_result['error']}")
+                st.error(f"❌ **Erreur de lecture**: {data_result['error']}")
                 return None
             
             # Validation des données
-            data_validation = self.validator.validate_data_structure(data_result["data"])
+            if self.validator:
+                data_validation = self.validator.validate_data_structure(data_result["data"])
+            else:
+                # Validation basique
+                data_validation = self._basic_data_validation(data_result["data"])
             
             if not data_validation["valid"]:
-                st.error(f" **Structure de données invalide**: {data_validation['error']}")
+                st.error(f"❌ **Structure de données invalide**: {data_validation['error']}")
                 if data_validation.get("suggestions"):
                     for suggestion in data_validation["suggestions"]:
-                        st.info(f" {suggestion}")
+                        st.info(f"💡 {suggestion}")
                 return None
             
             # Affichage des avertissements
             if data_validation.get("warnings"):
                 for warning in data_validation["warnings"]:
-                    st.warning(f" {warning}")
+                    st.warning(f"⚠️ {warning}")
             
             # Sauvegarde en session
             self._save_to_session(uploaded_file, data_result["data"], file_info)
             
             # Succès
-            st.success(" **Fichier chargé avec succès!**")
+            st.success("✅ **Fichier chargé avec succès!**")
             
             return {
                 "file": uploaded_file,
@@ -174,7 +271,7 @@ class UploadHandler:
             
         except Exception as e:
             logger.error(f"Erreur lors du traitement du fichier: {str(e)}")
-            st.error(f" **Erreur inattendue**: {str(e)}")
+            st.error(f"❌ **Erreur inattendue**: {str(e)}")
             return None
     
     def _display_file_info(self, uploaded_file, validation_result: Dict[str, Any]) -> Dict[str, Any]:
@@ -193,49 +290,64 @@ class UploadHandler:
         }
         
         # Affichage des informations
-        st.markdown(f"""
-        <div class="file-info">
-            <strong> Fichier:</strong> {info['name']}<br>
-            <strong> Taille:</strong> {info['size_formatted']}<br>
-            <strong> Type:</strong> {info['extension'].upper()}<br>
-            <strong>⏰ Chargé:</strong> {datetime.now().strftime('%H:%M:%S')}
-        </div>
-        """, unsafe_allow_html=True)
+        st.success(f"""
+        📄 **Fichier:** {info['name']}  
+        📊 **Taille:** {info['size_formatted']}  
+        📋 **Type:** {info['extension'].upper()}  
+        ⏰ **Chargé:** {datetime.now().strftime('%H:%M:%S')}
+        """)
         
         return info
     
     def _read_file_data(self, uploaded_file) -> Dict[str, Any]:
-        """Lit les données du fichier avec détection d'encodage"""
+        """Lit les données du fichier avec détection d'encodage robuste"""
         
         try:
-            # Détection de l'encodage
-            file_content = uploaded_file.read()
-            encoding_result = chardet.detect(file_content)
-            encoding = encoding_result.get('encoding', 'utf-8')
-            
-            # Reset du fichier
-            uploaded_file.seek(0)
+            file_extension = get_file_extension(uploaded_file.name).lower()
+            data = None
+            encoding = None
             
             # Lecture selon le type de fichier
-            file_extension = get_file_extension(uploaded_file.name).lower()
-            
             if file_extension == '.csv':
-                data = pd.read_csv(uploaded_file, encoding=encoding)
+                # Essai de multiples encodages
+                encodings_to_try = ['utf-8', 'utf-8-sig', 'latin-1', 'iso-8859-1', 'cp1252']
+                
+                for enc in encodings_to_try:
+                    try:
+                        uploaded_file.seek(0)
+                        data = pd.read_csv(uploaded_file, encoding=enc, on_bad_lines='skip')
+                        encoding = enc
+                        logger.info(f"CSV chargé avec encodage: {enc}")
+                        break
+                    except (UnicodeDecodeError, Exception) as e:
+                        logger.debug(f"Échec encodage {enc}: {e}")
+                        continue
+                
+                if data is None:
+                    return {"success": False, "error": "Impossible de décoder le CSV avec les encodages supportés"}
+                    
             elif file_extension in ['.xlsx', '.xls']:
+                uploaded_file.seek(0)
                 data = pd.read_excel(uploaded_file)
             elif file_extension == '.json':
+                uploaded_file.seek(0)
                 data = pd.read_json(uploaded_file)
             elif file_extension == '.parquet':
+                uploaded_file.seek(0)
                 data = pd.read_parquet(uploaded_file)
             else:
                 return {"success": False, "error": f"Format non supporté: {file_extension}"}
             
             # Validation des données
-            if data.empty:
-                return {"success": False, "error": "Le fichier est vide"}
+            if data is None or data.empty:
+                return {"success": False, "error": "Le fichier est vide ou invalide"}
             
             # Nettoyage des données
-            data = self.data_processor.clean_data(data)
+            if self.data_processor:
+                data = self.data_processor.clean_data(data)
+            else:
+                # Nettoyage basique
+                data = self._basic_clean_data(data)
             
             return {
                 "success": True,

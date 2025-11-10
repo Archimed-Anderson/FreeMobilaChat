@@ -2,65 +2,87 @@
 Module de Classification Dynamique et Relationnelle - FreeMobilaChat
 ====================================================================
 
-Classification intelligente qui s'adapte automatiquement au contenu CSV:
+Système de classification par règles qui s'adapte automatiquement au contenu du CSV.
+Fallback intelligent utilisé lorsque les modèles LLM sont indisponibles.
+
+Fonctionnalités:
 - Classification d'intention (information, demande, réclamation, compliment, etc.)
-- Catégorisation thématique dynamique
-- Analyse de sentiment contextuelle
-- Évaluation d'urgence adaptative
+- Catégorisation thématique dynamique avec détection automatique de nouveaux thèmes
+- Analyse de sentiment contextuelle avec gestion des négations et intensificateurs
+- Évaluation d'urgence adaptive basée sur des patterns linguistiques
+- Détection de mots-clés et extraction de termes significatifs
 
 Le module détecte automatiquement les colonnes de texte et adapte ses modèles
 de classification en fonction du contenu spécifique de chaque fichier.
 """
 
-import pandas as pd
-import numpy as np
-from typing import Dict, List, Optional, Any, Tuple
-from dataclasses import dataclass
-import re
-import logging
-from collections import Counter
+# Imports pour le traitement de données et structures avancées
+import pandas as pd  # Manipulation de DataFrames pour traitement batch
+import numpy as np  # Calculs mathématiques pour scores et pondérations
+from typing import Dict, List, Optional, Any, Tuple  # Typage statique pour clarté
+from dataclasses import dataclass  # Structures de données immutables pour résultats
+import re  # Expressions régulières pour détection de patterns linguistiques
+import logging  # Journalisation des opérations de classification
+from collections import Counter  # Comptage de fréquences pour détection de thèmes
 
+# Configuration du logger pour le suivi des classifications
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class DynamicClassificationResult:
-    """Résultat de classification dynamique"""
-    intention: str
-    theme: str
-    sentiment: str
-    urgency: str
-    confidence: float
-    detected_keywords: List[str]
-    metadata: Dict[str, Any]
+    """
+    Structure de données immutable pour stocker les résultats de classification
+    
+    Cette dataclass encapsule tous les résultats d'une classification multi-dimensionnelle:
+    intention, thème, sentiment, urgence, confiance et métadonnées associées.
+    """
+    intention: str  # Type d'intention détectée (réclamation, demande_info, compliment, etc.)
+    theme: str  # Thème principal identifié (fibre, mobile, sav, facture, etc.)
+    sentiment: str  # Polarité émotionnelle (positif, négatif, neutre)
+    urgency: str  # Niveau d'urgence évalué (critique, haute, moyenne, basse)
+    confidence: float  # Score de confiance global de la classification (0.0-1.0)
+    detected_keywords: List[str]  # Liste des mots-clés détectés qui ont influencé la classification
+    metadata: Dict[str, Any]  # Informations supplémentaires (scores détaillés, thèmes alternatifs, etc.)
 
 
 class IntentionClassifier:
-    """Classificateur d'intention adaptatif"""
+    """
+    Classificateur d'intention adaptatif basé sur la détection de patterns linguistiques
     
+    Identifie l'intention sous-jacente d'un message client parmi:
+    - réclamation: expression d'un problème ou insatisfaction
+    - demande_info: recherche d'information ou question
+    - demande_aide: demande d'assistance technique ou support
+    - compliment: expression de satisfaction ou remerciement
+    - suggestion: proposition d'amélioration ou idée
+    - information: partage d'information neutre ou annonce
+    """
+    
+    # Dictionnaire de patterns regex pour chaque type d'intention
     INTENTION_PATTERNS = {
-        'reclamation': [
+        'reclamation': [  # Patterns indiquant un problème ou une plainte
             r'\bproblème\b', r'\bpanne\b', r'\bbug\b', r'\berreur\b',
             r'\bne\s+fonctionne\s+pas\b', r'\bdysfonctionnement\b',
             r'\binsatisfait\b', r'\bmécontent\b'
         ],
-        'demande_info': [
+        'demande_info': [  # Patterns de questions et demandes d'information
             r'\bcomment\b', r'\bpourquoi\b', r'\bquand\b', r'\bquel\b',
             r'\best-ce\s+que\b', r'\bpouvez-vous\b', r'\bje\s+voudrais\s+savoir\b'
         ],
-        'demande_aide': [
+        'demande_aide': [  # Patterns de demande d'assistance ou support
             r'\baide\b', r'\baider\b', r'\bsupport\b', r'\bassistance\b',
             r'\bbesoin\b', r'\bje\s+ne\s+sais\s+pas\b', r'\bcomment\s+faire\b'
         ],
-        'compliment': [
+        'compliment': [  # Patterns de satisfaction et remerciements
             r'\bmerci\b', r'\bsuper\b', r'\bexcellent\b', r'\bparfait\b',
             r'\bgénial\b', r'\bbravo\b', r'\bfélicitations\b'
         ],
-        'suggestion': [
+        'suggestion': [  # Patterns de propositions et idées
             r'\bdevrais\b', r'\bdevrait\b', r'\bpourrait\b', r'\bserait\s+bien\b',
             r'\bje\s+propose\b', r'\bsuggestion\b', r'\bidée\b'
         ],
-        'information': [
+        'information': [  # Patterns d'annonces et informations neutres
             r'\bannonce\b', r'\binformation\b', r'\bnouveau\b', r'\bnouvelle\b',
             r'\bdécouvrez\b', r'\bdisponible\b'
         ]

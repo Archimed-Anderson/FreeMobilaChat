@@ -1,40 +1,42 @@
 """
-Configuration du Système de Classification LLM
-==============================================
+Configuration Centralisée du Système de Classification LLM - FreeMobilaChat
+=============================================================================
 
-Configuration centralisée pour le système de classification LLM intelligent.
-Contient tous les paramètres, constantes et configurations.
+Module de configuration global contenant tous les paramètres, constantes,
+taxonomies et règles de détection pour le système de classification intelligent.
 
-Développé dans le cadre d'un mémoire de master en Data Science
+Développé dans le cadre d'un mémoire de master en Data Science et Intelligence Artificielle.
+Ce module centralise la configuration pour faciliter la maintenance et les tests.
 """
 
-import os
-from pathlib import Path
-from typing import Dict, List, Any
+# Imports pour la gestion des chemins et types
+import os  # Accès aux variables d'environnement système
+from pathlib import Path  # Manipulation multi-plateforme des chemins de fichiers
+from typing import Dict, List, Any  # Annotations de types pour la sécurité du code
 
-# Chemins de base
-BASE_DIR = Path(__file__).parent
-SERVICES_DIR = BASE_DIR / "services"
-TESTS_DIR = BASE_DIR / "tests"
-DATA_DIR = BASE_DIR.parent / "data"
+# Définition des chemins de base du projet (structure hiérarchique)
+BASE_DIR = Path(__file__).parent  # Répertoire streamlit_app/ (racine de l'application)
+SERVICES_DIR = BASE_DIR / "services"  # Répertoire des modules de service (classificateurs, visualisations)
+TESTS_DIR = BASE_DIR / "tests"  # Répertoire des tests unitaires et d'intégration
+DATA_DIR = BASE_DIR.parent / "data"  # Répertoire des données (datasets, modèles entraînés)
 
-# Configuration des LLM
+# Configuration des modèles de langage (LLM) avec paramètres optimisés
 LLM_CONFIG = {
-    "ollama": {
-        "model": "llama2",
-        "temperature": 0.3,
-        "max_tokens": 1000,
-        "timeout": 30
+    "ollama": {  # Configuration pour Ollama (modèles locaux open-source)
+        "model": "llama2",  # Modèle par défaut (peut être substitué par mistral, codellama, etc.)
+        "temperature": 0.3,  # Contrôle de la créativité (0.3 = prévisible, 1.0 = créatif)
+        "max_tokens": 1000,  # Limitation de la longueur de réponse pour optimiser les performances
+        "timeout": 30  # Délai maximal d'attente en secondes avant abandon de la requête
     },
-    "openai": {
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.3,
-        "max_tokens": 1000,
-        "timeout": 30
+    "openai": {  # Configuration pour OpenAI GPT (API cloud payante)
+        "model": "gpt-3.5-turbo",  # Modèle économique d'OpenAI avec bon rapport qualité/prix
+        "temperature": 0.3,  # Température basse pour réponses cohérentes et reproductibles
+        "max_tokens": 1000,  # Limitation économique des tokens générés
+        "timeout": 30  # Timeout pour éviter les blocages sur requêtes lentes
     },
-    "fallback": {
-        "enabled": True,
-        "confidence_threshold": 0.5
+    "fallback": {  # Configuration du mode de secours (classification par règles)
+        "enabled": True,  # Activation du fallback automatique en cas d'échec LLM
+        "confidence_threshold": 0.5  # Seuil de confiance minimal pour accepter les résultats
     }
 }
 

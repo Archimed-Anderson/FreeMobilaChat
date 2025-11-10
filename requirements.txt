@@ -1,44 +1,67 @@
-# ═══════════════════════════════════════════════════════════
-# Dépendances pour Classificateur Ultra-Optimisé V2
-# FreeMobilaChat - Production Ready
-# ═══════════════════════════════════════════════════════════
+# FreeMobilaChat - Production Dependencies
+# Version: 4.2 - Production Ready
+# Python 3.8+
+# ============================================
 
-# Core ML/NLP
-torch>=2.0.0
-transformers>=4.30.0
-sentencepiece>=0.1.99
-accelerate>=0.20.0
+# Core Framework
+streamlit==1.28.1
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.4.2
 
 # Data Processing
-pandas>=2.0.0
-numpy>=1.24.0
-scikit-learn>=1.3.0
+pandas==2.1.1
+numpy==1.25.2
+openpyxl==3.1.2
 
-# Text Processing
-unidecode>=1.3.0
-emoji>=2.0.0
+# Machine Learning
+scikit-learn==1.3.1
+transformers==4.34.0
+torch==2.1.0
+sentencepiece==0.1.99
+accelerate==0.20.0
+
+# NLP & Text Processing
+emoji==2.8.0
+nltk==3.8.1
+unidecode==1.3.0
+
+# Visualization
+plotly==5.17.0
 
 # LLM Integration
-ollama>=0.1.0
+ollama>=0.6.0
 
-# Performance & Optimization
-tqdm>=4.65.0
-joblib>=1.3.0
-psutil>=5.9.0
+# API & HTTP
+requests==2.31.0
+httpx==0.25.0
 
-# Caching & Serialization
-# pickle5 non nécessaire (intégré dans Python 3.10+)
+# Database
+sqlalchemy==2.0.22
+alembic==1.12.1
 
-# Web Framework
-streamlit>=1.28.0
-plotly>=5.15.0
+# Authentication & Security
+python-jose[cryptography]==3.3.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.6
+bcrypt==4.0.1
+cryptography==41.0.7
 
 # Utilities
-python-dateutil>=2.8.2
-pytz>=2023.3
+python-dotenv==1.0.0
+pyyaml==6.0.1
+python-dateutil==2.8.2
+pytz==2023.3
 
-# Development (optionnel)
-pytest>=7.4.0
-black>=23.7.0
-flake8>=6.1.0
+# Logging & Monitoring
+loguru==0.7.2
 
+# Performance & Optimization
+aiofiles==23.2.1
+orjson==3.9.10
+joblib==1.3.2
+tqdm==4.65.0
+psutil==5.9.5
+
+# Note: Les dépendances de développement et tests sont dans requirements.dev.txt
+# Installer avec: pip install -r requirements.txt -r requirements.dev.txt

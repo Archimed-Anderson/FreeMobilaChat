@@ -26,7 +26,7 @@ source venv/bin/activate
 # Install production dependencies
 echo "✓ Installing production dependencies..."
 pip install --upgrade pip
-pip install -r requirements.production.txt
+pip install -r requirements.txt
 
 # Create necessary directories
 echo "✓ Creating production directories..."

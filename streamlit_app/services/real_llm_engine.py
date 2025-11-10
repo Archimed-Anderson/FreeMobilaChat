@@ -413,6 +413,7 @@ RÉPONDS EN JSON STRUCTURÉ avec cette structure exacte:
             
         except Exception as e:
             logger.error(f"Erreur lors du parsing de la réponse LLM: {e}")
+            filename = context.get('filename', 'unknown_file.csv')
             return self._get_fallback_analysis(df, filename, context)
     
     def _validate_analysis_structure(self, result: Dict[str, Any]) -> bool:

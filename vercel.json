@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "backend/app/main.py",
+      "src": "backend/api/index.py",
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb"
@@ -11,20 +11,27 @@
   ],
   "routes": [
     {
+      "src": "/api/(.*)",
+      "dest": "backend/api/index.py"
+    },
+    {
       "src": "/(.*)",
-      "dest": "backend/app/main.py"
+      "dest": "backend/api/index.py"
     }
   ],
   "env": {
     "PYTHONPATH": "backend",
-    "DATABASE_URL": "sqlite:///./data/freemobilachat.db",
+    "DATABASE_URL": "@database_url",
     "LOG_LEVEL": "INFO",
     "API_HOST": "0.0.0.0",
-    "API_PORT": "8000"
+    "API_PORT": "8000",
+    "SECRET_KEY": "@secret_key",
+    "JWT_SECRET_KEY": "@jwt_secret_key"
   },
   "functions": {
-    "backend/app/main.py": {
-      "maxDuration": 30
+    "backend/api/index.py": {
+      "maxDuration": 30,
+      "memory": 1024
     }
   }
 }

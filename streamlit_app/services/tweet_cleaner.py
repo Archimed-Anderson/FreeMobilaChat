@@ -2,8 +2,8 @@
 Module de Nettoyage de Tweets - FreeMobilaChat
 ===============================================
 
-Module avancé pour le nettoyage et la déduplication de tweets.
-Conforme aux spécifications techniques du projet.
+Module avancé pour le prétraitement et la déduplication de tweets.
+Conforme aux spécifications techniques du projet académique.
 
 Fonctionnalités:
 - Suppression des doublons (hash MD5)
@@ -12,22 +12,24 @@ Fonctionnalités:
 - Statistiques de nettoyage
 """
 
-from typing import Tuple, Dict, List
-import pandas as pd
-import hashlib
-import re
-from unidecode import unidecode
-import emoji
-import logging
+# Imports pour la manipulation de types et de données
+from typing import Tuple, Dict, List  # Annotations de types pour la clarté du code
+import pandas as pd  # Traitement de données tabulaires (DataFrames)
+import hashlib  # Génération de hash MD5 pour détection de doublons
+import re  # Expressions régulières pour le nettoyage de texte
+from unidecode import unidecode  # Normalisation des caractères unicode vers ASCII
+import emoji  # Conversion des emojis en représentation textuelle
+import logging  # Journalisation des opérations de nettoyage
 
+# Configuration du logger pour le suivi des opérations
 logger = logging.getLogger(__name__)
 
-# Patterns de nettoyage (conformes aux specs)
-URL_PATTERN = r'http\S+|www\S+|https\S+'
-MENTION_PATTERN = r'@\w+'
-HASHTAG_PATTERN = r'#\w+'
-PUNCTUATION_PATTERN = r'[^\w\s,.\?!]'
-WHITESPACE_PATTERN = r'\s+'
+# Définition des patterns regex pour le nettoyage (conformes aux spécifications)
+URL_PATTERN = r'http\S+|www\S+|https\S+'  # Détection de toutes les URLs (http, https, www)
+MENTION_PATTERN = r'@\w+'  # Détection des mentions Twitter (@username)
+HASHTAG_PATTERN = r'#\w+'  # Détection des hashtags (#tag)
+PUNCTUATION_PATTERN = r'[^\w\s,.\?!]'  # Suppression ponctuation exceptée (garde , . ? !)
+WHITESPACE_PATTERN = r'\s+'  # Normalisation des espaces multiples en espace unique
 
 
 class TweetCleaner:

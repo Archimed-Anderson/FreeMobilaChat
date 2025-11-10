@@ -1,29 +1,40 @@
 """
-Module de KPIs et Visualisations Avancées pour FreeMobilaChat
-Nouveaux indicateurs business et visualisations enrichies
+Module de Calcul de KPIs et Visualisations Avancées - FreeMobilaChat
+====================================================================
+
+Module spécialisé dans le calcul dynamique d'indicateurs clés de performance (KPIs)
+et la création de visualisations interactives pour l'analyse de sentiment client.
+
+Fonctionnalités:
+- Calculs 100% dynamiques (recalculés à chaque exécution, pas de cache)
+- Optimisation vectorielle avec pandas/numpy pour hautes performances
+- Support multi-formats (français/anglais, numérique/texte)
+- Visualisations interactives avec Plotly
+- Interface moderne avec design cards premium
 """
 
-import pandas as pd
-import numpy as np
-import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
-from typing import Dict, Any, List, Tuple
-import streamlit as st
-from datetime import datetime
+# Imports des bibliothèques de traitement et visualisation de données
+import pandas as pd  # Manipulation de DataFrames et calculs vectorisés
+import numpy as np  # Calculs mathématiques optimisés et agrégations
+import plotly.express as px  # Graphiques interactifs haut niveau
+import plotly.graph_objects as go  # Graphiques interactifs bas niveau (contrôle fin)
+from plotly.subplots import make_subplots  # Création de tableaux de bord multi-graphiques
+from typing import Dict, Any, List, Tuple  # Annotations de types pour clarté
+import streamlit as st  # Interface utilisateur et composants de rendu
+from datetime import datetime  # Gestion des horodatages pour traçabilité
 
-# Couleurs Free Mobile
+# Palette de couleurs Free Mobile (identité visuelle de la marque)
 COLORS = {
-    'primary': '#CC0000',
-    'secondary': '#8B0000',
-    'accent': '#FF6B6B',
-    'success': '#28a745',
-    'warning': '#ffc107',
-    'danger': '#dc3545',
-    'info': '#17a2b8',
-    'positive': '#28a745',
-    'neutral': '#6c757d',
-    'negative': '#dc3545'
+    'primary': '#CC0000',  # Rouge principal Free Mobile (couleur signature)
+    'secondary': '#8B0000',  # Rouge foncé pour contraste
+    'accent': '#FF6B6B',  # Rouge clair pour accents et highlights
+    'success': '#28a745',  # Vert pour indicateurs positifs (satisfaction, succès)
+    'warning': '#ffc107',  # Jaune/orange pour avertissements et alertes moyennes
+    'danger': '#dc3545',  # Rouge vif pour alertes critiques et erreurs
+    'info': '#17a2b8',  # Bleu pour informations neutres
+    'positive': '#28a745',  # Vert pour sentiments positifs
+    'neutral': '#6c757d',  # Gris pour sentiments neutres
+    'negative': '#dc3545'  # Rouge pour sentiments négatifs
 }
 
 def compute_business_kpis(df: pd.DataFrame) -> Dict[str, Any]:
@@ -55,31 +66,39 @@ def compute_business_kpis(df: pd.DataFrame) -> Dict[str, Any]:
     if total_tweets == 0:
         return kpis
     
-    # 1. Claim Rate (Taux de réclamations) - OPTIMISÉ
+    # 1. Claim Rate (Taux de réclamations) - OPTIMISÉ ET ROBUSTE
+    claims_count = 0
+    
+    # Vérifier multiple colonnes possibles
     if 'is_claim' in df.columns:
-        # Conversion vectorisée une seule fois
-        claims_array = pd.to_numeric(df['is_claim'], errors='coerce').fillna(0)
-        claims_count = int(claims_array.sum())
-        
-        kpis['claim_rate'] = {
-            'value': (claims_count / total_tweets * 100),
-            'count': claims_count,
-            'total': total_tweets
-        }
+        # Conversion vectorisée - supporter 'oui'/'non' et 1/0
+        claims_array = df['is_claim'].astype(str).str.lower()
+        claims_count = int(claims_array.isin(['oui', 'yes', '1', 'true']).sum())
     elif 'category' in df.columns:
-        # Vectorisation avec str.contains (plus rapide que apply)
-        claims_count = df['category'].str.contains('réclamation|claim', case=False, na=False).sum()
-        
-        kpis['claim_rate'] = {
-            'value': (claims_count / total_tweets * 100),
-            'count': int(claims_count),
-            'total': total_tweets
-        }
+        # Vectorisation avec str.contains
+        claims_mask = df['category'].astype(str).str.contains('réclamation|claim|complaint', case=False, na=False)
+        claims_count = int(claims_mask.sum())
+    elif 'incident' in df.columns:
+        # Support pour colonne 'incident'
+        claims_mask = df['incident'].astype(str).str.contains('réclamation|claim|complaint', case=False, na=False)
+        claims_count = int(claims_mask.sum())
+    
+    kpis['claim_rate'] = {
+        'value': (claims_count / total_tweets * 100) if total_tweets > 0 else 0.0,
+        'count': claims_count,
+        'total': total_tweets
+    }
     
     # 2. Thematic Distribution (Distribution thématique) - OPTIMISÉ
     if 'category' in df.columns:
-        # value_counts est déjà optimisé
         theme_dist = df['category'].value_counts()
+        kpis['thematic_distribution'] = {
+            'categories': theme_dist.to_dict(),
+            'top_category': theme_dist.index[0] if len(theme_dist) > 0 else 'N/A',
+            'count': len(theme_dist)
+        }
+    elif 'incident' in df.columns:
+        theme_dist = df['incident'].value_counts()
         kpis['thematic_distribution'] = {
             'categories': theme_dist.to_dict(),
             'top_category': theme_dist.index[0] if len(theme_dist) > 0 else 'N/A',
@@ -93,71 +112,74 @@ def compute_business_kpis(df: pd.DataFrame) -> Dict[str, Any]:
             'count': len(theme_dist)
         }
     
-    # 3. Customer Satisfaction Index (Indice de satisfaction) - OPTIMISÉ
+    # 3. Customer Satisfaction Index (Indice de satisfaction) - OPTIMISÉ ET ROBUSTE
     if 'sentiment' in df.columns:
-        # Calcul vectorisé avec mask au lieu de multiples str.contains
-        sentiment_lower = df['sentiment'].str.lower()
+        # Normaliser les sentiments pour supporter différents formats
+        sentiment_normalized = df['sentiment'].astype(str).str.lower().str.strip()
         
-        positive = (sentiment_lower.isin(['positive', 'positif', 'pos'])).sum()
-        neutral = (sentiment_lower.isin(['neutral', 'neutre', 'neu'])).sum()
-        negative = (sentiment_lower.isin(['negative', 'négatif', 'negatif', 'neg'])).sum()
+        # Détecter tous les formats possibles
+        positive_mask = sentiment_normalized.isin(['positive', 'positif', 'pos', '1', 'good', 'happy'])
+        neutral_mask = sentiment_normalized.isin(['neutral', 'neutre', 'neu', '0', 'ok'])
+        negative_mask = sentiment_normalized.isin(['negative', 'négatif', 'negatif', 'neg', '-1', 'bad', 'angry'])
         
-        # Calcul optimisé en une ligne
-        satisfaction_index = ((positive - negative) / total_tweets * 50 + 50)
+        positive = int(positive_mask.sum())
+        neutral = int(neutral_mask.sum())
+        negative = int(negative_mask.sum())
+        
+        # Calcul de l'indice de satisfaction (scale 0-100)
+        # Formule: ((positif - négatif) / total) * 50 + 50
+        satisfaction_index = ((positive - negative) / total_tweets * 50 + 50) if total_tweets > 0 else 50.0
         
         kpis['satisfaction_index'] = {
             'value': satisfaction_index,
-            'positive_count': int(positive),
-            'neutral_count': int(neutral),
-            'negative_count': int(negative),
-            'positive_pct': (positive / total_tweets * 100),
-            'neutral_pct': (neutral / total_tweets * 100),
-            'negative_pct': (negative / total_tweets * 100)
+            'positive_count': positive,
+            'neutral_count': neutral,
+            'negative_count': negative,
+            'positive_pct': (positive / total_tweets * 100) if total_tweets > 0 else 0.0,
+            'neutral_pct': (neutral / total_tweets * 100) if total_tweets > 0 else 0.0,
+            'negative_pct': (negative / total_tweets * 100) if total_tweets > 0 else 0.0
         }
     
-    # 4. Urgency Rate (Taux d'urgence) - OPTIMISÉ
+    # 4. Urgency Rate (Taux d'urgence) - OPTIMISÉ ET ROBUSTE
+    critical = 0
+    high = 0
+    
     if 'priority' in df.columns:
-        # Vectorisation avec str.lower() une seule fois
-        priority_lower = df['priority'].str.lower().fillna('')
-        
-        # Masques booléens vectorisés
-        critical_mask = priority_lower.str.contains('critique|critical|urgent', regex=True)
-        high_mask = priority_lower.str.contains('haute|high|élevée', regex=True)
-        
-        critical = critical_mask.sum()
-        high = high_mask.sum()
-        urgent_total = int(critical + high)
-        
-        kpis['urgency_rate'] = {
-            'critical_count': int(critical),
-            'high_count': int(high),
-            'urgent_total': urgent_total,
-            'urgency_pct': (urgent_total / total_tweets * 100)
-        }
+        priority_normalized = df['priority'].astype(str).str.lower().fillna('')
+        critical_mask = priority_normalized.str.contains('critique|critical|urgent|très haute', regex=True, na=False)
+        high_mask = priority_normalized.str.contains('haute|high|élevée', regex=True, na=False) & ~critical_mask
+        critical = int(critical_mask.sum())
+        high = int(high_mask.sum())
+    elif 'urgence' in df.columns:
+        urgence_normalized = df['urgence'].astype(str).str.lower().fillna('')
+        critical_mask = urgence_normalized.str.contains('critique|critical|urgent|très haute', regex=True, na=False)
+        high_mask = urgence_normalized.str.contains('haute|high|élevée', regex=True, na=False) & ~critical_mask
+        critical = int(critical_mask.sum())
+        high = int(high_mask.sum())
     elif 'is_urgent' in df.columns:
-        urgent_array = pd.to_numeric(df['is_urgent'], errors='coerce').fillna(0)
-        urgent = int(urgent_array.sum())
-        
-        kpis['urgency_rate'] = {
-            'critical_count': urgent,
-            'high_count': 0,
-            'urgent_total': urgent,
-            'urgency_pct': (urgent / total_tweets * 100)
-        }
+        urgent_array = df['is_urgent'].astype(str).str.lower()
+        critical = int(urgent_array.isin(['oui', 'yes', '1', 'true']).sum())
+        high = 0
+    
+    urgent_total = critical + high
+    kpis['urgency_rate'] = {
+        'critical_count': critical,
+        'high_count': high,
+        'urgent_total': urgent_total,
+        'urgency_pct': (urgent_total / total_tweets * 100) if total_tweets > 0 else 0.0
+    }
     
     # 5. Average Confidence Score (Score de confiance moyen) - OPTIMISÉ
     if 'confidence' in df.columns:
-        # Conversion vectorisée avec gestion des erreurs
         confidence_numeric = pd.to_numeric(df['confidence'], errors='coerce')
         confidence_clean = confidence_numeric.dropna()
         
         if len(confidence_clean) > 0:
-            # Calculs vectorisés numpy (plus rapides)
             kpis['confidence_score'] = {
                 'average': float(confidence_clean.mean()),
                 'min': float(confidence_clean.min()),
                 'max': float(confidence_clean.max()),
-                'std': float(confidence_clean.std())
+                'std': float(confidence_clean.std()) if len(confidence_clean) > 1 else 0.0
             }
         else:
             kpis['confidence_score'] = {'average': 0, 'min': 0, 'max': 0, 'std': 0}
@@ -169,7 +191,7 @@ def compute_business_kpis(df: pd.DataFrame) -> Dict[str, Any]:
                 'average': float(abs(sentiment_numeric.mean())),
                 'min': float(sentiment_numeric.min()),
                 'max': float(sentiment_numeric.max()),
-                'std': float(sentiment_numeric.std())
+                'std': float(sentiment_numeric.std()) if len(sentiment_numeric) > 1 else 0.0
             }
         else:
             kpis['confidence_score'] = {'average': 0, 'min': 0, 'max': 0, 'std': 0}
@@ -183,10 +205,11 @@ def render_business_kpis(kpis: Dict[str, Any]):
     
     AMÉLIORATIONS:
     - Design moderne avec cards premium
-    - Icônes Font Awesome contextuelles
+    - Emojis Unicode natifs (pas de Font Awesome)
     - Indicateurs visuels de performance (couleurs intelligentes)
     - Layout responsive et épuré
     - Typographie améliorée pour la lisibilité
+    - Calculs 100% dynamiques
     
     Args:
         kpis: Dictionnaire des KPIs calculés par compute_business_kpis()
@@ -200,12 +223,10 @@ def render_business_kpis(kpis: Dict[str, Any]):
                 margin: 1.5rem 0; 
                 box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
         <h2 style="font-size: 1.9rem; font-weight: 800; color: #1a202c; margin: 0; letter-spacing: -0.5px;">
-            <i class="fas fa-chart-line" style="color: #CC0000; margin-right: 0.5rem;"></i>
-            Tableau de Bord Business
+            📊 Tableau de Bord Business - KPIs Avancés
         </h2>
         <p style="color: #4a5568; font-size: 0.95rem; margin-top: 0.75rem; font-weight: 500;">
-            <i class="fas fa-sync-alt" style="font-size: 0.8rem; margin-right: 0.3rem;"></i>
-            Mise à jour en temps réel • Calculs dynamiques
+            🔄 Mise à jour en temps réel • Calculs dynamiques
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -221,6 +242,7 @@ def render_business_kpis(kpis: Dict[str, Any]):
             
             # Couleur dynamique basée sur le taux
             color = "#e53e3e" if claim_rate > 30 else "#ed8936" if claim_rate > 15 else "#48bb78"
+            emoji = "⚠️" if claim_rate > 30 else "🟠" if claim_rate > 15 else "✅"
             
             st.markdown(f"""
             <div style="background: white; 
@@ -230,14 +252,14 @@ def render_business_kpis(kpis: Dict[str, Any]):
                         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
                         height: 140px;">
                 <div style="display: flex; align-items: center; margin-bottom: 0.5rem;">
-                    <i class="fas fa-exclamation-triangle" style="color: {color}; font-size: 1.2rem; margin-right: 0.5rem;"></i>
-                    <span style="font-size: 0.85rem; font-weight: 600; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">Réclamations</span>
+                    <span style="font-size: 1.2rem; margin-right: 0.5rem;">{emoji}</span>
+                    <span style="font-size: 0.85rem; font-weight: 600; color: #4a5568; text-transform: uppercase; letter-spacing: 0.5px;">RÉCLAMATIONS</span>
                 </div>
                 <div style="font-size: 2.2rem; font-weight: 800; color: #1a202c; margin: 0.5rem 0;">
                     {claim_rate:.1f}<span style="font-size: 1.2rem; color: #718096;">%</span>
                 </div>
                 <div style="font-size: 0.8rem; color: #718096; font-weight: 500;">
-                    <i class="fas fa-hashtag" style="font-size: 0.7rem;"></i> {claim_count} tweets
+                    {claim_count} tweets
                 </div>
             </div>
             """, unsafe_allow_html=True)

@@ -22,7 +22,6 @@ AuthService.init_session_state()
 # Custom CSS styles loading
 def load_css():
     st.markdown("""
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
     /* Reset */
     .main {padding: 0 !important; background: #f8f9fa;}
@@ -32,8 +31,6 @@ def load_css():
     * {-webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; text-rendering: optimizeLegibility;}
     .stButton > button {background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); color: white; font-weight: 700; font-size: 1.2rem; padding: 1rem 3rem; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(204, 0, 0, 0.3); transition: all 0.3s; letter-spacing: 0.5px;}
     .stButton > button:hover {transform: translateY(-2px); box-shadow: 0 6px 20px rgba(204, 0, 0, 0.4);}
-    .icon-box {width: 80px; height: 80px; background: linear-gradient(135deg, #CC0000 0%, #8B0000 100%); border-radius: 20px; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; box-shadow: 0 8px 20px rgba(204, 0, 0, 0.3);}
-    .icon-box i {font-size: 2.5rem; color: white;}
     h1, h2, h3 {text-shadow: 1px 1px 2px rgba(0,0,0,0.1);}
     </style>
     """, unsafe_allow_html=True)
@@ -110,7 +107,7 @@ def render_hero():
     col1, col2, col3 = st.columns([1, 1, 1])
     with col2:
         if st.button("Start Now", type="primary", use_container_width=True):
-            st.switch_page("pages/2_Classification_LLM.py")
+            st.switch_page("pages/1_Classification_LLM.py")
     
     # Espacement après le bouton
     st.markdown("<div style='height: 2rem;'></div>", unsafe_allow_html=True)
@@ -143,9 +140,7 @@ def render_hero():
                     border-radius: 20px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
                     margin: 0 1rem;">
-            <div class="icon-box">
-                <i class="fas fa-bolt"></i>
-            </div>
+            <div style="font-size: 4rem; margin-bottom: 1rem;">⚡</div>
             <h3 style="color: #CC0000; 
                        font-size: 1.8rem; 
                        font-weight: 700; 
@@ -171,9 +166,7 @@ def render_hero():
                     border-radius: 20px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
                     margin: 0 1rem;">
-            <div class="icon-box">
-                <i class="fas fa-bullseye"></i>
-            </div>
+            <div style="font-size: 4rem; margin-bottom: 1rem;">🎯</div>
             <h3 style="color: #CC0000; 
                        font-size: 1.8rem; 
                        font-weight: 700; 
@@ -199,9 +192,7 @@ def render_hero():
                     border-radius: 20px;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
                     margin: 0 1rem;">
-            <div class="icon-box">
-                <i class="fas fa-chart-line"></i>
-            </div>
+            <div style="font-size: 4rem; margin-bottom: 1rem;">📈</div>
             <h3 style="color: #CC0000; 
                        font-size: 1.8rem; 
                        font-weight: 700; 
@@ -283,19 +274,19 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> 1,000 tweets/month
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> 1,000 tweets/month
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Sentiment analysis
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Sentiment analysis
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> 3 categories
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> 3 categories
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Monthly reports
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Monthly reports
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Support email
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Support email
                 </li>
             </ul>
         </div>
@@ -357,22 +348,22 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> 100,000 tweets/month
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> 100,000 tweets/month
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Advanced AI analysis
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> Advanced AI analysis
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Unlimited categories
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> Unlimited categories
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Real-time reports
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> Real-time reports
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> Support 24/7
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> Support 24/7
                 </li>
                 <li style="padding: 0.8rem 0; color: white; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #FFD700; margin-right: 0.5rem;"></i> API access
+                    <span style="color: #FFD700; margin-right: 0.5rem;">✓</span> API access
                 </li>
             </ul>
         </div>
@@ -415,22 +406,22 @@ def render_pricing():
                        margin: 2rem 0; 
                        text-align: left;">
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Unlimited volume
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Unlimited volume
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Dedicated AI models
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Dedicated AI models
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Custom dashboards
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Custom dashboards
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Integration complete
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Integration complete
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Dedicated manager
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Dedicated manager
                 </li>
                 <li style="padding: 0.8rem 0; color: #555; font-size: 1rem; font-weight: 400;">
-                    <i class="fas fa-check" style="color: #4ade80; margin-right: 0.5rem;"></i> Guaranteed SLA
+                    <span style="color: #4ade80; margin-right: 0.5rem;">✓</span> Guaranteed SLA
                 </li>
             </ul>
         </div>
@@ -468,22 +459,22 @@ def render_features():
                         box-shadow: 0 10px 30px rgba(204, 0, 0, 0.3); 
                         text-align: center; 
                         border: 3px solid #CC0000;">
-                <i class="fas fa-robot" style="font-size: 3rem; color: white; margin-bottom: 1rem;"></i>
+                <div style="font-size: 3rem; margin-bottom: 1rem;">🤖</div>
                 <h3 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">LLM Classification</h3>
                 <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Advanced AI analysis with 50-tweet intelligent classification</p>
                 <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
-                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Sentiment Detection</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0;">✓ Sentiment Detection</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem;">
-                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Topic Categorization</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0;">✓ Topic Categorization</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.2); padding: 0.8rem; border-radius: 10px;">
-                    <p style="color: white; font-size: 0.9rem; margin: 0;"><i class="fas fa-check"></i> Urgency Analysis</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0;">✓ Urgency Analysis</p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
             if st.button("Start LLM Classification", type="primary", use_container_width=True, key="btn_llm"):
-                st.switch_page("pages/2_Classification_LLM.py")
+                st.switch_page("pages/1_Classification_LLM.py")
         
         with subcol2:
             st.markdown("""
@@ -497,22 +488,22 @@ def render_features():
                         overflow: hidden;">
                 <div style="position: absolute; top: -50px; right: -50px; width: 200px; height: 200px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.5;"></div>
                 <div style="position: absolute; bottom: -30px; left: -30px; width: 150px; height: 150px; background: rgba(255,255,255,0.08); border-radius: 50%; opacity: 0.5;"></div>
-                <i class="fas fa-brain" style="font-size: 3rem; color: white; margin-bottom: 1rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));"></i>
+                <div style="font-size: 3rem; margin-bottom: 1rem; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));">🧠</div>
                 <h3 style="color: white; font-size: 1.8rem; font-weight: 700; margin-bottom: 1rem; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">Mistral AI Classification</h3>
                 <p style="color: rgba(255,255,255,0.95); font-size: 1.1rem; margin-bottom: 1.5rem; text-shadow: 1px 1px 2px rgba(0,0,0,0.2);">Advanced multi-model AI with 3 intelligent modes</p>
                 <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
-                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> BERT + Mistral + Rules</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><span style="color: #10AC84;">✓</span> BERT + Mistral + Rules</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; margin-bottom: 1rem; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
-                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> 88-95% Accuracy</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><span style="color: #10AC84;">✓</span> 88-95% Accuracy</p>
                 </div>
                 <div style="background: rgba(255,255,255,0.15); padding: 0.8rem; border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px);">
-                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><i class="fas fa-check-circle" style="color: #10AC84;"></i> 10 Business KPIs</p>
+                    <p style="color: white; font-size: 0.9rem; margin: 0; font-weight: 600;"><span style="color: #10AC84;">✓</span> 10 Business KPIs</p>
                 </div>
             </div>
             """, unsafe_allow_html=True)
             if st.button("Start Mistral Classification", type="primary", use_container_width=True, key="btn_mistral"):
-                st.switch_page("pages/5_Classification_Mistral.py")
+                st.switch_page("pages/2_Classification_Mistral.py")
     
     with col3:
         st.empty()  # Spacer for centering
@@ -541,12 +532,12 @@ def render_features():
     """, unsafe_allow_html=True)
     
     features = [
-        ("fas fa-robot", "Advanced AI Analysis", "Using state-of-the-art language models for precise analysis"),
-        ("fas fa-chart-bar", "Interactive Dashboards", "Dynamic and customizable visualizations"),
-        ("fas fa-clock", "Real Time", "Real-time tweet processing and analysis"),
-        ("fas fa-tags", "Auto Categorization", "Automatic tweet classification"),
-        ("fas fa-file-export", "Detailed Reports", "Automatic generation of exportable reports"),
-        ("fas fa-shield-alt", "Maximum Security", "Data encryption and GDPR compliance")
+        ("🤖", "Advanced AI Analysis", "Using state-of-the-art language models for precise analysis"),
+        ("📊", "Interactive Dashboards", "Dynamic and customizable visualizations"),
+        ("⏱️", "Real Time", "Real-time tweet processing and analysis"),
+        ("🏷️", "Auto Categorization", "Automatic tweet classification"),
+        ("📊", "Detailed Reports", "Automatic generation of exportable reports"),
+        ("🛡️", "Maximum Security", "Data encryption and GDPR compliance")
     ]
     
     for i in range(0, len(features), 3):
@@ -564,9 +555,7 @@ def render_features():
                                 text-align: center;
                                 border: 1px solid #f0f0f0; 
                                 height: 100%;">
-                        <div class="icon-box" style="width: 70px; height: 70px;">
-                            <i class="{icon}" style="font-size: 2rem;"></i>
-                        </div>
+                        <div style="font-size: 3rem; margin-bottom: 1rem;">{icon}</div>
                         <h3 style="color: #CC0000; 
                                    font-size: 1.5rem; 
                                    font-weight: 700; 
@@ -686,27 +675,27 @@ def render_footer():
             <div style="display: flex; gap: 1rem;">
                 <a href="#" style="width: 50px; height: 50px; background: #CC0000; 
                                   border-radius: 50%; display: flex; align-items: center; 
-                                  justify-content: center; color: white; font-size: 1.3rem;
-                                  transition: all 0.3s;">
-                    <i class="fab fa-facebook-f"></i>
+                                  justify-content: center; color: white; font-size: 1.5rem;
+                                  transition: all 0.3s; text-decoration: none;">
+                    👤
                 </a>
                 <a href="#" style="width: 50px; height: 50px; background: #CC0000; 
                                   border-radius: 50%; display: flex; align-items: center; 
-                                  justify-content: center; color: white; font-size: 1.3rem;
-                                  transition: all 0.3s;">
-                    <i class="fab fa-twitter"></i>
+                                  justify-content: center; color: white; font-size: 1.5rem;
+                                  transition: all 0.3s; text-decoration: none;">
+                    🐦
                 </a>
                 <a href="#" style="width: 50px; height: 50px; background: #CC0000; 
                                   border-radius: 50%; display: flex; align-items: center; 
-                                  justify-content: center; color: white; font-size: 1.3rem;
-                                  transition: all 0.3s;">
-                    <i class="fab fa-linkedin-in"></i>
+                                  justify-content: center; color: white; font-size: 1.5rem;
+                                  transition: all 0.3s; text-decoration: none;">
+                    💼
                 </a>
                 <a href="#" style="width: 50px; height: 50px; background: #CC0000; 
                                   border-radius: 50%; display: flex; align-items: center; 
-                                  justify-content: center; color: white; font-size: 1.3rem;
-                                  transition: all 0.3s;">
-                    <i class="fas fa-envelope"></i>
+                                  justify-content: center; color: white; font-size: 1.5rem;
+                                  transition: all 0.3s; text-decoration: none;">
+                    ✉️
                 </a>
             </div>
         </div>
@@ -732,7 +721,7 @@ def render_footer():
                                             font-weight: 500;
                                             text-shadow: none;
                                             transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Our Offers
+                        <span style="color: #CC0000; margin-right: 0.5rem;">▶</span> Our Offers
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -742,7 +731,7 @@ def render_footer():
                                                        font-weight: 500;
                                                        text-shadow: none;
                                                        transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Features
+                        <span style="color: #CC0000; margin-right: 0.5rem;">▶</span> Features
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -752,7 +741,7 @@ def render_footer():
                                                   font-weight: 500;
                                                   text-shadow: none;
                                                   transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Partners
+                        <span style="color: #CC0000; margin-right: 0.5rem;">▶</span> Partners
                     </a>
                 </li>
                 <li style="margin-bottom: 1rem;">
@@ -762,7 +751,7 @@ def render_footer():
                                                           font-weight: 500;
                                                           text-shadow: none;
                                                           transition: color 0.3s;">
-                        <i class="fas fa-angle-right" style="color: #CC0000; margin-right: 0.5rem;"></i> Get Started
+                        <span style="color: #CC0000; margin-right: 0.5rem;">▶</span> Get Started
                     </a>
                 </li>
             </ul>
@@ -783,7 +772,7 @@ def render_footer():
             </h3>
             <div style="margin-bottom: 1.5rem; padding: 1.2rem; background: #f8f9fa; border-radius: 10px; border: 1px solid #e0e0e0;">
                 <div style="color: #CC0000; font-size: 1.5rem; margin-bottom: 0.8rem;">
-                    <i class="fas fa-envelope"></i>
+                    ✉️
                 </div>
                 <div style="font-size: 0.9rem; 
                            color: #666; 
@@ -803,7 +792,7 @@ def render_footer():
             </div>
             <div style="padding: 1.2rem; background: #f8f9fa; border-radius: 10px; border: 1px solid #e0e0e0;">
                 <div style="color: #CC0000; font-size: 1.5rem; margin-bottom: 0.8rem;">
-                    <i class="fas fa-phone"></i>
+                    📞
                 </div>
                 <div style="font-size: 0.9rem; 
                            color: #666; 

@@ -1,50 +1,45 @@
-# FreeMobilaChat - Dépendances Python
-# ====================================
+# FreeMobilaChat - Streamlit App Dependencies
+# ============================================
 
 # Core Streamlit
 streamlit>=1.28.0
 pandas>=2.0.0
 numpy>=1.24.0
 
-# Visualisation
+# Visualization
 plotly>=5.14.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
 
-# LLM et IA
-ollama>=0.6.0                    # Mistral local
-transformers>=4.30.0             # BERT/CamemBERT
-torch>=2.0.0                     # PyTorch (GPU support)
-torchvision>=0.15.0
-torchaudio>=2.0.0
-sentencepiece>=0.1.99            # Tokenisation
-accelerate>=0.20.0               # Accélération GPU
+# LLM and AI
+ollama>=0.6.0
+transformers>=4.30.0
+torch>=2.0.0
+sentencepiece>=0.1.99
+accelerate>=0.20.0
 
-# Nettoyage de texte
+# Text Processing
 emoji>=2.0.0
 unidecode>=1.3.0
 nltk>=3.8.0
 
-# Optimisation et parallélisation
-joblib>=1.3.0                    # Parallélisation
-scikit-learn>=1.3.0              # Vectorisation, ML
-tqdm>=4.65.0                     # Progress bars
+# Optimization and Parallelization
+joblib>=1.3.0
+scikit-learn>=1.3.0
+tqdm>=4.65.0
 
-# Utilitaires
+# Utilities
 python-dotenv>=1.0.0
 requests>=2.31.0
-Pillow>=10.0.0
 
-# Authentification et sécurité
+# Authentication and Security
 bcrypt>=4.0.0
 cryptography>=41.0.0
 
-# Base de données (si utilisé)
+# Database
 sqlalchemy>=2.0.0
 
-# Export et reporting
+# Export and Reporting
 openpyxl>=3.1.0
-xlsxwriter>=3.1.0
 
-# Monitoring et logging
-psutil>=5.9.0                    # Monitoring ressources
+# Monitoring and Logging
+psutil>=5.9.0
+loguru>=0.7.0

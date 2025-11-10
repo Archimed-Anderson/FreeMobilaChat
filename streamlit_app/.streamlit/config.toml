@@ -1,27 +1,31 @@
 [server]
-port = 8501
+port = 8502
 headless = true
 enableCORS = false
-enableXsrfProtection = true
+enableXsrfProtection = false
 maxUploadSize = 200
-runOnSave = true
-
-[theme]
-base = "light"
-primaryColor = "#CC0000"
-backgroundColor = "#f8f9fa"
-secondaryBackgroundColor = "#e0e0e0"
-textColor = "#222222"
-font = "sans serif"
+enableWebsocketCompression = false
 
 [browser]
 gatherUsageStats = false
 serverAddress = "localhost"
+serverPort = 8502
 
 [runner]
 magicEnabled = true
 fastReruns = true
 
 [client]
-toolbarMode = "minimal"
 showErrorDetails = true
+toolbarMode = "minimal"
+
+[theme]
+base = "light"
+primaryColor = "#CC0000"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#F5F7FA"
+textColor = "#1a202c"
+font = "sans serif"
+
+[logger]
+level = "info"
