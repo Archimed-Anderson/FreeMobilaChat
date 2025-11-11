@@ -1,11 +1,11 @@
 [server]
-headless = true
-enableCORS = false
+headless = false
+enableCORS = true
 enableXsrfProtection = true
 maxUploadSize = 200
 enableWebsocketCompression = false
-address = "0.0.0.0"
-port = 8501
+address = "localhost"
+port = 8502
 
 [browser]
 gatherUsageStats = false

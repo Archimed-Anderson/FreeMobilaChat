@@ -214,16 +214,23 @@ class TweetCleaner:
         stats['cleaning_operations'].append(f"Doublons supprimés: {duplicates}")
         
         # 3. Calcul de la longueur moyenne avant nettoyage
-        stats['avg_length_before'] = float(df_clean[text_column].str.len().mean())
+        if len(df_clean) > 0:
+            stats['avg_length_before'] = float(df_clean[text_column].astype(str).str.len().mean())
+        else:
+            stats['avg_length_before'] = 0.0
         
         # 4. Nettoyage du texte
         df_clean[f'{text_column}_cleaned'] = df_clean[text_column].apply(self.clean_text)
         
         # 5. Calcul de la longueur moyenne après nettoyage
-        stats['avg_length_after'] = float(df_clean[f'{text_column}_cleaned'].str.len().mean())
+        if len(df_clean) > 0:
+            stats['avg_length_after'] = float(df_clean[f'{text_column}_cleaned'].str.len().mean())
+        else:
+            stats['avg_length_after'] = 0.0
         
         # 6. Suppression des tweets vides après nettoyage
-        df_clean = df_clean[df_clean[f'{text_column}_cleaned'].str.len() > 0]
+        if len(df_clean) > 0:
+            df_clean = df_clean[df_clean[f'{text_column}_cleaned'].str.len() > 0]
         
         # Statistiques finales
         stats['total_cleaned'] = len(df_clean)

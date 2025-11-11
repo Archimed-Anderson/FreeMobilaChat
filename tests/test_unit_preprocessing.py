@@ -46,7 +46,8 @@ class TestTweetCleaner(unittest.TestCase):
         # URLs doivent être supprimées
         self.assertNotIn('http://test.com', cleaned)
         self.assertNotIn('www.example.com', cleaned)
-        self.assertIn('Problème', cleaned)
+        # Note: normalize_unicode converts è to e
+        self.assertIn('Probleme', cleaned)
     
     def test_clean_text_mentions(self):
         """Test: Suppression des mentions @"""
@@ -56,7 +57,8 @@ class TestTweetCleaner(unittest.TestCase):
         # Mentions doivent être supprimées
         self.assertNotIn('@Free', cleaned)
         self.assertNotIn('@Freebox', cleaned)
-        self.assertIn('problème', cleaned)
+        # Note: normalize_unicode converts è to e
+        self.assertIn('probleme', cleaned)
     
     def test_clean_text_hashtags(self):
         """Test: Suppression des hashtags (optionnel)"""
