@@ -679,12 +679,12 @@ def _handle_upload_robust(uploaded_file):
         file_size_mb = uploaded_file.size / (1024 * 1024)
         
         if file_size_mb > 500:
-            st.error(f"Fichier trop volumineux: {file_size_mb:.1f} MB (max: 500 MB)", icon="●")
-            st.info("Réduisez la taille du fichier ou filtrez les données", icon="◆")
+            st.error(f"❌ Fichier trop volumineux: {file_size_mb:.1f} MB (max: 500 MB)")
+            st.info("◆ Réduisez la taille du fichier ou filtrez les données")
             return
         
         # Info fichier
-        st.success(f"Fichier accepté: {uploaded_file.name} ({file_size_mb:.1f} MB)", icon="✓")
+        st.success(f"✅ Fichier accepté: {uploaded_file.name} ({file_size_mb:.1f} MB)")
         
         # Lecture robuste avec multi-encodage
         with st.spinner("Lecture du fichier en cours..."):
@@ -706,15 +706,15 @@ def _handle_upload_robust(uploaded_file):
                     continue
             
             if df is None:
-                st.error("Impossible de lire le fichier", icon="●")
-                st.info("Essayez de sauvegarder le CSV avec encodage UTF-8 dans Excel", icon="◆")
+                st.error("❌ Impossible de lire le fichier")
+                st.info("◆ Essayez de sauvegarder le CSV avec encodage UTF-8 dans Excel")
                 return
         
         if df.empty:
-            st.error("Fichier vide", icon="●")
+            st.error("❌ Fichier vide")
             return
         
-        st.success(f"Chargé avec succès: {len(df):,} lignes • {len(df.columns)} colonnes", icon="✓")
+        st.success(f"✅ Chargé avec succès: {len(df):,} lignes • {len(df.columns)} colonnes")
         
         # Preview
         with st.expander("Aperçu des Données (10 premières lignes)", expanded=True):
@@ -735,7 +735,7 @@ def _handle_upload_robust(uploaded_file):
         text_columns = df.select_dtypes(include=['object']).columns.tolist()
         
         if not text_columns:
-            st.error("Aucune colonne de texte trouvée", icon="●")
+            st.error("❌ Aucune colonne de texte trouvée")
             return
         
         selected_column = st.selectbox(
@@ -800,7 +800,7 @@ def _handle_upload_robust(uploaded_file):
                         st.session_state.cleaning_stats = stats
                         st.session_state.workflow_step = 'classify'
                         
-                        st.success("Nettoyage terminé!", icon="✅")
+                        st.success("✅ Nettoyage terminé!")
                         
                         # Clear progress bar safely before rerun
                         time.sleep(0.1)
@@ -823,7 +823,7 @@ def _handle_upload_robust(uploaded_file):
                 st.rerun()
                 
     except Exception as e:
-        st.error("Erreur lors du traitement du fichier", icon="🔴")
+        st.error("🔴 Erreur lors du traitement du fichier")
         st.code(str(e))
         logger.error(f"Upload handling error: {e}", exc_info=True)
         
