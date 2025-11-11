@@ -358,7 +358,7 @@ def _render_sidebar_complete():
                     padding: 1rem; border-radius: 12px; margin-bottom: 1rem;
                     border-left: 4px solid #2E86DE;">
             <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem; font-weight: 700;">
-                ⓘ Statut Système
+                🔵 Statut Système
             </h3>
         </div>
         """, unsafe_allow_html=True)
@@ -749,7 +749,7 @@ def _handle_upload_robust(uploaded_file):
         
         # Sample texte
         sample = str(df[selected_column].iloc[0])
-        st.info(f"**Exemple de texte:**\n\n{sample[:300]}...", icon="ⓘ")
+        st.info(f"📄 **Exemple de texte:**\n\n{sample[:300]}...")
         
         # Stats colonne
         col1, col2, col3 = st.columns(3)
