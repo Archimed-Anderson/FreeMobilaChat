@@ -128,7 +128,7 @@ def _load_role_system():
 # ==============================================================================
 st.set_page_config(
     page_title="Classification System | FreeMobilaChat",
-    page_icon="⚡",
+    page_icon="🤖",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -267,7 +267,7 @@ def _render_header():
         st.markdown("""
         <div>
             <h1 style="margin-bottom: 0.5rem;">
-                🧠 Système de Classification Automatisé
+                🤖 Système de Classification Automatisé
             </h1>
             <p style="font-size: 1.1rem; color: var(--dark); font-weight: 500; opacity: 0.85;">
                 NLP Avancé avec <strong>Mistral AI</strong>, <strong>BERT</strong> & <strong>Règles</strong>
@@ -533,7 +533,7 @@ def _render_system_info_tab():
                 bert = BERTClassifier(use_gpu=False)
                 info = bert.get_model_info()
                 
-                st.markdown("**🧠 Modèle BERT**", unsafe_allow_html=True)
+                st.markdown("**🤖 Modèle BERT**", unsafe_allow_html=True)
                 
                 col1, col2 = st.columns(2)
                 with col1:
@@ -828,7 +828,7 @@ def _handle_upload_robust(uploaded_file):
         logger.error(f"Upload handling error: {e}", exc_info=True)
         
         # Proposer des solutions simples
-        st.info("💡 **Suggestions:** Vérifiez que votre fichier CSV est valide et que toutes les colonnes sont correctement formatées.")
+        st.info("◆ **Suggestions:** Vérifiez que votre fichier CSV est valide et que toutes les colonnes sont correctement formatées.")
 
 # ==============================================================================
 # SECTION CLASSIFICATION  
