@@ -128,7 +128,7 @@ def _load_role_system():
 # ==============================================================================
 st.set_page_config(
     page_title="Classification System | FreeMobilaChat",
-    page_icon="🧠",
+    page_icon="⚡",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -301,9 +301,9 @@ def _render_workflow_indicator():
     current_step = st.session_state.get('workflow_step', 'upload')
     
     steps = {
-        'upload': {'num': 1, 'name': 'Upload & Nettoyage', 'icon': '📤'},
-        'classify': {'num': 2, 'name': 'Classification', 'icon': '⚙️'},
-        'results': {'num': 3, 'name': 'Résultats & Export', 'icon': '📊'}
+        'upload': {'num': 1, 'name': 'Upload & Nettoyage', 'icon': '↑'},
+        'classify': {'num': 2, 'name': 'Classification', 'icon': '⚡'},
+        'results': {'num': 3, 'name': 'Résultats & Export', 'icon': '▣'}
     }
     
     cols = st.columns(3)
@@ -339,7 +339,7 @@ def _render_sidebar_complete():
                     box-shadow: 0 8px 24px rgba(30, 58, 95, 0.35);">
             <div style="text-align: center;">
                 <div style="font-size: 2.5rem; margin-bottom: 0.5rem;">
-                    ⚙️
+                    ⚡
                 </div>
                 <h2 style="color: white; margin: 0; font-size: 1.4rem; font-weight: 800;">
                     Configuration
@@ -358,7 +358,7 @@ def _render_sidebar_complete():
                     padding: 1rem; border-radius: 12px; margin-bottom: 1rem;
                     border-left: 4px solid #2E86DE;">
             <h3 style="margin: 0; color: var(--primary); font-size: 1.1rem; font-weight: 700;">
-                ℹ️ Statut Système
+                ⓘ Statut Système
             </h3>
         </div>
         """, unsafe_allow_html=True)
@@ -401,7 +401,7 @@ Temps: {detail['time']}
         """)
         
         # Configuration avancée optimisée
-        with st.expander("⚙️ Configuration Avancée", expanded=False):
+        with st.expander("⚡ Configuration Avancée", expanded=False):
             st.markdown("**Optimisations Performance**")
             
             # Timeout configuration
@@ -478,14 +478,14 @@ Temps: {detail['time']}
         
         # Footer
         st.markdown("---")
-        st.caption(f"💻 Version 4.5 Final | {datetime.now().strftime('%Y-%m-%d')}", unsafe_allow_html=True)
+        st.caption(f"◉ Version 4.5 Final | {datetime.now().strftime('%Y-%m-%d')}", unsafe_allow_html=True)
 
 def _render_classifiers_tab():
     """ONGLET CLASSIFICATEURS - RESTAURÉ avec FONT AWESOME"""
     modules = _load_classification_modules()
     
     if modules.get('available'):
-        st.success("✅ **Modules chargés** - Tous les classificateurs sont opérationnels")
+        st.success("✓ **Modules chargés** - Tous les classificateurs sont opérationnels")
         
         with st.expander("Classificateurs Disponibles (5)", expanded=False):
             classificateurs = [
@@ -611,7 +611,7 @@ def _render_role_management_tab():
                     icon_color = "#10AC84" if has_perm else "#95A5A6"
                     st.markdown(f"<span style='color:{icon_color};'>{icon}</span> {perm_label}", unsafe_allow_html=True)
                 
-                st.caption(f"📦 {len(role_config.features)} features disponibles", unsafe_allow_html=True)
+                st.caption(f"■ {len(role_config.features)} features disponibles", unsafe_allow_html=True)
                 
         except Exception as e:
             st.warning(f"Erreur système de rôles: {e}")
@@ -622,21 +622,21 @@ def _render_role_management_tab():
 
 def _section_upload():
     """Section upload avec gestion erreur robuste"""
-    st.header("📤 Étape 1 | Upload & Nettoyage des Données")
+    st.header("↑ Étape 1 | Upload & Nettoyage des Données")
     
     # Instructions
-    with st.expander("📋 Instructions d'Utilisation", expanded=True):
+    with st.expander("▣ Instructions d'Utilisation", expanded=True):
         st.markdown("""
-        **✅ Préparez vos données:**
+        **✓ Préparez vos données:**
         
-        1. 📄 **Format requis:** Fichier CSV
-        2. 📝 **Contenu:** Au moins une colonne de texte avec tweets
-        3. 💾 **Taille maximale:** 500 MB
-        4. 🔤 **Encodage:** UTF-8 recommandé (auto-détection: utf-8, latin-1, iso-8859-1, cp1252)
+        1. □ **Format requis:** Fichier CSV
+        2. ✎ **Contenu:** Au moins une colonne de texte avec tweets
+        3. ◉ **Taille maximale:** 500 MB
+        4. A **Encodage:** UTF-8 recommandé (auto-détection: utf-8, latin-1, iso-8859-1, cp1252)
         """)
         
         st.info("""
-        **💡 Conseils pour un upload réussi:**
+        **◆ Conseils pour un upload réussi:**
         
         - Assurez-vous que votre fichier CSV est valide
         - Vérifiez qu'il contient au moins une colonne de texte
@@ -644,7 +644,7 @@ def _section_upload():
         - Encodages supportés : UTF-8, Latin-1, ISO-8859-1, CP1252
         """)
     
-    st.markdown("<h3>📂 Sélection du Fichier</h3>", unsafe_allow_html=True)
+    st.markdown("<h3>■ Sélection du Fichier</h3>", unsafe_allow_html=True)
     
     # FILE UPLOADER ROBUSTE
     try:
@@ -666,7 +666,7 @@ def _section_upload():
             2. Rafraîchir la page (F5)
             3. Vider le cache navigateur
             4. Redémarrer Streamlit
-            """, icon="🔴")
+            """, icon="●")
         return
     
     if uploaded_file:
@@ -679,12 +679,12 @@ def _handle_upload_robust(uploaded_file):
         file_size_mb = uploaded_file.size / (1024 * 1024)
         
         if file_size_mb > 500:
-            st.error(f"Fichier trop volumineux: {file_size_mb:.1f} MB (max: 500 MB)", icon="🔴")
-            st.info("Réduisez la taille du fichier ou filtrez les données", icon="💡")
+            st.error(f"Fichier trop volumineux: {file_size_mb:.1f} MB (max: 500 MB)", icon="●")
+            st.info("Réduisez la taille du fichier ou filtrez les données", icon="◆")
             return
         
         # Info fichier
-        st.success(f"Fichier accepté: {uploaded_file.name} ({file_size_mb:.1f} MB)", icon="✅")
+        st.success(f"Fichier accepté: {uploaded_file.name} ({file_size_mb:.1f} MB)", icon="✓")
         
         # Lecture robuste avec multi-encodage
         with st.spinner("Lecture du fichier en cours..."):
@@ -706,15 +706,15 @@ def _handle_upload_robust(uploaded_file):
                     continue
             
             if df is None:
-                st.error("Impossible de lire le fichier", icon="🔴")
-                st.info("Essayez de sauvegarder le CSV avec encodage UTF-8 dans Excel", icon="💡")
+                st.error("Impossible de lire le fichier", icon="●")
+                st.info("Essayez de sauvegarder le CSV avec encodage UTF-8 dans Excel", icon="◆")
                 return
         
         if df.empty:
-            st.error("Fichier vide", icon="🔴")
+            st.error("Fichier vide", icon="●")
             return
         
-        st.success(f"Chargé avec succès: {len(df):,} lignes • {len(df.columns)} colonnes", icon="✅")
+        st.success(f"Chargé avec succès: {len(df):,} lignes • {len(df.columns)} colonnes", icon="✓")
         
         # Preview
         with st.expander("Aperçu des Données (10 premières lignes)", expanded=True):
@@ -730,12 +730,12 @@ def _handle_upload_robust(uploaded_file):
                 st.metric("Mémoire", f"{memory_mb:.1f} MB")
         
         # Sélection colonne
-        st.subheader("🔍 Sélection de la Colonne de Texte")
+        st.subheader("□ Sélection de la Colonne de Texte")
         
         text_columns = df.select_dtypes(include=['object']).columns.tolist()
         
         if not text_columns:
-            st.error("Aucune colonne de texte trouvée", icon="🔴")
+            st.error("Aucune colonne de texte trouvée", icon="●")
             return
         
         selected_column = st.selectbox(
@@ -749,7 +749,7 @@ def _handle_upload_robust(uploaded_file):
         
         # Sample texte
         sample = str(df[selected_column].iloc[0])
-        st.info(f"**Exemple de texte:**\n\n{sample[:300]}...", icon="ℹ️")
+        st.info(f"**Exemple de texte:**\n\n{sample[:300]}...", icon="ⓘ")
         
         # Stats colonne
         col1, col2, col3 = st.columns(3)
@@ -763,7 +763,7 @@ def _handle_upload_robust(uploaded_file):
             st.metric("Doublons", f"{duplicates:,}")
         
         # Bouton nettoyage
-        st.subheader("➡️ Démarrer le Nettoyage")
+        st.subheader("→ Démarrer le Nettoyage")
         
         col1, col2 = st.columns([2, 1])
         
@@ -899,7 +899,7 @@ def _section_classification():
         st.caption("✅ Cache multi-niveau")
     
     # Lancement
-    st.subheader("▶️ Lancer la Classification")
+    st.subheader("▶ Lancer la Classification")
     
     if st.button("Démarrer la Classification Intelligente", type="primary", use_container_width=True):
         _perform_classification(df_cleaned, text_col, mode, use_optimized)
@@ -923,7 +923,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
     try:
         # DOM safe operations with try-catch
         try:
-            status.info("🔄 Chargement des modules...")
+            status.info("↻ Chargement des modules...")
             t.sleep(0.05)
             progress_bar.progress(0.1)
         except Exception:
@@ -932,8 +932,8 @@ def _perform_classification(df, text_col, mode, use_optimized):
         modules = _load_classification_modules()
         
         if not modules.get('available'):
-            st.error(f"❌ Modules non disponibles: {modules.get('error')}")
-            st.warning("⚠️ Classification par règles de base utilisée...")
+            st.error(f"✗ Modules non disponibles: {modules.get('error')}")
+            st.warning("⚠ Classification par règles de base utilisée...")
             df_classified = _classify_fallback(df, text_col)
         else:
             start_time = time.time()
@@ -945,13 +945,13 @@ def _perform_classification(df, text_col, mode, use_optimized):
                 try:
                     check_ollama = modules.get('check_ollama_availability')
                     if check_ollama:
-                        status.info("🔍 Vérification connexion Ollama...")
+                        status.info("□ Vérification connexion Ollama...")
                         ollama_available = check_ollama()
                         
                         if ollama_available:
-                            st.success("✅ Ollama connecté - Mode LLM activé")
+                            st.success("✓ Ollama connecté - Mode LLM activé")
                         else:
-                            st.warning("⚠️ Ollama indisponible - Fallback vers mode FAST")
+                            st.warning("⚠ Ollama indisponible - Fallback vers mode FAST")
                             mode = 'fast'
                 except Exception as e:
                     logger.warning(f"Ollama check failed: {e}")
@@ -980,7 +980,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
                         try:
                             progress_bar.progress(0.2 + pct * 0.7)
                             t.sleep(0.03)
-                            status.info(f"🔄 {msg} | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
+                            status.info(f"↻ {msg} | {rate:.1f} tweets/sec | ETA: {eta:.0f}s")
                         except Exception:
                             pass  # Ignore DOM errors
                     
@@ -1010,7 +1010,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
                         MultiModelOrchestrator = modules['MultiModelOrchestrator']
                         orchestrator = MultiModelOrchestrator(mode=mode)
                         
-                        status.info("⚙️ Classification multi-modèles standard...")
+                        status.info("⚡ Classification multi-modèles standard...")
                         df_classified = orchestrator.classify_intelligent(
                             df,
                             text_col,
@@ -1024,7 +1024,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
                     MultiModelOrchestrator = modules['MultiModelOrchestrator']
                     orchestrator = MultiModelOrchestrator(mode=mode)
                     
-                    status.info("⚙️ Classification multi-modèles en cours...")
+                    status.info("⚡ Classification multi-modèles en cours...")
                     df_classified = orchestrator.classify_intelligent(
                         df,
                         text_col,
@@ -1035,7 +1035,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
         
         # Calcul rapport
         try:
-            status.info("📊 Calcul des métriques...")
+            status.info("▣ Calcul des métriques...")
             t.sleep(0.05)
             progress_bar.progress(0.95)
         except Exception:
@@ -1058,13 +1058,13 @@ def _perform_classification(df, text_col, mode, use_optimized):
         perf = st.session_state.get('performance_metrics', {})
         if perf:
             st.success(
-                f"✅ Classification terminée en {perf['total_time']:.1f}s | "
+                f"✓ Classification terminée en {perf['total_time']:.1f}s | "
                 f"{perf['tweets_per_second']:.1f} tweets/sec | "
                 f"Mode: {mode.upper()}"
             )
         else:
             try:
-                status.success("✅ Classification terminée avec succès!")
+                status.success("✓ Classification terminée avec succès!")
             except Exception:
                 pass
         
@@ -1088,7 +1088,7 @@ def _perform_classification(df, text_col, mode, use_optimized):
         except Exception:
             pass
         
-        st.error(f"🔴 Erreur classification: {str(e)}", icon="🔴")
+        st.error(f"● Erreur classification: {str(e)}", icon="●")
         logger.error(f"Classification error: {e}", exc_info=True)
         
         with st.expander("Détails de l'erreur"):
